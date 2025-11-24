@@ -531,13 +531,32 @@ const sessions = {
                 });
             }
 
+            function ensureProgramListAnchored() {
+                // Make sure the single program list node lives inside the modal body
+                const list = document.getElementById('programList');
+                const modalBody = document.querySelector('#programModal .doc-scroll');
+                if(list && modalBody && !modalBody.contains(list)) {
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(list);
+                }
+            }
+
             function removeLegacyProgramSidebar() {
                 // Clean up any previous sidebar widget instances for programs
-                const selectors = ['#programSidebar', '#programsSidebar', '.program-sidebar', '.program-widget'];
+                const selectors = ['#programSidebar', '#programsSidebar', '.program-sidebar', '.program-widget', '.programs-panel'];
                 selectors.forEach(sel => {
                     const node = document.querySelector(sel);
                     if(node) node.remove();
                 });
+
+                if(els.leftPanel) {
+                    els.leftPanel.querySelectorAll('.program-start, [data-program], [data-legacy-program]').forEach(btn => {
+                        const section = btn.closest('section') || btn.parentElement;
+                        if(section && section.parentElement === els.leftPanel) section.remove();
+                    });
+                }
+
+                ensureProgramListAnchored();
             }
 
             function resolveBreathPattern() {
@@ -630,8 +649,14 @@ const sessions = {
             }
 
             function renderPrograms() {
+                ensureProgramListAnchored();
+                els.programList = document.getElementById('programList');
                 if(!els.programList) return;
                 els.programList.innerHTML = '';
+                if(!programs.length) {
+                    els.programList.innerHTML = '<p class="text-sm text-zinc-400">Brak dostępnych programów.</p>';
+                    return;
+                }
                 programs.forEach(program => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'border border-white/5 rounded-xl p-4 bg-zinc-950/40 h-full flex flex-col gap-3';
@@ -661,6 +686,10 @@ const sessions = {
             }
 
             function openProgramModal() {
+                ensureProgramListAnchored();
+                els.programModal = document.getElementById('programModal');
+                els.programList = document.getElementById('programList');
+                els.programStatusModal = document.getElementById('programStatusModal');
                 if(!els.programModal || !els.programList) return;
                 renderPrograms();
                 updateProgramStatus();
