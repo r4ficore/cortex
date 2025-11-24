@@ -1143,15 +1143,20 @@
                 document.getElementById('closeGuide').addEventListener('click', () => els.guideModal.style.display = 'none');
 
                 // Programs
-                els.programToggle.addEventListener('click', () => {
+                const openProgramModal = () => {
+                    if(!els.programModal || !els.programList) return;
                     renderPrograms();
+                    updateProgramStatus();
                     els.programModal.classList.remove('hidden');
                     els.programModal.style.display = 'flex';
-                });
-                els.closeProgram.addEventListener('click', () => {
+                };
+                const closeProgramModal = () => {
+                    if(!els.programModal) return;
                     els.programModal.classList.add('hidden');
                     els.programModal.style.display = 'none';
-                });
+                };
+                els.programToggle.addEventListener('click', openProgramModal);
+                els.closeProgram.addEventListener('click', closeProgramModal);
 
                 // Safety
                 document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
@@ -1433,10 +1438,7 @@
             function startProgram(programId) {
                 const program = getProgramById(programId);
                 if(!program || state.active) return;
-                if(els.programModal) {
-                    els.programModal.classList.add('hidden');
-                    els.programModal.style.display = 'none';
-                }
+                if(els.programModal) closeProgramModal();
                 state.program = { active: true, id: programId, stepIndex: 0, awaitingNext: false };
                 updateProgramStatus();
                 startProgramStep(0);
@@ -1490,6 +1492,35 @@
                         showContinue: true
                     });
                 }
+            }
+
+            function endProgram() {
+                state.program = { active: false, id: null, stepIndex: 0, awaitingNext: false };
+                state.sessionDataOverride = null;
+                hideProgramOverlay();
+                updateProgramStatus();
+                if(!state.active) setSession(state.session);
+            }
+
+            function setHypnosDuration(key) {
+                state.hypnosDuration = key;
+                userPreferences.save({ hypnosDuration: key });
+                applyHypnosDuration(key);
+                updateHypnosDurationUI();
+                if(state.session === 'hypnos' && !state.active) {
+                    els.timer.textContent = formatTime(sessions.hypnos.duration);
+                }
+            }
+
+            function updateHypnosDurationUI() {
+                const isHypnos = state.session === 'hypnos';
+                els.hypnosDurationCard.classList.toggle('hidden', !isHypnos);
+                els.hypnosDurationButtons.forEach(btn => {
+                    const selected = btn.dataset.duration === state.hypnosDuration;
+                    btn.classList.toggle('border-medical-400', selected);
+                    btn.classList.toggle('text-white', selected);
+                    btn.classList.toggle('bg-medical-900/60', selected);
+                });
             }
 
             function endProgram() {
