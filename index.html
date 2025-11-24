@@ -310,6 +310,10 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                             <span>Raport</span>
                         </button>
+                        <button id="safetyToggle" class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>Bezpieczeństwo</span>
+                        </button>
                         <div class="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60">
                             <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
                             <span id="statusText" class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest w-16 text-center">Standby</span>
@@ -345,10 +349,6 @@
 
                         <section class="glass-panel rounded-xl p-5 space-y-4 relative overflow-hidden shrink-0">
                             <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-medical-400/5 rounded-full blur-2xl"></div>
-                            <div>
-                                <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Specyfikacja</h2>
-                                <p class="text-xs text-zinc-500 leading-relaxed font-light min-h-[28px]">Opis protokołu pojawia się teraz bezpośrednio w oknie wizualizacji.</p>
-                            </div>
                             <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                                 <div>
                                     <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Dudnienie</span>
@@ -387,7 +387,6 @@
                                 <button data-duration="90" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">90 min</button>
                                 <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
                             </div>
-                            <p class="text-[10px] text-zinc-600 leading-relaxed">Domyślnie zapisuje się ostatni wybór (localStorage). Ustawienie <span class="font-mono text-medical-400">HYPNOS_TEST_ACCELERATION</span> można tymczasowo zmienić na 60, aby przetestować skrócone minuty → sekundy.</p>
                         </section>
                     </div>
 
@@ -404,10 +403,8 @@
                                     </svg>
                                 </div>
                                 <div class="space-y-2 max-w-xl">
-                                    <div class="text-[11px] font-mono text-medical-400 uppercase tracking-widest">Specyfikacja</div>
                                     <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
-                                    <p class="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest">Opis zanika po starcie sesji.</p>
                                 </div>
                             </div>
 
@@ -423,7 +420,6 @@
 
                         <div id="controlPanel" class="glass-panel rounded-2xl px-6 py-4 flex items-center justify-between gap-6 shrink-0 h-auto sm:h-24 flex-wrap sm:flex-nowrap transition-all duration-1000">
                             <div class="flex flex-col justify-center min-w-[100px]">
-                                <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-widest mb-1">Status Czasowy</span>
                                 <div id="timer" class="font-mono text-4xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
                             </div>
                             <div class="hidden md:flex flex-col items-start px-6 border-l border-zinc-800/50 flex-1">
@@ -444,10 +440,7 @@
 
                 <footer id="appFooter" class="w-full px-4 relative z-0 mt-24 transition-opacity duration-1000">
                     <div class="border-t border-zinc-900 pt-6 pb-12 text-center backdrop-blur-sm">
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest max-w-2xl mx-auto leading-relaxed">
-                            <span class="text-zinc-500 font-bold">UWAGA BEZPIECZEŃSTWO:</span> Narzędzie generuje efekty stroboskopowe. <br class="hidden sm:block">
-                            Nie używać w przypadku epilepsji fotogennej. Nie używać podczas prowadzenia pojazdów.
-                        </p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest max-w-2xl mx-auto leading-relaxed">Sprawdź zakładkę „Bezpieczeństwo” w górnym menu, aby poznać pełne wytyczne korzystania.</p>
                     </div>
                 </footer>
             </main>
@@ -603,6 +596,52 @@
                         </section>
                         <section class="border-t border-zinc-800 pt-8 mt-12"><h4 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">Wybrana Bibliografia</h4><ul class="text-[10px] text-zinc-500 space-y-2 font-mono"><li>[1] Coffey et al. (2021). Oscillatory Entrainment of the Frequency-following Response.</li><li>[9] Guillot et al. (2024). Brain wave modulation and EEG power changes...</li><li>[19] Xie et al. (2013). Sleep Drives Metabolite Clearance from the Adult Brain.</li><li>[20] Tsai et al. (2025). Evidence that 40Hz gamma stimulation promotes brain health. MIT News.</li><li>[44] Harding FPA Guidelines for Photosensitive Epilepsy.</li></ul></section>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAFETY MODAL -->
+        <div id="safetyModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+                <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
+                    <div>
+                        <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
+                            <span class="w-2 h-2 bg-medical-400 rounded-full animate-pulse"></span>
+                            Instrukcja Bezpieczeństwa
+                        </h3>
+                        <p class="text-xs text-zinc-500 uppercase tracking-widest mt-1">Wytyczne przed uruchomieniem wizualizacji i audio</p>
+                    </div>
+                    <button id="closeSafety" class="p-2 text-zinc-500 hover:text-white border border-transparent hover:border-zinc-700 rounded transition-all">
+                        <span class="text-xs font-mono uppercase mr-2">Zamknij</span> ✕
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-8 doc-scroll text-sm leading-relaxed space-y-6 text-zinc-300">
+                    <div class="bg-red-900/10 border border-red-900/40 rounded p-4 text-red-200 font-semibold uppercase tracking-widest text-[11px]">UWAGA: Silne bodźce wizualne i dźwiękowe. Nie używać w przypadku epilepsji fotogennej ani podczas prowadzenia pojazdów.</div>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Przeciwwskazania</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Nadwrażliwość na światło (PSE), stany po urazach neurologicznych, migreny z aurą.</li>
+                            <li>Stosowanie leków obniżających próg drgawkowy – skonsultuj użycie z lekarzem.</li>
+                            <li>Zmęczenie, odwodnienie lub brak snu mogą zwiększać dyskomfort sensoryczny.</li>
+                        </ul>
+                    </section>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Zasady korzystania</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Zawsze używaj słuchawek stereo i zaczynaj od niskiej głośności.</li>
+                            <li>Włącz „Safe visuals” lub „Audio-only” przy pierwszym użyciu lub przy wrażliwości na bodźce.</li>
+                            <li>Przerwij sesję przy zawrotach głowy, mdłościach, mroczkach lub dyskomforcie.</li>
+                            <li>Unikaj patrzenia w jasne źródła światła w zaciemnionych pomieszczeniach podczas intensywnych protokołów.</li>
+                        </ul>
+                    </section>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Wskazówki praktyczne</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Przed snem wybieraj łagodne tryby (Hypnos/Restoration) i unikaj światła niebieskiego.</li>
+                            <li>Rób przerwy między sesjami (min. 10 minut) i nawadniaj się.</li>
+                            <li>Testuj kanały L/R w ustawieniach przed dłuższymi sesjami.</li>
+                        </ul>
+                    </section>
                 </div>
             </div>
         </div>
@@ -817,6 +856,7 @@
                 statusText: document.getElementById('statusText'),
                 settingsModal: document.getElementById('settingsModal'),
                 guideModal: document.getElementById('guideModal'),
+                safetyModal: document.getElementById('safetyModal'),
                 controlPanel: document.getElementById('controlPanel'),
                 noiseTypeDisplay: document.getElementById('noiseTypeDisplay'),
                 btnPink: document.getElementById('setPinkNoise'),
@@ -913,6 +953,10 @@
                 // Guide
                 document.getElementById('guideToggle').addEventListener('click', () => els.guideModal.style.display = 'flex');
                 document.getElementById('closeGuide').addEventListener('click', () => els.guideModal.style.display = 'none');
+
+                // Safety
+                document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
+                document.getElementById('closeSafety').addEventListener('click', () => els.safetyModal.style.display = 'none');
 
                 // Audio Tests
                 document.getElementById('testLeftButton').addEventListener('click', () => playTestTone(-1));
