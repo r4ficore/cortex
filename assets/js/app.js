@@ -335,9 +335,9 @@ const sessions = {
 
             function init() {
                 // Initialization Logic
+                removeLegacyProgramSidebar();
                 applyHypnosDuration(state.hypnosDuration);
                 renderModes();
-                renderPrograms();
                 setSession(state.session);
                 initCanvas();
                 updateNoiseUI();
@@ -528,6 +528,15 @@ const sessions = {
                     btn.classList.toggle('border-medical-400/60', active);
                     btn.classList.toggle('text-white', active);
                     btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
+                });
+            }
+
+            function removeLegacyProgramSidebar() {
+                // Clean up any previous sidebar widget instances for programs
+                const selectors = ['#programSidebar', '#programsSidebar', '.program-sidebar', '.program-widget'];
+                selectors.forEach(sel => {
+                    const node = document.querySelector(sel);
+                    if(node) node.remove();
                 });
             }
 
