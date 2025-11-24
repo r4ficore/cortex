@@ -1,0 +1,1284 @@
+const sessions = {
+                hypnos: {
+                    id: "hypnos", name: "Hypnos", category: "Sleep",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+                    desc: "Głęboka architektura snu. Delta (0.5-2Hz) ułatwia zasypianie i podtrzymuje fazę N3. Tryb nieskończony.",
+                    duration: Infinity,
+                    baseHz: "Delta 0.5-2Hz",
+                    phases: [
+                        { name: "Indukcja Snu", start: 0, end: 900, audio: { l: 100, r: 108, vol_s: 0.2, vol_e: 0.15 }, visual: { f: 6, mod: 'soft', bri: 0.3 } },
+                        { name: "Głęboki Sen", start: 900, end: Infinity, audio: { l: 60, r: 61, vol: 0.15 }, visual: { f: 0.5, mod: 'breath', bri: 0.05 } }
+                    ]
+                },
+                prime: {
+                    id: "prime", name: "Prime", category: "Activation",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+                    desc: "Rozgrzewka neuronalna (5 min). Łagodne przejście z fal Alpha do Beta. Idealne na start dnia.",
+                    duration: 300,
+                    baseHz: "Alpha -> Beta",
+                    phases: [
+                        { name: "Inicjacja Alpha", start: 0, end: 120, audio: { l: 220, r: 228, vol_s: 0.1, vol_e: 0.3 }, visual: { f: 8, mod: 'soft', bri: 0.6 } },
+                        { name: "Aktywacja Beta", start: 120, end: 300, audio: { l: 220, r: 234, vol: 0.35 }, visual: { f: 14, mod: 'soft', bri: 0.8 } }
+                    ]
+                },
+                overdrive: {
+                    id: "overdrive",
+                    name: "Overdrive",
+                    category: "Activation",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`,
+                    desc: "Intensywna stymulacja Gamma (30-40Hz). Krótka sesja do przełamania prokrastynacji.", duration: 300, baseHz: "Gamma 40Hz",
+                    phases: [{ name: "Ramp Up", start: 0, end: 60, audio: { l: 440, r: 470, vol_s: 0.3, vol_e: 0.5 }, visual: { f_s: 20, f_e: 35, mod: 'hard' } }, { name: "Gamma Peak", start: 60, end: 240, audio: { l: 440, r: 480, mod: 'pulse' }, visual: { f: 40, mod: 'hard', bri: 1.0 } }, { name: "Cool Down", start: 240, end: 300, audio: { l: 440, r: 460, vol_s: 0.5, vol_e: 0.2 }, visual: { f_s: 30, f_e: 10, mod: 'soft' } }]
+                },
+                deepFocus: {
+                    id: "deepFocus",
+                    name: "Deep Focus",
+                    category: "Work",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`,
+                    desc: "Klasyczne głębokie skupienie (15 min). Stabilne fale Beta pomagają utrzymać koncentrację na jednym zadaniu.",
+                    duration: 900,
+                    baseHz: "Beta 14-18Hz",
+                    phases: [
+                        { name: "Indukcja", start: 0, end: 120, audio: { l: 210, r: 224, vol_s: 0.1, vol_e: 0.3 }, visual: { f: 10, mod: 'soft', bri: 0.7 } },
+                        { name: "Tunel", start: 120, end: 780, audio: { l: 230, r: 248, vol: 0.4 }, visual: { f: 14, mod: 'soft', bri: 0.85 } },
+                        { name: "Wyjście", start: 780, end: 900, audio: { l: 210, r: 224, vol_s: 0.3, vol_e: 0.1 }, visual: { f: 10, mod: 'soft', bri: 0.6 } }
+                    ]
+                },
+                clarity: {
+                    id: "clarity",
+                    name: "Clarity",
+                    category: "Work",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
+                    desc: "Myślenie strategiczne. Zbalansowana sesja Alpha/Beta sprzyjająca planowaniu i porządkowaniu myśli.",
+                    duration: 720,
+                    baseHz: "Isochronic 12Hz",
+                    phases: [
+                        { name: "Centrowanie", start: 0, end: 180, audio: { l: 220, r: 232, vol_s: 0.2, vol_e: 0.35 }, visual: { f: 10, mod: 'soft' } },
+                        { name: "Analiza", start: 180, end: 600, audio: { l: 220, r: 236, mod: 'iso' }, visual: { f: 12, mod: 'soft' } },
+                        { name: "Synteza", start: 600, end: 720, audio: { l: 220, r: 232, vol_s: 0.35, vol_e: 0.1 }, visual: { f: 8, mod: 'soft' } }
+                    ]
+                },
+                genesis: {
+                    id: "genesis",
+                    name: "Genesis",
+                    category: "Creative",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,
+                    desc: "Stan Flow (Theta 6-7Hz). Głęboki relaks połączony z wizualizacją. Idealny do burzy mózgów i zadań kreatywnych.",
+                    duration: 600,
+                    baseHz: "Theta 6Hz",
+                    phases: [
+                        { name: "Zejście", start: 0, end: 120, audio: { l: 180, r: 190, vol_s: 0.2, vol_e: 0.3 }, visual: { f: 10, mod: 'soft', bri: 0.6 } },
+                        { name: "Theta Flow", start: 120, end: 500, audio: { l: 150, r: 156, vol: 0.35 }, visual: { f: 6, mod: 'soft', bri: 0.5 } },
+                        { name: "Powrót", start: 500, end: 600, audio: { l: 180, r: 190, vol_s: 0.3, vol_e: 0.1 }, visual: { f: 8, mod: 'soft', bri: 0.4 } }
+                    ]
+                },
+                equilibrium: {
+                    id: "equilibrium",
+                    name: "Equilibrium",
+                    category: "Calm",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5l3 5 5-11 4 6h3"></path></svg>`,
+                    desc: "Redukcja lęku i stresu. Stabilne 10Hz (Alpha) uziemia i uspokaja układ nerwowy bez usypiania.",
+                    duration: 420,
+                    baseHz: "Solid Alpha 10Hz",
+                    phases: [
+                        { name: "Uziemienie", start: 0, end: 60, audio: { l: 200, r: 212, vol_s: 0.15, vol_e: 0.25 }, visual: { f: 12, mod: 'soft', bri: 0.6 } },
+                        { name: "Stabilizacja", start: 60, end: 360, audio: { l: 200, r: 210, vol: 0.3 }, visual: { f: 10, mod: 'breath', bri: 0.7 } },
+                        { name: "Wyciszenie", start: 360, end: 420, audio: { l: 200, r: 208, vol_s: 0.25, vol_e: 0.1 }, visual: { f: 8, mod: 'breath', bri: 0.5 } }
+                    ]
+                },
+                restoration: {
+                    id: "restoration",
+                    name: "Restoration",
+                    category: "Calm",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"></path></svg>`,
+                    desc: "Głęboka regeneracja (Delta 2-4Hz). Bardzo powolne fale dla fizycznego i mentalnego odpoczynku.",
+                    duration: 900,
+                    baseHz: "Delta 3Hz",
+                    phases: [
+                        { name: "Zwolnienie", start: 0, end: 180, audio: { l: 100, r: 108, vol_s: 0.15, vol_e: 0.25 }, visual: { f: 8, mod: 'soft', bri: 0.5 } },
+                        { name: "Delta Immersion", start: 180, end: 800, audio: { l: 100, r: 103, vol: 0.3 }, visual: { f: 3, mod: 'breath', bri: 0.3 } },
+                        { name: "Przebudzenie", start: 800, end: 900, audio: { l: 100, r: 108, vol_s: 0.25, vol_e: 0.1 }, visual: { f: 6, mod: 'soft', bri: 0.4 } }
+                    ]
+                },
+                presence: {
+                    id: "presence",
+                    name: "Presence",
+                    category: "Work",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+                    desc: "Gotowość społeczna. Lekkie pobudzenie przed spotkaniem.",
+                    duration: 420,
+                    baseHz: "Alpha 10Hz",
+                    phases: [
+                        { name: "Flow", start: 0, end: 360, audio: { l: 240, r: 250, vol_s: 0.2, vol_e: 0.35 }, visual: { f: 10, mod: 'soft' } },
+                        { name: "Spokój", start: 360, end: 420, audio: { l: 240, r: 250, vol_s: 0.35, vol_e: 0.1 }, visual: { f: 8, mod: 'soft' } }
+                    ]
+                }
+            };
+
+            const programs = [
+                {
+                    id: 'flow90',
+                    name: 'Flow 90',
+                    description: 'Pełna ścieżka od pobudzenia do wyciszenia w 90 minut.',
+                    steps: [
+                        { sessionId: 'prime', durationMinutes: 5 },
+                        { sessionId: 'deepFocus', durationMinutes: 60 },
+                        { sessionId: 'genesis', durationMinutes: 10 },
+                        { sessionId: 'equilibrium', durationMinutes: 15 }
+                    ]
+                },
+                {
+                    id: 'socialUpgrade',
+                    name: 'Social Upgrade',
+                    description: 'Przygotowanie do spotkań – delikatne pobudzenie i uspokojenie.',
+                    steps: [
+                        { sessionId: 'presence', durationMinutes: 7 },
+                        { sessionId: 'equilibrium', durationMinutes: 10 }
+                    ]
+                },
+                {
+                    id: 'sleepReset',
+                    name: 'Sleep Reset',
+                    description: 'Wieczorna sekwencja do regeneracji i snu.',
+                    steps: [
+                        { sessionId: 'restoration', durationMinutes: 20 },
+                        { sessionId: 'hypnos', durationMinutes: 90 }
+                    ]
+                },
+                {
+                    id: 'powerNap45',
+                    name: 'Power Nap 45',
+                    description: 'Krótka sekwencja regeneracyjna na przerwę w ciągu dnia.',
+                    steps: [
+                        { sessionId: 'equilibrium', durationMinutes: 10 },
+                        { sessionId: 'hypnos', durationMinutes: 30 },
+                        { sessionId: 'genesis', durationMinutes: 5 }
+                    ]
+                },
+                {
+                    id: 'creativeBloom',
+                    name: 'Creative Bloom',
+                    description: 'Delikatne pobudzenie i flow dla pracy koncepcyjnej.',
+                    steps: [
+                        { sessionId: 'presence', durationMinutes: 8 },
+                        { sessionId: 'deepFocus', durationMinutes: 45 },
+                        { sessionId: 'equilibrium', durationMinutes: 10 }
+                    ]
+                }
+            ];
+
+            // User Preferences (localStorage) helper
+            const defaultPreferences = {
+                lastSessionId: 'prime',
+                preferredNoiseType: 'brown',
+                breathEnabled: false,
+                breathPattern: 'auto',
+                hypnosDuration: 'infinity',
+                onboardingCompleted: false,
+                safeVisuals: false,
+                audioOnly: false,
+                intensityLevel: 'medium'
+            };
+
+            const userPreferences = {
+                key: 'koraUserPreferences',
+                data: { ...defaultPreferences },
+                load() {
+                    try {
+                        const raw = localStorage.getItem(this.key);
+                        if (raw) this.data = { ...defaultPreferences, ...JSON.parse(raw) };
+                        else this.data = { ...defaultPreferences };
+                    } catch (e) {
+                        console.warn('Preferences load failed, using defaults', e);
+                        this.data = { ...defaultPreferences };
+                    }
+                    return this.data;
+                },
+                save(patch = {}) {
+                    this.data = { ...this.data, ...patch };
+                    try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { console.warn('Preferences save failed', e); }
+                }
+            };
+
+            userPreferences.load();
+
+            // Hypnos duration presets (values in minutes, converted to seconds later)
+            const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
+            const hypnosDurations = {
+                '30': 30,
+                '45': 45,
+                '90': 90,
+                'infinity': Infinity
+            };
+
+            // Safety/display preferences: safe visuals limit flicker/contrast, audio-only disables animations, intensity scales gain
+            const intensityProfiles = {
+                low: { gain: 0.6, delta: 0.9 },
+                medium: { gain: 1, delta: 1 },
+                high: { gain: 1.3, delta: 1.1 }
+            };
+
+            const breathPatterns = {
+                auto: { label: 'Auto (wg trybu)' },
+                '4-6': { label: '4–6', sequence: [
+                    { label: 'IN', duration: 4 },
+                    { label: 'OUT', duration: 6 }
+                ] },
+                '4-7-8': { label: '4–7–8', sequence: [
+                    { label: 'IN', duration: 4 },
+                    { label: 'HOLD', duration: 7 },
+                    { label: 'OUT', duration: 8 }
+                ] },
+                box: { label: 'Box 4–4–4–4', sequence: [
+                    { label: 'IN', duration: 4 },
+                    { label: 'HOLD', duration: 4 },
+                    { label: 'OUT', duration: 4 },
+                    { label: 'HOLD', duration: 4 }
+                ] }
+            };
+
+            const autoBreathMap = {
+                equilibrium: 'box',
+                presence: 'box',
+                hypnos: '4-7-8',
+                restoration: '4-7-8',
+                prime: '4-6',
+                overdrive: '4-6',
+                deepFocus: '4-6'
+            };
+
+            const hypnosBasePhases = JSON.parse(JSON.stringify(sessions.hypnos.phases));
+
+            let state = {
+                active: false,
+                session: userPreferences.data.lastSessionId || 'prime',
+                startTime: 0,
+                preview: false,
+                focusLock: false,
+                noiseType: userPreferences.data.preferredNoiseType || 'brown',
+                breathingPacer: !!userPreferences.data.breathEnabled,
+                breathPattern: userPreferences.data.breathPattern || 'auto',
+                hypnosDuration: userPreferences.data.hypnosDuration || 'infinity',
+                safeVisuals: !!userPreferences.data.safeVisuals,
+                audioOnly: !!userPreferences.data.audioOnly,
+                intensityLevel: userPreferences.data.intensityLevel || 'medium',
+                sessionDataOverride: null,
+                program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
+                hypnosRampProgress: 0,
+                hypnosRampTimer: null,
+                ctx: null,
+                audio: {
+                    oscL: null,
+                    oscR: null,
+                    gain: null,
+                    noise: null,
+                    noiseGain: null
+                },
+                analyser: null,
+                lastInteraction: 0 // For UI dimming
+            };
+
+            const els = {
+                canvas: document.getElementById('visualCanvas'),
+                timer: document.getElementById('timer'),
+                progressBar: document.getElementById('progressBar'),
+                mainBtn: document.getElementById('mainActionBtn'),
+                modeContainer: document.getElementById('modeContainer'),
+                msgBox: document.getElementById('message-box'),
+                desc: document.getElementById('modeDesc'),
+                messageTitle: document.getElementById('messageTitle'),
+                realtimeHz: document.getElementById('realtimeHz'),
+                phaseName: document.getElementById('currentPhaseName'),
+                statusDot: document.getElementById('statusDot'),
+                statusText: document.getElementById('statusText'),
+                settingsModal: document.getElementById('settingsModal'),
+                guideModal: document.getElementById('guideModal'),
+                programModal: document.getElementById('programModal'),
+                safetyModal: document.getElementById('safetyModal'),
+                programToggle: document.getElementById('programToggle'),
+                closeProgram: document.getElementById('closeProgram'),
+                controlPanel: document.getElementById('controlPanel'),
+                noiseTypeDisplay: document.getElementById('noiseTypeDisplay'),
+                btnPink: document.getElementById('setPinkNoise'),
+                btnBrown: document.getElementById('setBrownNoise'),
+                breathToggle: document.getElementById('breathToggle'),
+                breathPatternButtons: Array.from(document.querySelectorAll('#breathPatternButtons .breath-pattern-btn')),
+                breathPatternSummary: document.getElementById('breathPatternSummary'),
+                breathPatternHelper: document.getElementById('breathPatternHelper'),
+                safeVisualsToggle: document.getElementById('safeVisualsToggle'),
+                audioOnlyToggle: document.getElementById('audioOnlyToggle'),
+                intensityButtons: Array.from(document.querySelectorAll('#intensityButtons .intensity-btn')),
+                hypnosDurationCard: document.getElementById('hypnosDurationCard'),
+                hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
+                programList: document.getElementById('programList'),
+                programStatus: document.getElementById('programStatus'),
+                programStatusModal: document.getElementById('programStatusModal'),
+                programOverlay: document.getElementById('programOverlay'),
+                programOverlayTitle: document.getElementById('programOverlayTitle'),
+                programOverlayBody: document.getElementById('programOverlayBody'),
+                programOverlayLabel: document.getElementById('programOverlayLabel'),
+                programOverlayStep: document.getElementById('programOverlayStep'),
+                programOverlayStepMeta: document.getElementById('programOverlayStepMeta'),
+                programContinueBtn: document.getElementById('programContinueBtn'),
+                programEndBtn: document.getElementById('programEndBtn'),
+                // Elements for Landing Page
+                landingPage: document.getElementById('landingPage'),
+                enterSystemBtn: document.getElementById('enterSystemBtn'),
+                appInterface: document.getElementById('appInterface'),
+                landingGlow: document.getElementById('landingGlow'),
+                silentAudio: document.getElementById('silentAudioLoop'),
+                circadianWidget: document.getElementById('circadianWidget'),
+                circadianTitle: document.getElementById('circadianTitle'),
+                leftPanel: document.getElementById('leftPanel'),
+                appFooter: document.getElementById('appFooter'),
+                appHeader: document.getElementById('appHeader')
+            };
+
+            function init() {
+                // Initialization Logic
+                removeLegacyProgramSidebar();
+                applyHypnosDuration(state.hypnosDuration);
+                renderModes();
+                setSession(state.session);
+                initCanvas();
+                updateNoiseUI();
+                els.breathToggle.checked = state.breathingPacer;
+                els.safeVisualsToggle.checked = state.safeVisuals;
+                els.audioOnlyToggle.checked = state.audioOnly;
+                updateIntensityUI();
+                updateBreathPatternUI();
+                updateHypnosDurationUI();
+                updateProgramStatus();
+                checkCircadianRhythm();
+
+                window.addEventListener('resize', resizeCanvas);
+                setInterval(checkCircadianRhythm, 60000);
+
+                // Activity tracking for Hypnos dimming
+                ['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(evt => {
+                    document.addEventListener(evt, () => {
+                        state.lastInteraction = performance.now();
+                        // Wake up UI
+                        els.appHeader.style.opacity = '1';
+                        els.leftPanel.style.opacity = '1';
+                        els.controlPanel.style.opacity = '1';
+                        els.appFooter.style.opacity = '1';
+                    });
+                });
+
+                // Interactive Glow on Landing
+                document.addEventListener('mousemove', (e) => {
+                    if(els.landingPage.style.display !== 'none') {
+                        const x = e.clientX;
+                        const y = e.clientY;
+                        els.landingGlow.style.left = x + 'px';
+                        els.landingGlow.style.top = y + 'px';
+                    }
+                });
+
+                // Landing Page Logic
+                els.enterSystemBtn.addEventListener('click', () => {
+                    const content = els.landingPage.querySelector('.max-w-5xl');
+                    content.style.opacity = '0';
+                    content.style.transition = 'opacity 0.5s';
+
+                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
+
+                    setTimeout(() => {
+                        els.landingPage.style.display = 'none';
+                        const calib = document.getElementById('calibrationOverlay');
+                        calib.style.display = 'flex';
+                        simulateCalibration(() => {
+                            els.appInterface.style.display = 'block';
+                            requestAnimationFrame(() => {
+                                els.appInterface.style.opacity = '1';
+                                resizeCanvas();
+                            });
+                        });
+                    }, 500);
+                });
+
+                els.mainBtn.addEventListener('click', toggleSession);
+                document.getElementById('previewButton').addEventListener('click', togglePreview);
+                document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
+                document.getElementById('focusLockToggle').addEventListener('change', (e) => state.focusLock = e.target.checked);
+
+                // Settings
+                document.getElementById('settingsToggle').addEventListener('click', () => els.settingsModal.style.display = 'flex');
+                document.getElementById('closeSettings').addEventListener('click', () => els.settingsModal.style.display = 'none');
+
+                // Guide
+                document.getElementById('guideToggle').addEventListener('click', () => els.guideModal.style.display = 'flex');
+                document.getElementById('closeGuide').addEventListener('click', () => els.guideModal.style.display = 'none');
+
+                // Safety
+                document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
+                document.getElementById('closeSafety').addEventListener('click', () => els.safetyModal.style.display = 'none');
+
+                // Audio Tests
+                document.getElementById('testLeftButton').addEventListener('click', () => playTestTone(-1));
+                document.getElementById('testRightButton').addEventListener('click', () => playTestTone(1));
+
+                // Noise Selection
+                els.btnPink.addEventListener('click', () => setNoiseType('pink'));
+                els.btnBrown.addEventListener('click', () => setNoiseType('brown'));
+
+                // Breathing Pacer
+                els.breathToggle.addEventListener('change', (e) => {
+                    state.breathingPacer = e.target.checked;
+                    userPreferences.save({ breathEnabled: state.breathingPacer });
+                });
+
+                // Safety & display modes
+                els.safeVisualsToggle.addEventListener('change', (e) => setSafeVisuals(e.target.checked));
+                els.audioOnlyToggle.addEventListener('change', (e) => setAudioOnly(e.target.checked));
+
+                // Intensity selection
+                els.intensityButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setIntensity(btn.dataset.intensity));
+                });
+
+                // Breath pattern selection
+                els.breathPatternButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setBreathPattern(btn.dataset.pattern));
+                });
+
+                // Hypnos durations
+                els.hypnosDurationButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setHypnosDuration(btn.dataset.duration));
+                });
+
+                els.programContinueBtn.addEventListener('click', () => startProgramStep(state.program.stepIndex));
+                els.programEndBtn.addEventListener('click', endProgram);
+
+                els.programToggle.addEventListener('click', openProgramModal);
+                els.closeProgram.addEventListener('click', closeProgramModal);
+
+                // Circadian Widget Click
+                els.circadianWidget.addEventListener('click', () => {
+                    const recommended = els.circadianWidget.dataset.recommended;
+                    if(recommended) setSession(recommended);
+                });
+
+                requestAnimationFrame(loop);
+            }
+
+            // Circadian Sync Logic
+            function checkCircadianRhythm() {
+                const hour = new Date().getHours();
+                let recId = 'prime';
+                let recText = 'Inicjalizacja';
+
+                if (hour >= 5 && hour < 10) { recId = 'prime'; recText = 'Okno: Kortyzol / Start'; }
+                else if (hour >= 10 && hour < 14) { recId = 'deepFocus'; recText = 'Okno: Produktywność'; }
+                else if (hour >= 14 && hour < 17) { recId = 'genesis'; recText = 'Okno: Reset / Theta'; }
+                else if (hour >= 17 && hour < 21) { recId = 'clarity'; recText = 'Okno: Integracja'; }
+                else { recId = 'hypnos'; recText = 'Okno: Melatonina'; }
+
+                els.circadianTitle.textContent = recText;
+                els.circadianWidget.dataset.recommended = recId;
+            }
+
+            function setNoiseType(type) {
+                state.noiseType = type;
+                userPreferences.save({ preferredNoiseType: type });
+                updateNoiseUI();
+                if(state.active && state.audio.noise) {
+                    state.audio.noise.type = type;
+                }
+            }
+
+            function updateNoiseUI() {
+                const active = ['bg-medical-900', 'border-medical-400', 'text-white', 'shadow-[0_0_12px_rgba(34,211,238,0.35)]'];
+                const inactive = ['bg-zinc-800', 'border-zinc-700', 'text-zinc-300', 'shadow-none'];
+                const setState = (btn, isActive) => {
+                    active.forEach(c => btn.classList.toggle(c, isActive));
+                    inactive.forEach(c => btn.classList.toggle(c, !isActive));
+                };
+
+                const isPink = state.noiseType === 'pink';
+                setState(els.btnPink, isPink);
+                setState(els.btnBrown, !isPink);
+                els.noiseTypeDisplay.textContent = isPink ? "Pink Noise (Soft)" : "Brown Noise (Deep)";
+            }
+
+            // UI + storage: safe visuals and audio-only toggles with intensity selection
+            function setSafeVisuals(enabled) {
+                state.safeVisuals = !!enabled;
+                els.safeVisualsToggle.checked = state.safeVisuals;
+                userPreferences.save({ safeVisuals: state.safeVisuals });
+            }
+
+            function setAudioOnly(enabled) {
+                state.audioOnly = !!enabled;
+                els.audioOnlyToggle.checked = state.audioOnly;
+                userPreferences.save({ audioOnly: state.audioOnly });
+            }
+
+            function setIntensity(level) {
+                if(!intensityProfiles[level]) level = 'medium';
+                state.intensityLevel = level;
+                userPreferences.save({ intensityLevel: level });
+                updateIntensityUI();
+            }
+
+            function updateIntensityUI() {
+                els.intensityButtons.forEach(btn => {
+                    const active = btn.dataset.intensity === state.intensityLevel;
+                    btn.classList.toggle('bg-medical-900/40', active);
+                    btn.classList.toggle('border-medical-400/60', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
+                });
+            }
+
+            function ensureProgramListAnchored() {
+                // Make sure the single program list node lives inside the modal body
+                const list = document.getElementById('programList');
+                const modalBody = document.querySelector('#programModal .doc-scroll');
+                if(list && modalBody && !modalBody.contains(list)) {
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(list);
+                }
+            }
+
+            function removeLegacyProgramSidebar() {
+                // Clean up any previous sidebar widget instances for programs
+                const selectors = ['#programSidebar', '#programsSidebar', '.program-sidebar', '.program-widget', '.programs-panel'];
+                selectors.forEach(sel => {
+                    const node = document.querySelector(sel);
+                    if(node) node.remove();
+                });
+
+                if(els.leftPanel) {
+                    els.leftPanel.querySelectorAll('.program-start, [data-program], [data-legacy-program]').forEach(btn => {
+                        const section = btn.closest('section') || btn.parentElement;
+                        if(section && section.parentElement === els.leftPanel) section.remove();
+                    });
+                }
+
+                ensureProgramListAnchored();
+            }
+
+            function resolveBreathPattern() {
+                if(state.breathPattern && state.breathPattern !== 'auto') return state.breathPattern;
+                return autoBreathMap[state.session] || '4-6';
+            }
+
+            function describeBreathSequence(patternId) {
+                const pattern = breathPatterns[patternId];
+                if(!pattern || !pattern.sequence) return 'Stabilny rytm oddechu';
+                return pattern.sequence.map(step => `${step.label} ${step.duration}s`).join(' · ');
+            }
+
+            function updateBreathPatternUI() {
+                const resolved = resolveBreathPattern();
+                const currentLabel = breathPatterns[state.breathPattern]?.label || 'Auto';
+                els.breathPatternButtons.forEach(btn => {
+                    const active = btn.dataset.pattern === state.breathPattern;
+                    btn.classList.toggle('bg-medical-900/40', active);
+                    btn.classList.toggle('border-medical-400/60', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
+                    btn.classList.toggle('bg-zinc-800', !active);
+                    btn.classList.toggle('border-zinc-700', !active);
+                    btn.classList.toggle('text-zinc-300', !active);
+                });
+
+                const resolvedLabel = breathPatterns[resolved]?.label || '4–6';
+                const sequenceText = describeBreathSequence(resolved);
+                if(state.breathPattern === 'auto') {
+                    const modeName = sessions[state.session]?.name || 'wybranego trybu';
+                    els.breathPatternSummary.textContent = `${resolvedLabel} · auto dla ${modeName}`;
+                    els.breathPatternHelper.textContent = `Auto wybiera: ${sequenceText}`;
+                } else {
+                    els.breathPatternSummary.textContent = `${currentLabel} · ${sequenceText}`;
+                    els.breathPatternHelper.textContent = sequenceText;
+                }
+            }
+
+            function setBreathPattern(pattern) {
+                state.breathPattern = breathPatterns[pattern] ? pattern : 'auto';
+                userPreferences.save({ breathPattern: state.breathPattern });
+                updateBreathPatternUI();
+            }
+
+            function getHypnosDurationSeconds(key) {
+                const minutes = hypnosDurations[key] ?? hypnosDurations['infinity'];
+                if (minutes === Infinity) return Infinity;
+                return (minutes * 60) / HYPNOS_TEST_ACCELERATION;
+            }
+
+            function applyHypnosDuration(key) {
+                const durationSeconds = getHypnosDurationSeconds(key);
+                sessions.hypnos.duration = durationSeconds;
+                const cloned = JSON.parse(JSON.stringify(hypnosBasePhases));
+                cloned[1].end = durationSeconds === Infinity ? Infinity : durationSeconds;
+                sessions.hypnos.phases = cloned;
+            }
+
+            function getSessionData() {
+                return state.sessionDataOverride || sessions[state.session];
+            }
+
+            function cloneSessionWithDuration(sessionId, durationSeconds) {
+                const base = sessions[sessionId];
+                if(!base) return null;
+                if(durationSeconds === undefined || durationSeconds === null || durationSeconds === base.duration) return base;
+                const referenceDuration = base.duration === Infinity
+                    ? base.phases.reduce((max, p) => Math.max(max, p.end === Infinity ? p.start : p.end), 0)
+                    : base.duration;
+                const ratio = durationSeconds === Infinity || referenceDuration === 0 ? 1 : (durationSeconds / referenceDuration);
+                const phases = base.phases.map(p => ({
+                    ...p,
+                    start: p.start * ratio,
+                    end: p.end === Infinity ? Infinity : p.end * ratio,
+                    audio: { ...p.audio },
+                    visual: { ...p.visual }
+                }));
+                return { ...base, duration: durationSeconds, phases };
+            }
+
+            function getProgramById(id) {
+                return programs.find(p => p.id === id);
+            }
+
+            function formatProgramStep(step, idx, total) {
+                const sessionName = sessions[step.sessionId]?.name || step.sessionId;
+                const minutes = step.durationMinutes === Infinity ? '∞' : `${step.durationMinutes} min`;
+                return `${idx + 1}/${total}: ${sessionName} · ${minutes}`;
+            }
+
+            function renderPrograms() {
+                ensureProgramListAnchored();
+                els.programList = document.getElementById('programList');
+                if(!els.programList) return;
+                els.programList.innerHTML = '';
+                if(!programs.length) {
+                    els.programList.innerHTML = '<p class="text-sm text-zinc-400">Brak dostępnych programów.</p>';
+                    return;
+                }
+                programs.forEach(program => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'border border-white/5 rounded-xl p-4 bg-zinc-950/40 h-full flex flex-col gap-3';
+                    const stepsText = program.steps.map((step, idx) => formatProgramStep(step, idx, program.steps.length)).map(text => `<li>${text}</li>`).join('');
+                    wrapper.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-medical-400">${program.name}</span>
+                                    <span class="text-[10px] text-zinc-500">${program.steps.length} kroki</span>
+                                </div>
+                                <p class="text-xs text-zinc-300 leading-relaxed">${program.description}</p>
+                            </div>
+                            <button data-program="${program.id}" class="program-start px-3 py-2 text-[10px] uppercase tracking-wider bg-medical-400 text-black rounded hover:shadow-[0_0_14px_rgba(34,211,238,0.4)] transition-all">Start programu</button>
+                        </div>
+                        <ul class="mt-1 text-[11px] text-zinc-300 leading-relaxed space-y-1 list-disc list-inside">${stepsText}</ul>
+                    `;
+                    els.programList.appendChild(wrapper);
+                });
+
+                els.programList.querySelectorAll('.program-start').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.program;
+                        startProgram(id);
+                    });
+                });
+            }
+
+            function openProgramModal() {
+                ensureProgramListAnchored();
+                els.programModal = document.getElementById('programModal');
+                els.programList = document.getElementById('programList');
+                els.programStatusModal = document.getElementById('programStatusModal');
+                if(!els.programModal || !els.programList) return;
+                renderPrograms();
+                updateProgramStatus();
+                els.programModal.classList.remove('hidden');
+                els.programModal.style.display = 'flex';
+            }
+
+            function closeProgramModal() {
+                if(!els.programModal) return;
+                els.programModal.classList.add('hidden');
+                els.programModal.style.display = 'none';
+            }
+
+            function updateProgramStatus() {
+                if(!state.program.active) {
+                    els.programStatus.textContent = 'Brak aktywnego programu';
+                    if(els.programStatusModal) els.programStatusModal.textContent = 'Brak aktywnego programu';
+                    return;
+                }
+                const program = getProgramById(state.program.id);
+                if(!program) {
+                    els.programStatus.textContent = 'Program nieznany';
+                    if(els.programStatusModal) els.programStatusModal.textContent = 'Program nieznany';
+                    return;
+                }
+                const stepNo = Math.min(state.program.stepIndex + 1, program.steps.length);
+                const suffix = state.program.awaitingNext ? ' · pauza' : '';
+                const label = `${program.name}: krok ${stepNo}/${program.steps.length}${suffix}`;
+                els.programStatus.textContent = label;
+                if(els.programStatusModal) els.programStatusModal.textContent = label;
+            }
+
+            function hideProgramOverlay() {
+                els.programOverlay.classList.add('hidden');
+            }
+
+            function showProgramOverlay(config) {
+                const { label, title, body, stepText, stepMeta, showContinue } = config;
+                els.programOverlayLabel.textContent = label;
+                els.programOverlayTitle.textContent = title;
+                els.programOverlayBody.textContent = body;
+                els.programOverlayStep.textContent = stepText;
+                els.programOverlayStepMeta.textContent = stepMeta;
+                els.programContinueBtn.classList.toggle('hidden', !showContinue);
+                els.programOverlay.classList.remove('hidden');
+            }
+
+            function resolveProgramDuration(step) {
+                if(step.durationMinutes === Infinity) return Infinity;
+                if(typeof step.durationMinutes === 'number') return step.durationMinutes * 60;
+                return null;
+            }
+
+            function startProgram(programId) {
+                const program = getProgramById(programId);
+                if(!program || state.active) return;
+                if(els.programModal) closeProgramModal();
+                state.program = { active: true, id: programId, stepIndex: 0, awaitingNext: false };
+                updateProgramStatus();
+                startProgramStep(0);
+            }
+
+            function startProgramStep(index) {
+                const program = getProgramById(state.program.id);
+                if(!program) { endProgram(); return; }
+                const step = program.steps[index];
+                if(!step) { endProgram(); return; }
+                state.program.stepIndex = index;
+                state.program.awaitingNext = false;
+                const durationSeconds = resolveProgramDuration(step);
+                setSession(step.sessionId, { overrideDurationSeconds: durationSeconds, skipSave: true });
+                updateProgramStatus();
+                hideProgramOverlay();
+                if(!state.active) toggleSession('program-start');
+            }
+
+            function handleProgramAfterStep() {
+                if(!state.program.active) return;
+                const program = getProgramById(state.program.id);
+                if(!program) { endProgram(); return; }
+                const nextIndex = state.program.stepIndex + 1;
+                if(nextIndex >= program.steps.length) {
+                    state.program.active = false;
+                    state.program.awaitingNext = false;
+                    updateProgramStatus();
+                    showProgramOverlay({
+                        label: 'Program zakończony',
+                        title: `${program.name} ukończony`,
+                        body: 'Wszystkie etapy zostały wykonane. Możesz zakończyć program i wrócić do pojedynczych trybów.',
+                        stepText: `Zrealizowano ${program.steps.length} / ${program.steps.length} kroków`,
+                        stepMeta: '',
+                        showContinue: false
+                    });
+                } else {
+                    const nextStep = program.steps[nextIndex];
+                    const stepText = formatProgramStep(nextStep, nextIndex, program.steps.length);
+                    const minutes = nextStep.durationMinutes === Infinity ? '∞' : `${nextStep.durationMinutes} min`;
+                    const sessionName = sessions[nextStep.sessionId]?.name || nextStep.sessionId;
+                    state.program.awaitingNext = true;
+                    state.program.stepIndex = nextIndex;
+                    updateProgramStatus();
+                    showProgramOverlay({
+                        label: 'Następny etap programu',
+                        title: program.name,
+                        body: 'Rozpocznij kolejny etap lub zakończ program.',
+                        stepText,
+                        stepMeta: `${sessionName} · ${minutes}`,
+                        showContinue: true
+                    });
+                }
+            }
+
+            function endProgram() {
+                state.program = { active: false, id: null, stepIndex: 0, awaitingNext: false };
+                state.sessionDataOverride = null;
+                hideProgramOverlay();
+                updateProgramStatus();
+                if(!state.active) setSession(state.session);
+            }
+
+            function setHypnosDuration(key) {
+                state.hypnosDuration = key;
+                userPreferences.save({ hypnosDuration: key });
+                applyHypnosDuration(key);
+                updateHypnosDurationUI();
+                if(state.session === 'hypnos' && !state.active) {
+                    els.timer.textContent = formatTime(sessions.hypnos.duration);
+                }
+            }
+
+            function updateHypnosDurationUI() {
+                const isHypnos = state.session === 'hypnos';
+                els.hypnosDurationCard.classList.toggle('hidden', !isHypnos);
+                els.hypnosDurationButtons.forEach(btn => {
+                    const selected = btn.dataset.duration === state.hypnosDuration;
+                    btn.classList.toggle('border-medical-400', selected);
+                    btn.classList.toggle('text-white', selected);
+                    btn.classList.toggle('bg-medical-900/60', selected);
+                });
+            }
+
+            function simulateCalibration(callback) {
+                const overlay = document.getElementById('calibrationOverlay');
+                const bar = document.getElementById('calibBar');
+                const text = document.getElementById('calibText');
+                const perc = document.getElementById('calibPercent');
+                let p = 0;
+                const steps = [{p: 20, t: "Loading Audio Drivers..."}, {p: 45, t: "Calibrating Oscillators..."}, {p: 70, t: "Initializing Noise Engine..."}, {p: 100, t: "System Ready."}];
+                let stepIdx = 0;
+                const interval = setInterval(() => {
+                    p += Math.random() * 5;
+                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx++; }
+                    if(p >= 100) { p = 100; clearInterval(interval); setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 1000); }, 500); }
+                    bar.style.width = p + "%"; perc.textContent = Math.floor(p) + "%";
+                }, 30);
+            }
+
+            function renderModes() {
+                els.modeContainer.innerHTML = '';
+                Object.values(sessions).forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = `mode-btn w-full text-left p-3 rounded border transition-all duration-200 flex flex-col gap-1 group relative overflow-hidden`;
+                    btn.dataset.id = s.id;
+                    btn.innerHTML = `<div class="flex items-center justify-between w-full relative z-10"><div class="flex items-center gap-3"><div class="text-zinc-500 group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div><span class="font-bold text-[11px] uppercase tracking-wider">${s.name}</span></div><span class="text-[9px] font-mono text-zinc-500">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span></div>`;
+                    btn.addEventListener('click', () => setSession(s.id));
+                    els.modeContainer.appendChild(btn);
+                });
+            }
+
+            function setSession(id, options = {}) {
+                if (state.active) return;
+                state.session = id;
+                const overrideSeconds = options.overrideDurationSeconds ?? null;
+                state.sessionDataOverride = overrideSeconds ? cloneSessionWithDuration(id, overrideSeconds) : null;
+                if(!options.skipSave) userPreferences.save({ lastSessionId: id });
+                const data = getSessionData();
+
+                if(id === 'hypnos') {
+                    setNoiseType('brown');
+                    applyHypnosDuration(state.hypnosDuration);
+                } else {
+                    els.hypnosDurationCard.classList.add('hidden');
+                }
+
+                document.querySelectorAll('.mode-btn').forEach(b => {
+                    const isActive = b.dataset.id === id;
+                    const icon = b.querySelector('.icon-container');
+                    if(isActive) {
+                        b.classList.remove('border-transparent', 'text-zinc-500');
+                        b.classList.add('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
+                        icon.classList.remove('text-zinc-500');
+                        icon.classList.add('text-medical-400');
+                    } else {
+                        b.classList.add('border-transparent', 'text-zinc-500');
+                        b.classList.remove('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
+                        icon.classList.add('text-zinc-500');
+                        icon.classList.remove('text-medical-400');
+                    }
+                });
+                els.messageTitle.textContent = data.name;
+                els.desc.textContent = data.desc;
+                els.timer.textContent = formatTime(data.duration);
+                els.realtimeHz.textContent = "0.00 Hz";
+                els.phaseName.textContent = "Gotowy";
+                updateBreathPatternUI();
+                updateHypnosDurationUI();
+            }
+
+            async function startAudio() {
+                await Tone.start();
+
+                const data = getSessionData();
+
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: 'Kora Cortex',
+                        artist: 'Bio-Entrainment System',
+                        album: data.name
+                    });
+                    navigator.mediaSession.setActionHandler('play', toggleSession);
+                    navigator.mediaSession.setActionHandler('pause', toggleSession);
+                }
+                const startPhase = data.phases[0];
+                const startL = startPhase.audio.l || 220;
+                const startR = startPhase.audio.r || 228;
+                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
+
+                state.audio.gain = new Tone.Gain(0).toDestination();
+                const pL = new Tone.Panner(-1).connect(state.audio.gain);
+                const pR = new Tone.Panner(1).connect(state.audio.gain);
+
+                state.audio.oscL = new Tone.Oscillator(startL, "sine").connect(pL).start();
+                state.audio.oscR = new Tone.Oscillator(startR, "sine").connect(pR).start();
+
+                state.audio.noiseGain = new Tone.Gain(0).toDestination();
+                state.audio.noise = new Tone.Noise(state.noiseType).connect(state.audio.noiseGain).start();
+
+                state.audio.noiseGain.gain.rampTo(0.08, 3);
+                state.audio.gain.gain.rampTo(0.1 * (intensity.gain || 1), 1);
+            }
+
+            function stopAudio() {
+                if (state.audio.oscL) { state.audio.oscL.dispose(); state.audio.oscL = null; }
+                if (state.audio.oscR) { state.audio.oscR.dispose(); state.audio.oscR = null; }
+                if (state.audio.gain) { state.audio.gain.dispose(); state.audio.gain = null; }
+                if (state.audio.noise) { state.audio.noise.dispose(); state.audio.noise = null; }
+                if (state.audio.noiseGain) { state.audio.noiseGain.dispose(); state.audio.noiseGain = null; }
+            }
+
+            function updateAudio(phase, progress, t) {
+                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
+                const a = phase.audio || {};
+                if (a.l) state.audio.oscL.frequency.value = a.l;
+                if (a.r) state.audio.oscR.frequency.value = a.r;
+
+                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
+
+                const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
+                const displayHz = (currentHz + (Math.random() * 0.05 - 0.025)).toFixed(2);
+                els.realtimeHz.textContent = `${displayHz} Hz`;
+
+                let vol = 0.2;
+                if(a.vol !== undefined) vol = a.vol;
+                else if(a.vol_s !== undefined && a.vol_e !== undefined) {
+                    vol = (progress === undefined || isNaN(progress)) ? a.vol_s : lerp(a.vol_s, a.vol_e, progress);
+                }
+
+                vol = vol * (intensity.gain || 1);
+
+                const rampFactor = 1 - (state.hypnosRampProgress * 0.9);
+                vol = Math.max(0, vol * rampFactor);
+
+                if (a.mod === 'iso') {
+                    const rate = 2;
+                    const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
+                    state.audio.gain.gain.value = vol * mod;
+                } else {
+                    state.audio.gain.gain.value = vol;
+                }
+
+                const deltaFactor = intensity.delta || 1;
+                if(deltaFactor !== 1) {
+                    const l = state.audio.oscL.frequency.value;
+                    const r = state.audio.oscR.frequency.value;
+                    const center = (l + r) / 2;
+                    const diff = ((r - l) / 2) * deltaFactor;
+                    state.audio.oscL.frequency.value = center - diff;
+                    state.audio.oscR.frequency.value = center + diff;
+                }
+            }
+
+            // Smooth Hypnos ramp-down before auto-stop
+            function startHypnosRampDown() {
+                if(state.hypnosRampTimer || !state.active) return;
+                const startGain = state.audio.gain?.gain.value ?? 0;
+                const startNoise = state.audio.noiseGain?.gain.value ?? 0;
+                state.hypnosRampProgress = 0;
+                state.hypnosRampTimer = setInterval(() => {
+                    state.hypnosRampProgress = Math.min(1, state.hypnosRampProgress + 0.1);
+                    if(state.audio.gain) state.audio.gain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(startNoise * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.hypnosRampProgress >= 1) {
+                        clearInterval(state.hypnosRampTimer);
+                        state.hypnosRampTimer = null;
+                        toggleSession('auto-complete');
+                    }
+                }, 700);
+            }
+
+            async function playTestTone(pan) {
+                await Tone.start();
+                const synth = new Tone.Synth().toDestination();
+                const panner = new Tone.Panner(pan).toDestination();
+                synth.connect(panner);
+                synth.triggerAttackRelease("C5", "0.2");
+            }
+
+            function initCanvas() {
+                state.ctx = els.canvas.getContext('2d');
+                resizeCanvas();
+            }
+
+            function resizeCanvas() {
+                const container = els.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                els.canvas.width = rect.width;
+                els.canvas.height = rect.height;
+            }
+
+            function drawVisual(phase, progress, t) {
+                const ctx = state.ctx;
+                const w = els.canvas.width;
+                const h = els.canvas.height;
+                const v = phase.visual || { f: 1, mod: 'soft', bri: 0.5 };
+
+                if(state.audioOnly) {
+                    const grad = ctx.createLinearGradient(0, 0, 0, h);
+                    grad.addColorStop(0, 'rgba(10,10,12,0.95)');
+                    grad.addColorStop(1, 'rgba(5,5,7,0.98)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+                    return;
+                }
+
+                // HYPNOS BLACKOUT LOGIC
+                let isHypnos = state.session === 'hypnos';
+
+                let freq = v.f;
+                if (v.f_s && v.f_e && !isNaN(progress)) freq = lerp(v.f_s, v.f_e, progress);
+
+                let modType = v.mod;
+                let safeBrightnessCap = 1;
+                if(state.safeVisuals) {
+                    freq = Math.min(freq, state.session === 'overdrive' ? 12 : 10);
+                    modType = modType === 'hard' ? 'soft' : modType;
+                    safeBrightnessCap = state.session === 'overdrive' ? 0.6 : 0.5;
+                }
+
+                const pulseRaw = Math.sin(t * Math.PI * 2 * freq);
+                const pulse = (pulseRaw + 1) / 2;
+
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+
+                let bri = v.bri || 0.8;
+                if (isHypnos && state.active) {
+                    bri = bri * 0.05; // Ultra dim for sleep
+                }
+
+                if (modType === 'breath') bri = bri * (0.6 + 0.4 * pulse);
+                else if (modType === 'soft') bri = bri * (0.8 + 0.2 * pulse);
+                else if (modType === 'hard') bri = pulseRaw > 0 ? 1 : 0;
+
+                bri = bri * (1 - state.hypnosRampProgress * 0.8);
+                bri = Math.min(bri, safeBrightnessCap);
+
+                if (bri > 0.001) {
+                    const maxR = Math.sqrt(w*w + h*h) * 0.6;
+                    const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, maxR);
+                    const cVal = Math.floor(bri * 255);
+                    grad.addColorStop(0, `rgba(${cVal}, ${cVal}, ${cVal + 20}, 1)`);
+                    grad.addColorStop(1, 'rgba(0,0,0,1)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+                }
+
+                // Only draw oscilloscope if NOT in Hypnos mode
+                if (!isHypnos) {
+                    ctx.beginPath();
+                    ctx.lineWidth = state.safeVisuals ? 1.2 : 2;
+                    ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 + bri*0.5})`;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#22d3ee';
+                    const amplitude = h * 0.15 * (state.safeVisuals ? 0.6 : 1);
+                    const centerY = h / 2;
+                    for(let x=0; x<w; x+=2) {
+                        const y = centerY + Math.sin((x + t * 100) * 0.02) * amplitude * bri + Math.sin((x - t * 50) * 0.05) * (amplitude/2);
+                        if(x===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                if (state.breathingPacer) {
+                    // Hide pacer in Hypnos to avoid light
+                    if (!isHypnos || !state.active) {
+                        const patternId = resolveBreathPattern();
+                        const preset = breathPatterns[patternId] || breathPatterns['4-6'];
+                        const sequence = preset.sequence || breathPatterns['4-6'].sequence;
+                        const totalDuration = sequence.reduce((acc, step) => acc + step.duration, 0) || 10;
+                        const cycleT = t % totalDuration;
+                        let breathProgress = 0;
+                        let breathLabel = "";
+                        let elapsed = 0;
+                        let currentLevel = 0;
+
+                        for (const step of sequence) {
+                            const start = elapsed;
+                            const end = elapsed + step.duration;
+                            const targetLevel = step.label === 'IN' ? 1 : step.label === 'OUT' ? 0 : currentLevel;
+
+                            if (cycleT >= start && cycleT < end) {
+                                const localP = (cycleT - start) / step.duration;
+                                if (targetLevel > currentLevel) {
+                                    breathProgress = currentLevel + (1 - Math.pow(1 - localP, 3)) * (targetLevel - currentLevel);
+                                } else if (targetLevel < currentLevel) {
+                                    breathProgress = currentLevel - Math.pow(localP, 3) * (currentLevel - targetLevel);
+                                } else {
+                                    breathProgress = currentLevel;
+                                }
+                                breathLabel = step.label;
+                                break;
+                            }
+
+                            currentLevel = targetLevel;
+                            elapsed = end;
+                        }
+
+                        if (!breathLabel) {
+                            breathLabel = sequence[sequence.length - 1]?.label || 'HOLD';
+                            breathProgress = currentLevel;
+                        }
+
+                        const baseR = Math.min(w, h) * 0.2;
+                        const maxR = Math.min(w, h) * 0.35;
+                        const currentR = baseR + (maxR - baseR) * breathProgress;
+                        ctx.beginPath();
+                        ctx.arc(w/2, h/2, currentR, 0, Math.PI * 2);
+                        ctx.lineWidth = 3;
+                        ctx.strokeStyle = `rgba(34, 211, 238, 0.5)`;
+                        ctx.stroke();
+                        ctx.fillStyle = `rgba(34, 211, 238, ${0.05 + 0.1 * breathProgress})`;
+                        ctx.fill();
+                        ctx.font = "12px JetBrains Mono";
+                        ctx.fillStyle = `rgba(34, 211, 238, 0.9)`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(breathLabel, w/2, h/2);
+                    }
+                }
+            }
+
+            async function toggleSession(reason = 'manual') {
+                if (state.active) {
+                    state.active = false;
+                    if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
+                    state.hypnosRampProgress = 0;
+                    stopAudio();
+                    els.canvas.style.opacity = 0;
+                    els.msgBox.style.opacity = 1;
+                    els.msgBox.style.transform = "scale(1)";
+                    els.mainBtn.textContent = "URUCHOM";
+                    els.mainBtn.classList.remove('bg-medical-400', 'text-black', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
+                    els.mainBtn.classList.add('bg-zinc-100', 'text-black', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
+                    els.controlPanel.classList.remove('glow-box-cyan');
+                    els.timer.classList.remove('glow-text-cyan');
+                    els.statusText.textContent = "Standby";
+                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-zinc-600";
+                    els.statusDot.style.boxShadow = 'none';
+
+                    els.appHeader.style.opacity = '1';
+                    els.leftPanel.style.opacity = '1';
+                    els.controlPanel.style.opacity = '1';
+                    els.appFooter.style.opacity = '1';
+
+                    disableFocusLock();
+                    setSession(state.session);
+                    handleProgramAfterStep();
+                } else {
+                    await startAudio();
+                    state.active = true;
+                    state.startTime = performance.now();
+                    state.hypnosRampProgress = 0;
+                    state.lastInteraction = performance.now();
+                    els.canvas.style.opacity = 1;
+                    els.msgBox.style.opacity = 0;
+                    els.msgBox.style.transform = "scale(0.95)";
+                    els.mainBtn.textContent = "ZATRZYMAJ";
+                    els.mainBtn.classList.remove('bg-zinc-100', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
+                    els.mainBtn.classList.add('bg-medical-400', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
+                    els.controlPanel.classList.add('glow-box-cyan');
+                    els.timer.classList.add('glow-text-cyan');
+                    els.statusText.textContent = "ACTIVE";
+                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
+                    els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
+                    if(state.focusLock) enableFocusLock();
+                }
+            }
+
+            function togglePreview() {
+                if (state.active) return;
+                state.preview = !state.preview;
+                els.canvas.style.opacity = state.preview ? 1 : 0;
+                els.msgBox.style.opacity = state.preview ? 0 : 1;
+                state.startTime = performance.now();
+                if(state.preview) els.realtimeHz.textContent = "PREVIEW";
+            }
+
+            function loop() {
+                const now = performance.now();
+
+                if (state.active && state.session === 'hypnos') {
+                    if (now - state.lastInteraction > 5000) {
+                        els.appHeader.style.opacity = '0.1';
+                        els.leftPanel.style.opacity = '0.1';
+                        els.controlPanel.style.opacity = '0.1';
+                        els.appFooter.style.opacity = '0';
+                    }
+                }
+
+                if (state.active || state.preview) {
+                    const data = getSessionData();
+                    const elapsed = (now - state.startTime) / 1000;
+
+                    if (state.active && data.duration !== Infinity) {
+                        if(state.session === 'hypnos') {
+                            if(elapsed >= data.duration) { startHypnosRampDown(); }
+                        } else if (elapsed >= data.duration) { toggleSession('auto-complete'); return; }
+                    }
+
+                    let currentPhase = data.phases[data.phases.length-1];
+                    for(let i=0; i<data.phases.length; i++) {
+                        const p = data.phases[i];
+                        if (elapsed >= p.start && (elapsed < p.end || p.end === Infinity)) {
+                            currentPhase = p;
+                            break;
+                        }
+                    }
+
+                    if (state.preview) { drawVisual(data.phases[1] || data.phases[0], 0.5, elapsed); }
+                    else {
+                        const phaseDuration = currentPhase.end === Infinity ? 1 : (currentPhase.end - currentPhase.start);
+                        const phaseProgress = currentPhase.end === Infinity ? 0 : (elapsed - currentPhase.start) / phaseDuration;
+
+                        updateAudio(currentPhase, phaseProgress, elapsed);
+                        drawVisual(currentPhase, phaseProgress, elapsed);
+
+                        if(data.duration === Infinity) {
+                            els.timer.textContent = "∞";
+                            els.progressBar.style.width = "100%";
+                        } else {
+                            els.timer.textContent = formatTime(Math.max(0, data.duration - elapsed));
+                            els.progressBar.style.width = `${(elapsed / data.duration) * 100}%`;
+                        }
+                        els.phaseName.textContent = currentPhase.name;
+                    }
+                }
+                requestAnimationFrame(loop);
+            }
+
+            function formatTime(s) {
+                if(s === Infinity) return "∞";
+                const m = Math.floor(s / 60).toString().padStart(2,'0');
+                const sec = Math.floor(s % 60).toString().padStart(2,'0');
+                return `${m}:${sec}`;
+            }
+            function lerp(a, b, t) { return a + (b - a) * t; }
+            function enableFocusLock() { document.documentElement.requestFullscreen().catch(()=>{}); document.addEventListener('keydown', lockKey); }
+            function disableFocusLock() { if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.removeEventListener('keydown', lockKey); }
+            function lockKey(e) { if(e.key === 'Escape') { e.preventDefault(); toggleSession(); } }
+            function toggleFullscreen() {
+                const el = document.getElementById('visualizer');
+                if(!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if(el.requestFullscreen) el.requestFullscreen();
+                    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                } else {
+                    if(document.exitFullscreen) document.exitFullscreen();
+                    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+                }
+            }
+            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, () => { setTimeout(resizeCanvas, 100); }); });
+            init();
