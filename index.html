@@ -268,6 +268,24 @@
                                 <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
                             </div>
                         </section>
+
+                        <!-- Hypnos duration selection (visible only for Hypnos mode) -->
+                        <section id="hypnosDurationCard" class="glass-panel rounded-xl p-5 space-y-3 relative overflow-hidden shrink-0 hidden">
+                            <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Hypnos · Czas</h2>
+                                    <p class="text-xs text-zinc-400">Wybierz długość sesji i zachowaj w pamięci.</p>
+                                </div>
+                                <span class="text-[9px] text-medical-400 font-mono">Auto-stop</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2" id="hypnosDurationButtons">
+                                <button data-duration="30" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">30 min</button>
+                                <button data-duration="45" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">45 min</button>
+                                <button data-duration="90" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">90 min</button>
+                                <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
+                            </div>
+                        </section>
                     </div>
 
                     <div class="lg:col-span-8 flex flex-col gap-4 order-1 lg:order-2 h-full">
