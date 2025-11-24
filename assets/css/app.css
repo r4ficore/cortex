@@ -1,0 +1,104 @@
+:root {
+                --bg-dark: #050505;
+                --panel-bg: rgba(15, 15, 18, 0.85);
+                --cyan-glow: rgba(34, 211, 238, 0.4);
+            }
+
+            body {
+                background-color: var(--bg-dark);
+                color: #e4e4e7;
+                -webkit-font-smoothing: antialiased;
+                overflow-x: hidden;
+            }
+
+            .doc-scroll::-webkit-scrollbar { width: 8px; }
+            .doc-scroll::-webkit-scrollbar-track { background: #09090b; }
+            .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+            .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+            .bg-grid {
+                background-size: 50px 50px;
+                mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
+                -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: -1;
+                border-top: 1px solid rgba(255,255,255,0.05);
+            }
+
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+            #visualizer:fullscreen, #visualizer:-webkit-full-screen {
+                width: 100vw !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                border: none !important;
+                background-color: #000 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #visualizer:fullscreen canvas, #visualizer:-webkit-full-screen canvas {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain;
+            }
+
+            .glass-panel {
+                background: var(--panel-bg);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+                transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 1s ease;
+            }
+
+            .glass-panel:hover {
+                border-color: rgba(34, 211, 238, 0.3);
+                box-shadow: 0 12px 40px 0 rgba(34, 211, 238, 0.1);
+            }
+
+            .glow-text-cyan { text-shadow: 0 0 15px var(--cyan-glow); color: #22d3ee; }
+            .glow-box-cyan {
+                box-shadow: 0 0 15px var(--cyan-glow), inset 0 0 10px rgba(34, 211, 238, 0.1);
+                border-color: rgba(34, 211, 238, 0.5);
+            }
+
+            .scanline {
+                width: 100%;
+                height: 100%;
+                z-index: 10;
+                background: linear-gradient(0deg, rgba(0,0,0,0) 50%, rgba(34, 211, 238, 0.02) 50%), linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
+                background-size: 100% 2px, 3px 100%;
+                pointer-events: none;
+            }
+
+            .science-table {
+                width: 100%; border-collapse: collapse; font-size: 0.75rem; margin: 1rem 0;
+            }
+            .science-table th {
+                text-align: left; padding: 0.75rem; border-bottom: 1px solid #3f3f46; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+            }
+            .science-table td { padding: 0.75rem; border-bottom: 1px solid #27272a; color: #d4d4d8; }
+            .science-table tr:last-child td { border-bottom: none; }
+
+            .landing-glitch:hover {
+                animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+                color: #22d3ee;
+            }
+
+            .terminal-log {
+                font-family: 'JetBrains Mono', monospace;
+                mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            }
+
+            .dimmed-ui {
+                opacity: 0.15;
+                transition: opacity 1s ease;
+            }
+            .dimmed-ui:hover {
+                opacity: 1;
+            }
