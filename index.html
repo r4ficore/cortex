@@ -72,112 +72,8 @@
             }
         </script>
 
-        <style>
-            :root {
-                --bg-dark: #050505;
-                --panel-bg: rgba(15, 15, 18, 0.85);
-                --cyan-glow: rgba(34, 211, 238, 0.4);
-            }
+        <link rel="stylesheet" href="assets/css/app.css">
 
-            body {
-                background-color: var(--bg-dark);
-                color: #e4e4e7;
-                -webkit-font-smoothing: antialiased;
-                overflow-x: hidden;
-            }
-
-            .doc-scroll::-webkit-scrollbar { width: 8px; }
-            .doc-scroll::-webkit-scrollbar-track { background: #09090b; }
-            .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-            .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-
-            .bg-grid {
-                background-size: 50px 50px;
-                mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
-                -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                z-index: -1;
-                border-top: 1px solid rgba(255,255,255,0.05);
-            }
-
-            .no-scrollbar::-webkit-scrollbar { display: none; }
-            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-            #visualizer:fullscreen, #visualizer:-webkit-full-screen {
-                width: 100vw !important;
-                height: 100vh !important;
-                border-radius: 0 !important;
-                border: none !important;
-                background-color: #000 !important;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            #visualizer:fullscreen canvas, #visualizer:-webkit-full-screen canvas {
-                width: 100% !important;
-                height: 100% !important;
-                object-fit: contain;
-            }
-
-            .glass-panel {
-                background: var(--panel-bg);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-                transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 1s ease;
-            }
-
-            .glass-panel:hover {
-                border-color: rgba(34, 211, 238, 0.3);
-                box-shadow: 0 12px 40px 0 rgba(34, 211, 238, 0.1);
-            }
-
-            .glow-text-cyan { text-shadow: 0 0 15px var(--cyan-glow); color: #22d3ee; }
-            .glow-box-cyan {
-                box-shadow: 0 0 15px var(--cyan-glow), inset 0 0 10px rgba(34, 211, 238, 0.1);
-                border-color: rgba(34, 211, 238, 0.5);
-            }
-
-            .scanline {
-                width: 100%;
-                height: 100%;
-                z-index: 10;
-                background: linear-gradient(0deg, rgba(0,0,0,0) 50%, rgba(34, 211, 238, 0.02) 50%), linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
-                background-size: 100% 2px, 3px 100%;
-                pointer-events: none;
-            }
-
-            .science-table {
-                width: 100%; border-collapse: collapse; font-size: 0.75rem; margin: 1rem 0;
-            }
-            .science-table th {
-                text-align: left; padding: 0.75rem; border-bottom: 1px solid #3f3f46; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
-            }
-            .science-table td { padding: 0.75rem; border-bottom: 1px solid #27272a; color: #d4d4d8; }
-            .science-table tr:last-child td { border-bottom: none; }
-
-            .landing-glitch:hover {
-                animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-                color: #22d3ee;
-            }
-
-            .terminal-log {
-                font-family: 'JetBrains Mono', monospace;
-                mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            }
-
-            .dimmed-ui {
-                opacity: 0.15;
-                transition: opacity 1s ease;
-            }
-            .dimmed-ui:hover {
-                opacity: 1;
-            }
-        </style>
     </head>
     <body class="min-h-screen flex flex-col selection:bg-medical-400 selection:text-black font-sans overflow-x-hidden">
 
@@ -310,9 +206,21 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                             <span>Raport</span>
                         </button>
+                        <button id="programToggle" class="flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9.5 5.5-9.5 5.5L2.5 8.5 12 3z"></path><path d="M2.5 15.5 12 21l9.5-5.5"></path><path d="m2.5 12 9.5 5.5 9.5-5.5"></path></svg>
+                            <span>Programy</span>
+                        </button>
+                        <button id="safetyToggle" class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>Bezpieczeństwo</span>
+                        </button>
                         <div class="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60">
                             <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
                             <span id="statusText" class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest w-16 text-center">Standby</span>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+                            <span class="w-2 h-2 rounded-full bg-medical-900/70"></span>
+                            <span id="programStatus">Brak aktywnego programu</span>
                         </div>
                         <button id="settingsToggle" class="p-2 text-zinc-400 hover:text-medical-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
@@ -343,31 +251,21 @@
                             <div class="overflow-y-auto flex-1 p-1 space-y-1 custom-scroll" id="modeContainer"></div>
                         </section>
 
-                        <section class="glass-panel rounded-xl p-5 space-y-4 relative overflow-hidden shrink-0">
-                            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-medical-400/5 rounded-full blur-2xl"></div>
-                            <div>
-                                <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Specyfikacja</h2>
-                                <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light min-h-[60px]">Inicjalizacja...</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                        <!-- Hypnos duration selection (visible only for Hypnos mode) -->
+                        <section id="hypnosDurationCard" class="glass-panel rounded-xl p-5 space-y-3 relative overflow-hidden shrink-0 hidden">
+                            <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
+                            <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Dudnienie</span>
-                                    <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Hypnos · Czas</h2>
+                                    <p class="text-xs text-zinc-400">Wybierz długość sesji i zachowaj w pamięci.</p>
                                 </div>
-                                <div>
-                                    <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Tło</span>
-                                    <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
-                                </div>
+                                <span class="text-[9px] text-medical-400 font-mono">Auto-stop</span>
                             </div>
-                            <div class="pt-2 flex items-center justify-between">
-                                <label class="flex items-center gap-3 cursor-pointer group">
-                                    <div class="relative">
-                                        <input id="focusLockToggle" type="checkbox" class="sr-only peer">
-                                        <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
-                                    </div>
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-wider group-hover:text-zinc-300 transition-colors">Focus Lock</span>
-                                </label>
-                                <span class="text-[9px] text-zinc-700 font-mono">ESC aby przerwać</span>
+                            <div class="grid grid-cols-4 gap-2" id="hypnosDurationButtons">
+                                <button data-duration="30" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">30 min</button>
+                                <button data-duration="45" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">45 min</button>
+                                <button data-duration="90" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">90 min</button>
+                                <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
                             </div>
                         </section>
                     </div>
@@ -378,16 +276,66 @@
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
 
                             <div id="message-box" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-black/40 backdrop-blur-sm transition-all duration-700">
-                                <div class="w-20 h-20 mb-6 rounded-full border border-zinc-800 flex items-center justify-center relative group-hover:border-medical-400/30 transition-colors duration-500">
+                                <div class="w-14 h-14 mb-5 rounded-full border border-zinc-800 flex items-center justify-center relative group-hover:border-medical-400/30 transition-colors duration-500">
                                     <div class="absolute inset-0 border border-medical-400/20 rounded-full animate-ping opacity-20"></div>
-                                    <svg class="w-8 h-8 text-zinc-500 group-hover:text-medical-400 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    <svg class="w-6 h-6 text-zinc-500 group-hover:text-medical-400 transition-colors duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                                        <circle cx="12" cy="12" r="7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.5v4.75" />
+                                        <circle cx="12" cy="16.5" r="0.65" fill="currentColor" />
                                     </svg>
                                 </div>
-                                <h1 class="text-2xl font-light text-white mb-2 tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
-                                <p class="text-xs text-zinc-500 max-w-xs leading-relaxed uppercase tracking-widest">
-                                    System gotowy.<br>Wymagane słuchawki stereo.
-                                </p>
+                                <div class="space-y-2 max-w-xl">
+                                    <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
+                                    <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
+                                </div>
+                            </div>
+
+                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-xl">
+                                <div class="glass-panel rounded-xl border border-white/5 bg-black/70 backdrop-blur p-4 sm:p-5 shadow-lg">
+                                    <div class="grid grid-cols-2 gap-4 sm:gap-6 items-center">
+                                        <div>
+                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Dudnienie</span>
+                                            <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Tło</span>
+                                            <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
+                                        </div>
+                                    </div>
+                                    <div class="pt-3 flex items-center justify-between gap-3 flex-wrap text-left">
+                                        <label class="flex items-center gap-3 cursor-pointer group">
+                                            <div class="relative">
+                                                <input id="focusLockToggle" type="checkbox" class="sr-only peer">
+                                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                                            </div>
+                                            <span class="text-[10px] text-zinc-500 uppercase tracking-wider group-hover:text-zinc-300 transition-colors">Focus Lock</span>
+                                        </label>
+                                        <span class="text-[9px] text-zinc-700 font-mono">ESC aby przerwać</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="programOverlay" class="absolute inset-0 hidden flex items-center justify-center p-4 z-30">
+                                <div class="glass-panel rounded-xl border border-medical-400/20 bg-black/70 max-w-xl w-full p-6 space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-medical-900/60 border border-medical-500/50 flex items-center justify-center text-medical-400">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14" stroke-linecap="round" /></svg>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p id="programOverlayLabel" class="text-[11px] font-mono uppercase tracking-[0.2em] text-medical-400">Program</p>
+                                            <h3 id="programOverlayTitle" class="text-lg font-semibold text-white">Następny etap programu</h3>
+                                            <p id="programOverlayBody" class="text-sm text-zinc-300 leading-relaxed"></p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-zinc-900/40 border border-zinc-800 rounded-lg p-3">
+                                        <div id="programOverlayStep" class="text-sm text-white font-medium"></div>
+                                        <p id="programOverlayStepMeta" class="text-xs text-zinc-400"></p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 justify-end">
+                                        <button id="programEndBtn" class="px-3 py-2 text-xs uppercase tracking-wider border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-red-400/70 transition-colors">Zakończ program</button>
+                                        <button id="programContinueBtn" class="px-3 py-2 text-xs uppercase tracking-wider bg-medical-400 text-black rounded shadow-[0_0_14px_rgba(34,211,238,0.35)] hover:shadow-[0_0_18px_rgba(34,211,238,0.55)] transition-all">Start kolejnego etapu</button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -402,7 +350,6 @@
 
                         <div id="controlPanel" class="glass-panel rounded-2xl px-6 py-4 flex items-center justify-between gap-6 shrink-0 h-auto sm:h-24 flex-wrap sm:flex-nowrap transition-all duration-1000">
                             <div class="flex flex-col justify-center min-w-[100px]">
-                                <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-widest mb-1">Status Czasowy</span>
                                 <div id="timer" class="font-mono text-4xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
                             </div>
                             <div class="hidden md:flex flex-col items-start px-6 border-l border-zinc-800/50 flex-1">
@@ -423,10 +370,7 @@
 
                 <footer id="appFooter" class="w-full px-4 relative z-0 mt-24 transition-opacity duration-1000">
                     <div class="border-t border-zinc-900 pt-6 pb-12 text-center backdrop-blur-sm">
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest max-w-2xl mx-auto leading-relaxed">
-                            <span class="text-zinc-500 font-bold">UWAGA BEZPIECZEŃSTWO:</span> Narzędzie generuje efekty stroboskopowe. <br class="hidden sm:block">
-                            Nie używać w przypadku epilepsji fotogennej. Nie używać podczas prowadzenia pojazdów.
-                        </p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest max-w-2xl mx-auto leading-relaxed">Sprawdź zakładkę „Bezpieczeństwo” w górnym menu, aby poznać pełne wytyczne korzystania.</p>
                     </div>
                 </footer>
             </main>
@@ -448,9 +392,20 @@
                             </div>
                             <div>
                                 <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Asystent Oddechu</span>
-                                <span class="block text-[9px] text-zinc-500 mt-0.5">Rytm 4s (Wdech) / 6s (Wydech)</span>
+                                <span id="breathPatternSummary" class="block text-[9px] text-zinc-500 mt-0.5">Rytm 4s/6s lub automatyczny wg protokołu.</span>
                             </div>
                         </label>
+
+                        <div class="mt-3">
+                            <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-2">Styl oddechu</label>
+                            <div class="grid grid-cols-2 gap-2" id="breathPatternButtons">
+                                <button data-pattern="auto" class="breath-pattern-btn py-2 border border-zinc-700 bg-zinc-800 rounded text-[11px] text-zinc-300 hover:text-white transition-all">Auto (wg trybu)</button>
+                                <button data-pattern="4-6" class="breath-pattern-btn py-2 border border-zinc-700 bg-zinc-800 rounded text-[11px] text-zinc-300 hover:text-white transition-all">4–6</button>
+                                <button data-pattern="4-7-8" class="breath-pattern-btn py-2 border border-zinc-700 bg-zinc-800 rounded text-[11px] text-zinc-300 hover:text-white transition-all">4–7–8</button>
+                                <button data-pattern="box" class="breath-pattern-btn py-2 border border-zinc-700 bg-zinc-800 rounded text-[11px] text-zinc-300 hover:text-white transition-all">Box 4–4–4–4</button>
+                            </div>
+                            <p id="breathPatternHelper" class="text-[10px] text-zinc-500 mt-2">Auto dopasuje wzorzec do wybranego trybu.</p>
+                        </div>
                     </div>
 
                     <div>
@@ -459,6 +414,40 @@
                             <button id="setPinkNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all active-noise">Różowy</button>
                             <button id="setBrownNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Brązowy</button>
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="safeVisualsToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Safe Visuals</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Ogranicz migotanie i kontrast.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="audioOnlyToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Tryb Tylko Audio</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Statyczne tło bez animacji.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-3">Poziom Intensywności</label>
+                        <div class="grid grid-cols-3 gap-3" id="intensityButtons">
+                            <button data-intensity="low" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Low</button>
+                            <button data-intensity="medium" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Medium</button>
+                            <button data-intensity="high" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">High</button>
+                        </div>
+                        <p class="text-[10px] text-zinc-500 mt-2">Skaluje głośność kanałów L/R i separację częstotliwości.</p>
                     </div>
 
                     <div>
@@ -552,654 +541,80 @@
             </div>
         </div>
 
-        <script>
-            const sessions = {
-                hypnos: {
-                    id: "hypnos", name: "Hypnos", category: "Sleep",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
-                    desc: "Głęboka architektura snu. Delta (0.5-2Hz) ułatwia zasypianie i podtrzymuje fazę N3. Tryb nieskończony.",
-                    duration: Infinity,
-                    baseHz: "Delta 0.5-2Hz",
-                    phases: [
-                        { name: "Indukcja Snu", start: 0, end: 900, audio: { l: 100, r: 108, vol_s: 0.2, vol_e: 0.15 }, visual: { f: 6, mod: 'soft', bri: 0.3 } },
-                        { name: "Głęboki Sen", start: 900, end: Infinity, audio: { l: 60, r: 61, vol: 0.15 }, visual: { f: 0.5, mod: 'breath', bri: 0.05 } }
-                    ]
-                },
-                prime: {
-                    id: "prime", name: "Prime", category: "Activation",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-                    desc: "Rozgrzewka neuronalna (5 min). Łagodne przejście z fal Alpha do Beta. Idealne na start dnia.",
-                    duration: 300,
-                    baseHz: "Alpha -> Beta",
-                    phases: [
-                        { name: "Inicjacja Alpha", start: 0, end: 120, audio: { l: 220, r: 228, vol_s: 0.1, vol_e: 0.3 }, visual: { f: 8, mod: 'soft', bri: 0.6 } },
-                        { name: "Aktywacja Beta", start: 120, end: 300, audio: { l: 220, r: 234, vol: 0.35 }, visual: { f: 14, mod: 'soft', bri: 0.8 } }
-                    ]
-                },
-                overdrive: {
-                    id: "overdrive",
-                    name: "Overdrive",
-                    category: "Activation",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`,
-                    desc: "Intensywna stymulacja Gamma (30-40Hz). Krótka sesja do przełamania prokrastynacji.", duration: 300, baseHz: "Gamma 40Hz",
-                    phases: [{ name: "Ramp Up", start: 0, end: 60, audio: { l: 440, r: 470, vol_s: 0.3, vol_e: 0.5 }, visual: { f_s: 20, f_e: 35, mod: 'hard' } }, { name: "Gamma Peak", start: 60, end: 240, audio: { l: 440, r: 480, mod: 'pulse' }, visual: { f: 40, mod: 'hard', bri: 1.0 } }, { name: "Cool Down", start: 240, end: 300, audio: { l: 440, r: 460, vol_s: 0.5, vol_e: 0.2 }, visual: { f_s: 30, f_e: 10, mod: 'soft' } }]
-                },
-                deepFocus: {
-                    id: "deepFocus",
-                    name: "Deep Focus",
-                    category: "Work",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`,
-                    desc: "Klasyczne głębokie skupienie (15 min). Stabilne fale Beta pomagają utrzymać koncentrację na jednym zadaniu.",
-                    duration: 900,
-                    baseHz: "Beta 14-18Hz",
-                    phases: [
-                        { name: "Indukcja", start: 0, end: 120, audio: { l: 210, r: 224, vol_s: 0.1, vol_e: 0.3 }, visual: { f: 10, mod: 'soft', bri: 0.7 } },
-                        { name: "Tunel", start: 120, end: 780, audio: { l: 230, r: 248, vol: 0.4 }, visual: { f: 14, mod: 'soft', bri: 0.85 } },
-                        { name: "Wyjście", start: 780, end: 900, audio: { l: 210, r: 224, vol_s: 0.3, vol_e: 0.1 }, visual: { f: 10, mod: 'soft', bri: 0.6 } }
-                    ]
-                },
-                clarity: {
-                    id: "clarity",
-                    name: "Clarity",
-                    category: "Work",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
-                    desc: "Myślenie strategiczne. Zbalansowana sesja Alpha/Beta sprzyjająca planowaniu i porządkowaniu myśli.",
-                    duration: 720,
-                    baseHz: "Isochronic 12Hz",
-                    phases: [
-                        { name: "Centrowanie", start: 0, end: 180, audio: { l: 220, r: 232, vol_s: 0.2, vol_e: 0.35 }, visual: { f: 10, mod: 'soft' } },
-                        { name: "Analiza", start: 180, end: 600, audio: { l: 220, r: 236, mod: 'iso' }, visual: { f: 12, mod: 'soft' } },
-                        { name: "Synteza", start: 600, end: 720, audio: { l: 220, r: 232, vol_s: 0.35, vol_e: 0.1 }, visual: { f: 8, mod: 'soft' } }
-                    ]
-                },
-                genesis: {
-                    id: "genesis",
-                    name: "Genesis",
-                    category: "Creative",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,
-                    desc: "Stan Flow (Theta 6-7Hz). Głęboki relaks połączony z wizualizacją. Idealny do burzy mózgów i zadań kreatywnych.",
-                    duration: 600,
-                    baseHz: "Theta 6Hz",
-                    phases: [
-                        { name: "Zejście", start: 0, end: 120, audio: { l: 180, r: 190, vol_s: 0.2, vol_e: 0.3 }, visual: { f: 10, mod: 'soft', bri: 0.6 } },
-                        { name: "Theta Flow", start: 120, end: 500, audio: { l: 150, r: 156, vol: 0.35 }, visual: { f: 6, mod: 'soft', bri: 0.5 } },
-                        { name: "Powrót", start: 500, end: 600, audio: { l: 180, r: 190, vol_s: 0.3, vol_e: 0.1 }, visual: { f: 8, mod: 'soft', bri: 0.4 } }
-                    ]
-                },
-                equilibrium: {
-                    id: "equilibrium",
-                    name: "Equilibrium",
-                    category: "Calm",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5l3 5 5-11 4 6h3"></path></svg>`,
-                    desc: "Redukcja lęku i stresu. Stabilne 10Hz (Alpha) uziemia i uspokaja układ nerwowy bez usypiania.",
-                    duration: 420,
-                    baseHz: "Solid Alpha 10Hz",
-                    phases: [
-                        { name: "Uziemienie", start: 0, end: 60, audio: { l: 200, r: 212, vol_s: 0.15, vol_e: 0.25 }, visual: { f: 12, mod: 'soft', bri: 0.6 } },
-                        { name: "Stabilizacja", start: 60, end: 360, audio: { l: 200, r: 210, vol: 0.3 }, visual: { f: 10, mod: 'breath', bri: 0.7 } },
-                        { name: "Wyciszenie", start: 360, end: 420, audio: { l: 200, r: 208, vol_s: 0.25, vol_e: 0.1 }, visual: { f: 8, mod: 'breath', bri: 0.5 } }
-                    ]
-                },
-                restoration: {
-                    id: "restoration",
-                    name: "Restoration",
-                    category: "Calm",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z"></path></svg>`,
-                    desc: "Głęboka regeneracja (Delta 2-4Hz). Bardzo powolne fale dla fizycznego i mentalnego odpoczynku.",
-                    duration: 900,
-                    baseHz: "Delta 3Hz",
-                    phases: [
-                        { name: "Zwolnienie", start: 0, end: 180, audio: { l: 100, r: 108, vol_s: 0.15, vol_e: 0.25 }, visual: { f: 8, mod: 'soft', bri: 0.5 } },
-                        { name: "Delta Immersion", start: 180, end: 800, audio: { l: 100, r: 103, vol: 0.3 }, visual: { f: 3, mod: 'breath', bri: 0.3 } },
-                        { name: "Przebudzenie", start: 800, end: 900, audio: { l: 100, r: 108, vol_s: 0.25, vol_e: 0.1 }, visual: { f: 6, mod: 'soft', bri: 0.4 } }
-                    ]
-                },
-                presence: {
-                    id: "presence",
-                    name: "Presence",
-                    category: "Work",
-                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
-                    desc: "Gotowość społeczna. Lekkie pobudzenie przed spotkaniem.",
-                    duration: 420,
-                    baseHz: "Alpha 10Hz",
-                    phases: [
-                        { name: "Flow", start: 0, end: 360, audio: { l: 240, r: 250, vol_s: 0.2, vol_e: 0.35 }, visual: { f: 10, mod: 'soft' } },
-                        { name: "Spokój", start: 360, end: 420, audio: { l: 240, r: 250, vol_s: 0.35, vol_e: 0.1 }, visual: { f: 8, mod: 'soft' } }
-                    ]
-                }
-            };
+        <!-- SAFETY MODAL -->
+        <div id="safetyModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+                <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
+                    <div>
+                        <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
+                            <span class="w-2 h-2 bg-medical-400 rounded-full animate-pulse"></span>
+                            Instrukcja Bezpieczeństwa
+                        </h3>
+                        <p class="text-xs text-zinc-500 uppercase tracking-widest mt-1">Wytyczne przed uruchomieniem wizualizacji i audio</p>
+                    </div>
+                    <button id="closeSafety" class="p-2 text-zinc-500 hover:text-white border border-transparent hover:border-zinc-700 rounded transition-all">
+                        <span class="text-xs font-mono uppercase mr-2">Zamknij</span> ✕
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-8 doc-scroll text-sm leading-relaxed space-y-6 text-zinc-300">
+                    <div class="bg-red-900/10 border border-red-900/40 rounded p-4 text-red-200 font-semibold uppercase tracking-widest text-[11px]">UWAGA: Silne bodźce wizualne i dźwiękowe. Nie używać w przypadku epilepsji fotogennej ani podczas prowadzenia pojazdów.</div>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Przeciwwskazania</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Nadwrażliwość na światło (PSE), stany po urazach neurologicznych, migreny z aurą.</li>
+                            <li>Stosowanie leków obniżających próg drgawkowy – skonsultuj użycie z lekarzem.</li>
+                            <li>Zmęczenie, odwodnienie lub brak snu mogą zwiększać dyskomfort sensoryczny.</li>
+                        </ul>
+                    </section>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Zasady korzystania</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Zawsze używaj słuchawek stereo i zaczynaj od niskiej głośności.</li>
+                            <li>Włącz „Safe visuals” lub „Audio-only” przy pierwszym użyciu lub przy wrażliwości na bodźce.</li>
+                            <li>Przerwij sesję przy zawrotach głowy, mdłościach, mroczkach lub dyskomforcie.</li>
+                            <li>Unikaj patrzenia w jasne źródła światła w zaciemnionych pomieszczeniach podczas intensywnych protokołów.</li>
+                        </ul>
+                    </section>
+                    <section class="space-y-2">
+                        <h4 class="text-lg text-white font-semibold">Wskazówki praktyczne</h4>
+                        <ul class="list-disc list-inside space-y-1 text-zinc-400">
+                            <li>Przed snem wybieraj łagodne tryby (Hypnos/Restoration) i unikaj światła niebieskiego.</li>
+                            <li>Rób przerwy między sesjami (min. 10 minut) i nawadniaj się.</li>
+                            <li>Testuj kanały L/R w ustawieniach przed dłuższymi sesjami.</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROGRAMS MODAL -->
+        <div id="programModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-5xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+                <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
+                    <div>
+                        <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
+                            <span class="w-2 h-2 bg-medical-400 rounded-full animate-pulse"></span>
+                            Programy Kora
+                        </h3>
+                        <p class="text-xs text-zinc-500 uppercase tracking-widest mt-1">Sekwencje kilku protokołów z pauzą między krokami.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60 text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
+                            <span class="w-2 h-2 rounded-full bg-medical-900/70"></span>
+                            <span id="programStatusModal">Brak aktywnego programu</span>
+                        </div>
+                        <button id="closeProgram" class="p-2 text-zinc-500 hover:text-white border border-transparent hover:border-zinc-700 rounded transition-all">
+                            <span class="text-xs font-mono uppercase mr-2">Zamknij</span> ✕
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-8 doc-scroll">
+                    <div id="programList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="assets/js/app.js"></script>
 
-            let state = {
-                active: false,
-                session: 'prime',
-                startTime: 0,
-                preview: false,
-                focusLock: false,
-                noiseType: 'brown', // DEFAULT TO BROWN NOISE
-                breathingPacer: false,
-                ctx: null,
-                audio: {
-                    oscL: null,
-                    oscR: null,
-                    gain: null,
-                    noise: null,
-                    noiseGain: null
-                },
-                analyser: null,
-                lastInteraction: 0 // For UI dimming
-            };
-
-            const els = {
-                canvas: document.getElementById('visualCanvas'),
-                timer: document.getElementById('timer'),
-                progressBar: document.getElementById('progressBar'),
-                mainBtn: document.getElementById('mainActionBtn'),
-                modeContainer: document.getElementById('modeContainer'),
-                msgBox: document.getElementById('message-box'),
-                desc: document.getElementById('modeDesc'),
-                realtimeHz: document.getElementById('realtimeHz'),
-                phaseName: document.getElementById('currentPhaseName'),
-                statusDot: document.getElementById('statusDot'),
-                statusText: document.getElementById('statusText'),
-                settingsModal: document.getElementById('settingsModal'),
-                guideModal: document.getElementById('guideModal'),
-                controlPanel: document.getElementById('controlPanel'),
-                noiseTypeDisplay: document.getElementById('noiseTypeDisplay'),
-                btnPink: document.getElementById('setPinkNoise'),
-                btnBrown: document.getElementById('setBrownNoise'),
-                breathToggle: document.getElementById('breathToggle'),
-                // Elements for Landing Page
-                landingPage: document.getElementById('landingPage'),
-                enterSystemBtn: document.getElementById('enterSystemBtn'),
-                appInterface: document.getElementById('appInterface'),
-                landingGlow: document.getElementById('landingGlow'),
-                silentAudio: document.getElementById('silentAudioLoop'),
-                circadianWidget: document.getElementById('circadianWidget'),
-                circadianTitle: document.getElementById('circadianTitle'),
-                leftPanel: document.getElementById('leftPanel'),
-                appFooter: document.getElementById('appFooter'),
-                appHeader: document.getElementById('appHeader')
-            };
-
-            function init() {
-                // Initialization Logic
-                renderModes();
-                setSession('prime');
-                initCanvas();
-                updateNoiseUI();
-                checkCircadianRhythm();
-
-                window.addEventListener('resize', resizeCanvas);
-                setInterval(checkCircadianRhythm, 60000);
-
-                // Activity tracking for Hypnos dimming
-                ['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(evt => {
-                    document.addEventListener(evt, () => {
-                        state.lastInteraction = performance.now();
-                        // Wake up UI
-                        els.appHeader.style.opacity = '1';
-                        els.leftPanel.style.opacity = '1';
-                        els.controlPanel.style.opacity = '1';
-                        els.appFooter.style.opacity = '1';
-                    });
-                });
-
-                // Interactive Glow on Landing
-                document.addEventListener('mousemove', (e) => {
-                    if(els.landingPage.style.display !== 'none') {
-                        const x = e.clientX;
-                        const y = e.clientY;
-                        els.landingGlow.style.left = x + 'px';
-                        els.landingGlow.style.top = y + 'px';
-                    }
-                });
-
-                // Landing Page Logic
-                els.enterSystemBtn.addEventListener('click', () => {
-                    const content = els.landingPage.querySelector('.max-w-5xl');
-                    content.style.opacity = '0';
-                    content.style.transition = 'opacity 0.5s';
-
-                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
-
-                    setTimeout(() => {
-                        els.landingPage.style.display = 'none';
-                        const calib = document.getElementById('calibrationOverlay');
-                        calib.style.display = 'flex';
-                        simulateCalibration(() => {
-                            els.appInterface.style.display = 'block';
-                            requestAnimationFrame(() => {
-                                els.appInterface.style.opacity = '1';
-                                resizeCanvas();
-                            });
-                        });
-                    }, 500);
-                });
-
-                els.mainBtn.addEventListener('click', toggleSession);
-                document.getElementById('previewButton').addEventListener('click', togglePreview);
-                document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
-                document.getElementById('focusLockToggle').addEventListener('change', (e) => state.focusLock = e.target.checked);
-
-                // Settings
-                document.getElementById('settingsToggle').addEventListener('click', () => els.settingsModal.style.display = 'flex');
-                document.getElementById('closeSettings').addEventListener('click', () => els.settingsModal.style.display = 'none');
-
-                // Guide
-                document.getElementById('guideToggle').addEventListener('click', () => els.guideModal.style.display = 'flex');
-                document.getElementById('closeGuide').addEventListener('click', () => els.guideModal.style.display = 'none');
-
-                // Audio Tests
-                document.getElementById('testLeftButton').addEventListener('click', () => playTestTone(-1));
-                document.getElementById('testRightButton').addEventListener('click', () => playTestTone(1));
-
-                // Noise Selection
-                els.btnPink.addEventListener('click', () => setNoiseType('pink'));
-                els.btnBrown.addEventListener('click', () => setNoiseType('brown'));
-
-                // Breathing Pacer
-                els.breathToggle.addEventListener('change', (e) => {
-                    state.breathingPacer = e.target.checked;
-                });
-
-                // Circadian Widget Click
-                els.circadianWidget.addEventListener('click', () => {
-                    const recommended = els.circadianWidget.dataset.recommended;
-                    if(recommended) setSession(recommended);
-                });
-
-                requestAnimationFrame(loop);
-            }
-
-            // Circadian Sync Logic
-            function checkCircadianRhythm() {
-                const hour = new Date().getHours();
-                let recId = 'prime';
-                let recText = 'Inicjalizacja';
-
-                if (hour >= 5 && hour < 10) { recId = 'prime'; recText = 'Okno: Kortyzol / Start'; }
-                else if (hour >= 10 && hour < 14) { recId = 'deepFocus'; recText = 'Okno: Produktywność'; }
-                else if (hour >= 14 && hour < 17) { recId = 'genesis'; recText = 'Okno: Reset / Theta'; }
-                else if (hour >= 17 && hour < 21) { recId = 'clarity'; recText = 'Okno: Integracja'; }
-                else { recId = 'hypnos'; recText = 'Okno: Melatonina'; }
-
-                els.circadianTitle.textContent = recText;
-                els.circadianWidget.dataset.recommended = recId;
-            }
-
-            function setNoiseType(type) {
-                state.noiseType = type;
-                updateNoiseUI();
-                if(state.active && state.audio.noise) {
-                    state.audio.noise.type = type;
-                }
-            }
-
-            function updateNoiseUI() {
-                if(state.noiseType === 'pink') {
-                    els.btnPink.classList.add('bg-medical-900', 'border-medical-400', 'text-white');
-                    els.btnBrown.classList.remove('bg-medical-900', 'border-medical-400', 'text-white');
-                    els.noiseTypeDisplay.textContent = "Pink Noise (Soft)";
-                } else {
-                    els.btnBrown.classList.add('bg-medical-900', 'border-medical-400', 'text-white');
-                    els.btnPink.classList.remove('bg-medical-900', 'border-medical-400', 'text-white');
-                    els.noiseTypeDisplay.textContent = "Brown Noise (Deep)";
-                }
-            }
-
-            function simulateCalibration(callback) {
-                const overlay = document.getElementById('calibrationOverlay');
-                const bar = document.getElementById('calibBar');
-                const text = document.getElementById('calibText');
-                const perc = document.getElementById('calibPercent');
-                let p = 0;
-                const steps = [{p: 20, t: "Loading Audio Drivers..."}, {p: 45, t: "Calibrating Oscillators..."}, {p: 70, t: "Initializing Noise Engine..."}, {p: 100, t: "System Ready."}];
-                let stepIdx = 0;
-                const interval = setInterval(() => {
-                    p += Math.random() * 5;
-                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx++; }
-                    if(p >= 100) { p = 100; clearInterval(interval); setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 1000); }, 500); }
-                    bar.style.width = p + "%"; perc.textContent = Math.floor(p) + "%";
-                }, 30);
-            }
-
-            function renderModes() {
-                els.modeContainer.innerHTML = '';
-                Object.values(sessions).forEach(s => {
-                    const btn = document.createElement('button');
-                    btn.className = `mode-btn w-full text-left p-3 rounded border transition-all duration-200 flex flex-col gap-1 group relative overflow-hidden`;
-                    btn.dataset.id = s.id;
-                    btn.innerHTML = `<div class="flex items-center justify-between w-full relative z-10"><div class="flex items-center gap-3"><div class="text-zinc-500 group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div><span class="font-bold text-[11px] uppercase tracking-wider">${s.name}</span></div><span class="text-[9px] font-mono text-zinc-500">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span></div>`;
-                    btn.addEventListener('click', () => setSession(s.id));
-                    els.modeContainer.appendChild(btn);
-                });
-            }
-
-            function setSession(id) {
-                if (state.active) return;
-                state.session = id;
-                const data = sessions[id];
-
-                if(id === 'hypnos') {
-                    setNoiseType('brown');
-                }
-
-                document.querySelectorAll('.mode-btn').forEach(b => {
-                    const isActive = b.dataset.id === id;
-                    const icon = b.querySelector('.icon-container');
-                    if(isActive) {
-                        b.classList.remove('border-transparent', 'text-zinc-500');
-                        b.classList.add('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
-                        icon.classList.remove('text-zinc-500');
-                        icon.classList.add('text-medical-400');
-                    } else {
-                        b.classList.add('border-transparent', 'text-zinc-500');
-                        b.classList.remove('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
-                        icon.classList.add('text-zinc-500');
-                        icon.classList.remove('text-medical-400');
-                    }
-                });
-                els.desc.textContent = data.desc;
-                els.timer.textContent = formatTime(data.duration);
-                els.realtimeHz.textContent = "0.00 Hz";
-                els.phaseName.textContent = "Gotowy";
-            }
-
-            async function startAudio() {
-                await Tone.start();
-
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: 'Kora Cortex',
-                        artist: 'Bio-Entrainment System',
-                        album: sessions[state.session].name
-                    });
-                    navigator.mediaSession.setActionHandler('play', toggleSession);
-                    navigator.mediaSession.setActionHandler('pause', toggleSession);
-                }
-
-                const data = sessions[state.session];
-                const startPhase = data.phases[0];
-                const startL = startPhase.audio.l || 220;
-                const startR = startPhase.audio.r || 228;
-
-                state.audio.gain = new Tone.Gain(0).toDestination();
-                const pL = new Tone.Panner(-1).connect(state.audio.gain);
-                const pR = new Tone.Panner(1).connect(state.audio.gain);
-
-                state.audio.oscL = new Tone.Oscillator(startL, "sine").connect(pL).start();
-                state.audio.oscR = new Tone.Oscillator(startR, "sine").connect(pR).start();
-
-                state.audio.noiseGain = new Tone.Gain(0).toDestination();
-                state.audio.noise = new Tone.Noise(state.noiseType).connect(state.audio.noiseGain).start();
-
-                state.audio.noiseGain.gain.rampTo(0.08, 3);
-                state.audio.gain.gain.rampTo(0.1, 1);
-            }
-
-            function stopAudio() {
-                if (state.audio.oscL) { state.audio.oscL.dispose(); state.audio.oscL = null; }
-                if (state.audio.oscR) { state.audio.oscR.dispose(); state.audio.oscR = null; }
-                if (state.audio.gain) { state.audio.gain.dispose(); state.audio.gain = null; }
-                if (state.audio.noise) { state.audio.noise.dispose(); state.audio.noise = null; }
-                if (state.audio.noiseGain) { state.audio.noiseGain.dispose(); state.audio.noiseGain = null; }
-            }
-
-            function updateAudio(phase, progress, t) {
-                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
-                const a = phase.audio || {};
-                if (a.l) state.audio.oscL.frequency.value = a.l;
-                if (a.r) state.audio.oscR.frequency.value = a.r;
-
-                const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
-                const displayHz = (currentHz + (Math.random() * 0.05 - 0.025)).toFixed(2);
-                els.realtimeHz.textContent = `${displayHz} Hz`;
-
-                let vol = 0.2;
-                if(a.vol !== undefined) vol = a.vol;
-                else if(a.vol_s !== undefined && a.vol_e !== undefined) {
-                    vol = (progress === undefined || isNaN(progress)) ? a.vol_s : lerp(a.vol_s, a.vol_e, progress);
-                }
-
-                if (a.mod === 'iso') {
-                    const rate = 2;
-                    const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
-                    state.audio.gain.gain.value = vol * mod;
-                } else {
-                    state.audio.gain.gain.value = vol;
-                }
-            }
-
-            async function playTestTone(pan) {
-                await Tone.start();
-                const synth = new Tone.Synth().toDestination();
-                const panner = new Tone.Panner(pan).toDestination();
-                synth.connect(panner);
-                synth.triggerAttackRelease("C5", "0.2");
-            }
-
-            function initCanvas() {
-                state.ctx = els.canvas.getContext('2d');
-                resizeCanvas();
-            }
-
-            function resizeCanvas() {
-                const container = els.canvas.parentElement;
-                const rect = container.getBoundingClientRect();
-                els.canvas.width = rect.width;
-                els.canvas.height = rect.height;
-            }
-
-            function drawVisual(phase, progress, t) {
-                const ctx = state.ctx;
-                const w = els.canvas.width;
-                const h = els.canvas.height;
-                const v = phase.visual || { f: 1, mod: 'soft', bri: 0.5 };
-
-                // HYPNOS BLACKOUT LOGIC
-                let isHypnos = state.session === 'hypnos';
-
-                let freq = v.f;
-                if (v.f_s && v.f_e && !isNaN(progress)) freq = lerp(v.f_s, v.f_e, progress);
-
-                const pulseRaw = Math.sin(t * Math.PI * 2 * freq);
-                const pulse = (pulseRaw + 1) / 2;
-
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, w, h);
-
-                let bri = v.bri || 0.8;
-                if (isHypnos && state.active) {
-                    bri = bri * 0.05; // Ultra dim for sleep
-                }
-
-                if (v.mod === 'breath') bri = bri * (0.6 + 0.4 * pulse);
-                else if (v.mod === 'soft') bri = bri * (0.8 + 0.2 * pulse);
-                else if (v.mod === 'hard') bri = pulseRaw > 0 ? 1 : 0;
-
-                if (bri > 0.001) {
-                    const maxR = Math.sqrt(w*w + h*h) * 0.6;
-                    const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, maxR);
-                    const cVal = Math.floor(bri * 255);
-                    grad.addColorStop(0, `rgba(${cVal}, ${cVal}, ${cVal + 20}, 1)`);
-                    grad.addColorStop(1, 'rgba(0,0,0,1)');
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, w, h);
-                }
-
-                // Only draw oscilloscope if NOT in Hypnos mode
-                if (!isHypnos) {
-                    ctx.beginPath();
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 + bri*0.5})`;
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#22d3ee';
-                    const amplitude = h * 0.15;
-                    const centerY = h / 2;
-                    for(let x=0; x<w; x+=2) {
-                        const y = centerY + Math.sin((x + t * 100) * 0.02) * amplitude * bri + Math.sin((x - t * 50) * 0.05) * (amplitude/2);
-                        if(x===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                    }
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
-                }
-
-                if (state.breathingPacer) {
-                    // Hide pacer in Hypnos to avoid light
-                    if (!isHypnos || !state.active) {
-                        const cycleT = t % 10;
-                        let breathProgress = 0;
-                        let breathLabel = "";
-                        if (cycleT < 4) {
-                            let p = cycleT / 4;
-                            breathLabel = "IN";
-                            breathProgress = 1 - Math.pow(1 - p, 3);
-                        } else {
-                            let p = (cycleT - 4) / 6;
-                            breathLabel = "OUT";
-                            breathProgress = 1 - Math.pow(p, 3);
-                        }
-                        const baseR = Math.min(w, h) * 0.2;
-                        const maxR = Math.min(w, h) * 0.35;
-                        const currentR = baseR + (maxR - baseR) * breathProgress;
-                        ctx.beginPath();
-                        ctx.arc(w/2, h/2, currentR, 0, Math.PI * 2);
-                        ctx.lineWidth = 3;
-                        ctx.strokeStyle = `rgba(34, 211, 238, 0.5)`;
-                        ctx.stroke();
-                        ctx.fillStyle = `rgba(34, 211, 238, ${0.05 + 0.1 * breathProgress})`;
-                        ctx.fill();
-                        ctx.font = "12px JetBrains Mono";
-                        ctx.fillStyle = `rgba(34, 211, 238, 0.9)`;
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-                        ctx.fillText(breathLabel, w/2, h/2);
-                    }
-                }
-            }
-
-            async function toggleSession() {
-                if (state.active) {
-                    state.active = false;
-                    stopAudio();
-                    els.canvas.style.opacity = 0;
-                    els.msgBox.style.opacity = 1;
-                    els.msgBox.style.transform = "scale(1)";
-                    els.mainBtn.textContent = "URUCHOM";
-                    els.mainBtn.classList.remove('bg-medical-400', 'text-black', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
-                    els.mainBtn.classList.add('bg-zinc-100', 'text-black', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
-                    els.controlPanel.classList.remove('glow-box-cyan');
-                    els.timer.classList.remove('glow-text-cyan');
-                    els.statusText.textContent = "Standby";
-                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-zinc-600";
-                    els.statusDot.style.boxShadow = 'none';
-
-                    els.appHeader.style.opacity = '1';
-                    els.leftPanel.style.opacity = '1';
-                    els.controlPanel.style.opacity = '1';
-                    els.appFooter.style.opacity = '1';
-
-                    disableFocusLock();
-                    setSession(state.session);
-                } else {
-                    await startAudio();
-                    state.active = true;
-                    state.startTime = performance.now();
-                    state.lastInteraction = performance.now();
-                    els.canvas.style.opacity = 1;
-                    els.msgBox.style.opacity = 0;
-                    els.msgBox.style.transform = "scale(0.95)";
-                    els.mainBtn.textContent = "ZATRZYMAJ";
-                    els.mainBtn.classList.remove('bg-zinc-100', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
-                    els.mainBtn.classList.add('bg-medical-400', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
-                    els.controlPanel.classList.add('glow-box-cyan');
-                    els.timer.classList.add('glow-text-cyan');
-                    els.statusText.textContent = "ACTIVE";
-                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
-                    els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
-                    if(state.focusLock) enableFocusLock();
-                }
-            }
-
-            function togglePreview() {
-                if (state.active) return;
-                state.preview = !state.preview;
-                els.canvas.style.opacity = state.preview ? 1 : 0;
-                els.msgBox.style.opacity = state.preview ? 0 : 1;
-                state.startTime = performance.now();
-                if(state.preview) els.realtimeHz.textContent = "PREVIEW";
-            }
-
-            function loop() {
-                const now = performance.now();
-
-                if (state.active && state.session === 'hypnos') {
-                    if (now - state.lastInteraction > 5000) {
-                        els.appHeader.style.opacity = '0.1';
-                        els.leftPanel.style.opacity = '0.1';
-                        els.controlPanel.style.opacity = '0.1';
-                        els.appFooter.style.opacity = '0';
-                    }
-                }
-
-                if (state.active || state.preview) {
-                    const data = sessions[state.session];
-                    const elapsed = (now - state.startTime) / 1000;
-
-                    if (state.active && data.duration !== Infinity && elapsed >= data.duration) { toggleSession(); return; }
-
-                    let currentPhase = data.phases[data.phases.length-1];
-                    for(let i=0; i<data.phases.length; i++) {
-                        const p = data.phases[i];
-                        if (elapsed >= p.start && (elapsed < p.end || p.end === Infinity)) {
-                            currentPhase = p;
-                            break;
-                        }
-                    }
-
-                    if (state.preview) { drawVisual(data.phases[1] || data.phases[0], 0.5, elapsed); }
-                    else {
-                        const phaseDuration = currentPhase.end === Infinity ? 1 : (currentPhase.end - currentPhase.start);
-                        const phaseProgress = currentPhase.end === Infinity ? 0 : (elapsed - currentPhase.start) / phaseDuration;
-
-                        updateAudio(currentPhase, phaseProgress, elapsed);
-                        drawVisual(currentPhase, phaseProgress, elapsed);
-
-                        if(data.duration === Infinity) {
-                            els.timer.textContent = "∞";
-                            els.progressBar.style.width = "100%";
-                        } else {
-                            els.timer.textContent = formatTime(Math.max(0, data.duration - elapsed));
-                            els.progressBar.style.width = `${(elapsed / data.duration) * 100}%`;
-                        }
-                        els.phaseName.textContent = currentPhase.name;
-                    }
-                }
-                requestAnimationFrame(loop);
-            }
-
-            function formatTime(s) {
-                if(s === Infinity) return "∞";
-                const m = Math.floor(s / 60).toString().padStart(2,'0');
-                const sec = Math.floor(s % 60).toString().padStart(2,'0');
-                return `${m}:${sec}`;
-            }
-            function lerp(a, b, t) { return a + (b - a) * t; }
-            function enableFocusLock() { document.documentElement.requestFullscreen().catch(()=>{}); document.addEventListener('keydown', lockKey); }
-            function disableFocusLock() { if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.removeEventListener('keydown', lockKey); }
-            function lockKey(e) { if(e.key === 'Escape') { e.preventDefault(); toggleSession(); } }
-            function toggleFullscreen() {
-                const el = document.getElementById('visualizer');
-                if(!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    if(el.requestFullscreen) el.requestFullscreen();
-                    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-                } else {
-                    if(document.exitFullscreen) document.exitFullscreen();
-                    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-                }
-            }
-            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, () => { setTimeout(resizeCanvas, 100); }); });
-            init();
-        </script>
     </body>
 </html>
