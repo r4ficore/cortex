@@ -370,6 +370,25 @@
                                 <span class="text-[9px] text-zinc-700 font-mono">ESC aby przerwać</span>
                             </div>
                         </section>
+
+                        <!-- Hypnos duration selection (visible only for Hypnos mode) -->
+                        <section id="hypnosDurationCard" class="glass-panel rounded-xl p-5 space-y-3 relative overflow-hidden shrink-0 hidden">
+                            <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Hypnos · Czas</h2>
+                                    <p class="text-xs text-zinc-400">Wybierz długość sesji i zachowaj w pamięci.</p>
+                                </div>
+                                <span class="text-[9px] text-medical-400 font-mono">Auto-stop</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2" id="hypnosDurationButtons">
+                                <button data-duration="30" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">30 min</button>
+                                <button data-duration="45" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">45 min</button>
+                                <button data-duration="90" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">90 min</button>
+                                <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
+                            </div>
+                            <p class="text-[10px] text-zinc-600 leading-relaxed">Domyślnie zapisuje się ostatni wybór (localStorage). Ustawienie <span class="font-mono text-medical-400">HYPNOS_TEST_ACCELERATION</span> można tymczasowo zmienić na 60, aby przetestować skrócone minuty → sekundy.</p>
+                        </section>
                     </div>
 
                     <div class="lg:col-span-8 flex flex-col gap-4 order-1 lg:order-2 h-full">
@@ -459,6 +478,40 @@
                             <button id="setPinkNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all active-noise">Różowy</button>
                             <button id="setBrownNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Brązowy</button>
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="safeVisualsToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Safe Visuals</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Ogranicz migotanie i kontrast.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="audioOnlyToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Tryb Tylko Audio</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Statyczne tło bez animacji.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-3">Poziom Intensywności</label>
+                        <div class="grid grid-cols-3 gap-3" id="intensityButtons">
+                            <button data-intensity="low" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Low</button>
+                            <button data-intensity="medium" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Medium</button>
+                            <button data-intensity="high" class="intensity-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">High</button>
+                        </div>
+                        <p class="text-[10px] text-zinc-500 mt-2">Skaluje głośność kanałów L/R i separację częstotliwości.</p>
                     </div>
 
                     <div>
@@ -669,14 +722,72 @@
                 }
             };
 
+            // User Preferences (localStorage) helper
+            const defaultPreferences = {
+                lastSessionId: 'prime',
+                preferredNoiseType: 'brown',
+                breathEnabled: false,
+                hypnosDuration: 'infinity',
+                onboardingCompleted: false,
+                safeVisuals: false,
+                audioOnly: false,
+                intensityLevel: 'medium'
+            };
+
+            const userPreferences = {
+                key: 'koraUserPreferences',
+                data: { ...defaultPreferences },
+                load() {
+                    try {
+                        const raw = localStorage.getItem(this.key);
+                        if (raw) this.data = { ...defaultPreferences, ...JSON.parse(raw) };
+                        else this.data = { ...defaultPreferences };
+                    } catch (e) {
+                        console.warn('Preferences load failed, using defaults', e);
+                        this.data = { ...defaultPreferences };
+                    }
+                    return this.data;
+                },
+                save(patch = {}) {
+                    this.data = { ...this.data, ...patch };
+                    try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { console.warn('Preferences save failed', e); }
+                }
+            };
+
+            userPreferences.load();
+
+            // Hypnos duration presets (values in minutes, converted to seconds later)
+            const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
+            const hypnosDurations = {
+                '30': 30,
+                '45': 45,
+                '90': 90,
+                'infinity': Infinity
+            };
+
+            // Safety/display preferences: safe visuals limit flicker/contrast, audio-only disables animations, intensity scales gain
+            const intensityProfiles = {
+                low: { gain: 0.6, delta: 0.9 },
+                medium: { gain: 1, delta: 1 },
+                high: { gain: 1.3, delta: 1.1 }
+            };
+
+            const hypnosBasePhases = JSON.parse(JSON.stringify(sessions.hypnos.phases));
+
             let state = {
                 active: false,
-                session: 'prime',
+                session: userPreferences.data.lastSessionId || 'prime',
                 startTime: 0,
                 preview: false,
                 focusLock: false,
-                noiseType: 'brown', // DEFAULT TO BROWN NOISE
-                breathingPacer: false,
+                noiseType: userPreferences.data.preferredNoiseType || 'brown',
+                breathingPacer: !!userPreferences.data.breathEnabled,
+                hypnosDuration: userPreferences.data.hypnosDuration || 'infinity',
+                safeVisuals: !!userPreferences.data.safeVisuals,
+                audioOnly: !!userPreferences.data.audioOnly,
+                intensityLevel: userPreferences.data.intensityLevel || 'medium',
+                hypnosRampProgress: 0,
+                hypnosRampTimer: null,
                 ctx: null,
                 audio: {
                     oscL: null,
@@ -708,6 +819,11 @@
                 btnPink: document.getElementById('setPinkNoise'),
                 btnBrown: document.getElementById('setBrownNoise'),
                 breathToggle: document.getElementById('breathToggle'),
+                safeVisualsToggle: document.getElementById('safeVisualsToggle'),
+                audioOnlyToggle: document.getElementById('audioOnlyToggle'),
+                intensityButtons: Array.from(document.querySelectorAll('#intensityButtons .intensity-btn')),
+                hypnosDurationCard: document.getElementById('hypnosDurationCard'),
+                hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
@@ -723,10 +839,16 @@
 
             function init() {
                 // Initialization Logic
+                applyHypnosDuration(state.hypnosDuration);
                 renderModes();
-                setSession('prime');
+                setSession(state.session);
                 initCanvas();
                 updateNoiseUI();
+                els.breathToggle.checked = state.breathingPacer;
+                els.safeVisualsToggle.checked = state.safeVisuals;
+                els.audioOnlyToggle.checked = state.audioOnly;
+                updateIntensityUI();
+                updateHypnosDurationUI();
                 checkCircadianRhythm();
 
                 window.addEventListener('resize', resizeCanvas);
@@ -800,6 +922,21 @@
                 // Breathing Pacer
                 els.breathToggle.addEventListener('change', (e) => {
                     state.breathingPacer = e.target.checked;
+                    userPreferences.save({ breathEnabled: state.breathingPacer });
+                });
+
+                // Safety & display modes
+                els.safeVisualsToggle.addEventListener('change', (e) => setSafeVisuals(e.target.checked));
+                els.audioOnlyToggle.addEventListener('change', (e) => setAudioOnly(e.target.checked));
+
+                // Intensity selection
+                els.intensityButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setIntensity(btn.dataset.intensity));
+                });
+
+                // Hypnos durations
+                els.hypnosDurationButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setHypnosDuration(btn.dataset.duration));
                 });
 
                 // Circadian Widget Click
@@ -829,6 +966,7 @@
 
             function setNoiseType(type) {
                 state.noiseType = type;
+                userPreferences.save({ preferredNoiseType: type });
                 updateNoiseUI();
                 if(state.active && state.audio.noise) {
                     state.audio.noise.type = type;
@@ -845,6 +983,71 @@
                     els.btnPink.classList.remove('bg-medical-900', 'border-medical-400', 'text-white');
                     els.noiseTypeDisplay.textContent = "Brown Noise (Deep)";
                 }
+            }
+
+            // UI + storage: safe visuals and audio-only toggles with intensity selection
+            function setSafeVisuals(enabled) {
+                state.safeVisuals = !!enabled;
+                els.safeVisualsToggle.checked = state.safeVisuals;
+                userPreferences.save({ safeVisuals: state.safeVisuals });
+            }
+
+            function setAudioOnly(enabled) {
+                state.audioOnly = !!enabled;
+                els.audioOnlyToggle.checked = state.audioOnly;
+                userPreferences.save({ audioOnly: state.audioOnly });
+            }
+
+            function setIntensity(level) {
+                if(!intensityProfiles[level]) level = 'medium';
+                state.intensityLevel = level;
+                userPreferences.save({ intensityLevel: level });
+                updateIntensityUI();
+            }
+
+            function updateIntensityUI() {
+                els.intensityButtons.forEach(btn => {
+                    const active = btn.dataset.intensity === state.intensityLevel;
+                    btn.classList.toggle('bg-medical-900/40', active);
+                    btn.classList.toggle('border-medical-400/60', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
+                });
+            }
+
+            function getHypnosDurationSeconds(key) {
+                const minutes = hypnosDurations[key] ?? hypnosDurations['infinity'];
+                if (minutes === Infinity) return Infinity;
+                return (minutes * 60) / HYPNOS_TEST_ACCELERATION;
+            }
+
+            function applyHypnosDuration(key) {
+                const durationSeconds = getHypnosDurationSeconds(key);
+                sessions.hypnos.duration = durationSeconds;
+                const cloned = JSON.parse(JSON.stringify(hypnosBasePhases));
+                cloned[1].end = durationSeconds === Infinity ? Infinity : durationSeconds;
+                sessions.hypnos.phases = cloned;
+            }
+
+            function setHypnosDuration(key) {
+                state.hypnosDuration = key;
+                userPreferences.save({ hypnosDuration: key });
+                applyHypnosDuration(key);
+                updateHypnosDurationUI();
+                if(state.session === 'hypnos' && !state.active) {
+                    els.timer.textContent = formatTime(sessions.hypnos.duration);
+                }
+            }
+
+            function updateHypnosDurationUI() {
+                const isHypnos = state.session === 'hypnos';
+                els.hypnosDurationCard.classList.toggle('hidden', !isHypnos);
+                els.hypnosDurationButtons.forEach(btn => {
+                    const selected = btn.dataset.duration === state.hypnosDuration;
+                    btn.classList.toggle('border-medical-400', selected);
+                    btn.classList.toggle('text-white', selected);
+                    btn.classList.toggle('bg-medical-900/60', selected);
+                });
             }
 
             function simulateCalibration(callback) {
@@ -878,10 +1081,14 @@
             function setSession(id) {
                 if (state.active) return;
                 state.session = id;
+                userPreferences.save({ lastSessionId: id });
                 const data = sessions[id];
 
                 if(id === 'hypnos') {
                     setNoiseType('brown');
+                    applyHypnosDuration(state.hypnosDuration);
+                } else {
+                    els.hypnosDurationCard.classList.add('hidden');
                 }
 
                 document.querySelectorAll('.mode-btn').forEach(b => {
@@ -903,6 +1110,7 @@
                 els.timer.textContent = formatTime(data.duration);
                 els.realtimeHz.textContent = "0.00 Hz";
                 els.phaseName.textContent = "Gotowy";
+                updateHypnosDurationUI();
             }
 
             async function startAudio() {
@@ -922,6 +1130,7 @@
                 const startPhase = data.phases[0];
                 const startL = startPhase.audio.l || 220;
                 const startR = startPhase.audio.r || 228;
+                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 state.audio.gain = new Tone.Gain(0).toDestination();
                 const pL = new Tone.Panner(-1).connect(state.audio.gain);
@@ -934,7 +1143,7 @@
                 state.audio.noise = new Tone.Noise(state.noiseType).connect(state.audio.noiseGain).start();
 
                 state.audio.noiseGain.gain.rampTo(0.08, 3);
-                state.audio.gain.gain.rampTo(0.1, 1);
+                state.audio.gain.gain.rampTo(0.1 * (intensity.gain || 1), 1);
             }
 
             function stopAudio() {
@@ -951,6 +1160,8 @@
                 if (a.l) state.audio.oscL.frequency.value = a.l;
                 if (a.r) state.audio.oscR.frequency.value = a.r;
 
+                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
+
                 const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
                 const displayHz = (currentHz + (Math.random() * 0.05 - 0.025)).toFixed(2);
                 els.realtimeHz.textContent = `${displayHz} Hz`;
@@ -961,6 +1172,11 @@
                     vol = (progress === undefined || isNaN(progress)) ? a.vol_s : lerp(a.vol_s, a.vol_e, progress);
                 }
 
+                vol = vol * (intensity.gain || 1);
+
+                const rampFactor = 1 - (state.hypnosRampProgress * 0.9);
+                vol = Math.max(0, vol * rampFactor);
+
                 if (a.mod === 'iso') {
                     const rate = 2;
                     const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
@@ -968,6 +1184,34 @@
                 } else {
                     state.audio.gain.gain.value = vol;
                 }
+
+                const deltaFactor = intensity.delta || 1;
+                if(deltaFactor !== 1) {
+                    const l = state.audio.oscL.frequency.value;
+                    const r = state.audio.oscR.frequency.value;
+                    const center = (l + r) / 2;
+                    const diff = ((r - l) / 2) * deltaFactor;
+                    state.audio.oscL.frequency.value = center - diff;
+                    state.audio.oscR.frequency.value = center + diff;
+                }
+            }
+
+            // Smooth Hypnos ramp-down before auto-stop
+            function startHypnosRampDown() {
+                if(state.hypnosRampTimer || !state.active) return;
+                const startGain = state.audio.gain?.gain.value ?? 0;
+                const startNoise = state.audio.noiseGain?.gain.value ?? 0;
+                state.hypnosRampProgress = 0;
+                state.hypnosRampTimer = setInterval(() => {
+                    state.hypnosRampProgress = Math.min(1, state.hypnosRampProgress + 0.1);
+                    if(state.audio.gain) state.audio.gain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(startNoise * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.hypnosRampProgress >= 1) {
+                        clearInterval(state.hypnosRampTimer);
+                        state.hypnosRampTimer = null;
+                        toggleSession();
+                    }
+                }, 700);
             }
 
             async function playTestTone(pan) {
@@ -996,11 +1240,28 @@
                 const h = els.canvas.height;
                 const v = phase.visual || { f: 1, mod: 'soft', bri: 0.5 };
 
+                if(state.audioOnly) {
+                    const grad = ctx.createLinearGradient(0, 0, 0, h);
+                    grad.addColorStop(0, 'rgba(10,10,12,0.95)');
+                    grad.addColorStop(1, 'rgba(5,5,7,0.98)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+                    return;
+                }
+
                 // HYPNOS BLACKOUT LOGIC
                 let isHypnos = state.session === 'hypnos';
 
                 let freq = v.f;
                 if (v.f_s && v.f_e && !isNaN(progress)) freq = lerp(v.f_s, v.f_e, progress);
+
+                let modType = v.mod;
+                let safeBrightnessCap = 1;
+                if(state.safeVisuals) {
+                    freq = Math.min(freq, state.session === 'overdrive' ? 12 : 10);
+                    modType = modType === 'hard' ? 'soft' : modType;
+                    safeBrightnessCap = state.session === 'overdrive' ? 0.6 : 0.5;
+                }
 
                 const pulseRaw = Math.sin(t * Math.PI * 2 * freq);
                 const pulse = (pulseRaw + 1) / 2;
@@ -1013,9 +1274,12 @@
                     bri = bri * 0.05; // Ultra dim for sleep
                 }
 
-                if (v.mod === 'breath') bri = bri * (0.6 + 0.4 * pulse);
-                else if (v.mod === 'soft') bri = bri * (0.8 + 0.2 * pulse);
-                else if (v.mod === 'hard') bri = pulseRaw > 0 ? 1 : 0;
+                if (modType === 'breath') bri = bri * (0.6 + 0.4 * pulse);
+                else if (modType === 'soft') bri = bri * (0.8 + 0.2 * pulse);
+                else if (modType === 'hard') bri = pulseRaw > 0 ? 1 : 0;
+
+                bri = bri * (1 - state.hypnosRampProgress * 0.8);
+                bri = Math.min(bri, safeBrightnessCap);
 
                 if (bri > 0.001) {
                     const maxR = Math.sqrt(w*w + h*h) * 0.6;
@@ -1030,11 +1294,11 @@
                 // Only draw oscilloscope if NOT in Hypnos mode
                 if (!isHypnos) {
                     ctx.beginPath();
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = state.safeVisuals ? 1.2 : 2;
                     ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 + bri*0.5})`;
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = '#22d3ee';
-                    const amplitude = h * 0.15;
+                    const amplitude = h * 0.15 * (state.safeVisuals ? 0.6 : 1);
                     const centerY = h / 2;
                     for(let x=0; x<w; x+=2) {
                         const y = centerY + Math.sin((x + t * 100) * 0.02) * amplitude * bri + Math.sin((x - t * 50) * 0.05) * (amplitude/2);
@@ -1081,6 +1345,8 @@
             async function toggleSession() {
                 if (state.active) {
                     state.active = false;
+                    if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
+                    state.hypnosRampProgress = 0;
                     stopAudio();
                     els.canvas.style.opacity = 0;
                     els.msgBox.style.opacity = 1;
@@ -1105,6 +1371,7 @@
                     await startAudio();
                     state.active = true;
                     state.startTime = performance.now();
+                    state.hypnosRampProgress = 0;
                     state.lastInteraction = performance.now();
                     els.canvas.style.opacity = 1;
                     els.msgBox.style.opacity = 0;
@@ -1146,7 +1413,11 @@
                     const data = sessions[state.session];
                     const elapsed = (now - state.startTime) / 1000;
 
-                    if (state.active && data.duration !== Infinity && elapsed >= data.duration) { toggleSession(); return; }
+                    if (state.active && data.duration !== Infinity) {
+                        if(state.session === 'hypnos') {
+                            if(elapsed >= data.duration) { startHypnosRampDown(); }
+                        } else if (elapsed >= data.duration) { toggleSession(); return; }
+                    }
 
                     let currentPhase = data.phases[data.phases.length-1];
                     for(let i=0; i<data.phases.length; i++) {
