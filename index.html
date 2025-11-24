@@ -1142,22 +1142,6 @@
                 document.getElementById('guideToggle').addEventListener('click', () => els.guideModal.style.display = 'flex');
                 document.getElementById('closeGuide').addEventListener('click', () => els.guideModal.style.display = 'none');
 
-                // Programs
-                const openProgramModal = () => {
-                    if(!els.programModal || !els.programList) return;
-                    renderPrograms();
-                    updateProgramStatus();
-                    els.programModal.classList.remove('hidden');
-                    els.programModal.style.display = 'flex';
-                };
-                const closeProgramModal = () => {
-                    if(!els.programModal) return;
-                    els.programModal.classList.add('hidden');
-                    els.programModal.style.display = 'none';
-                };
-                els.programToggle.addEventListener('click', openProgramModal);
-                els.closeProgram.addEventListener('click', closeProgramModal);
-
                 // Safety
                 document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
                 document.getElementById('closeSafety').addEventListener('click', () => els.safetyModal.style.display = 'none');
@@ -1197,6 +1181,9 @@
 
                 els.programContinueBtn.addEventListener('click', () => startProgramStep(state.program.stepIndex));
                 els.programEndBtn.addEventListener('click', endProgram);
+
+                els.programToggle.addEventListener('click', openProgramModal);
+                els.closeProgram.addEventListener('click', closeProgramModal);
 
                 // Circadian Widget Click
                 els.circadianWidget.addEventListener('click', () => {
@@ -1366,6 +1353,7 @@
             }
 
             function renderPrograms() {
+                if(!els.programList) return;
                 els.programList.innerHTML = '';
                 programs.forEach(program => {
                     const wrapper = document.createElement('div');
@@ -1393,6 +1381,20 @@
                         startProgram(id);
                     });
                 });
+            }
+
+            function openProgramModal() {
+                if(!els.programModal || !els.programList) return;
+                renderPrograms();
+                updateProgramStatus();
+                els.programModal.classList.remove('hidden');
+                els.programModal.style.display = 'flex';
+            }
+
+            function closeProgramModal() {
+                if(!els.programModal) return;
+                els.programModal.classList.add('hidden');
+                els.programModal.style.display = 'none';
             }
 
             function updateProgramStatus() {
@@ -1492,64 +1494,6 @@
                         showContinue: true
                     });
                 }
-            }
-
-            function endProgram() {
-                state.program = { active: false, id: null, stepIndex: 0, awaitingNext: false };
-                state.sessionDataOverride = null;
-                hideProgramOverlay();
-                updateProgramStatus();
-                if(!state.active) setSession(state.session);
-            }
-
-            function setHypnosDuration(key) {
-                state.hypnosDuration = key;
-                userPreferences.save({ hypnosDuration: key });
-                applyHypnosDuration(key);
-                updateHypnosDurationUI();
-                if(state.session === 'hypnos' && !state.active) {
-                    els.timer.textContent = formatTime(sessions.hypnos.duration);
-                }
-            }
-
-            function updateHypnosDurationUI() {
-                const isHypnos = state.session === 'hypnos';
-                els.hypnosDurationCard.classList.toggle('hidden', !isHypnos);
-                els.hypnosDurationButtons.forEach(btn => {
-                    const selected = btn.dataset.duration === state.hypnosDuration;
-                    btn.classList.toggle('border-medical-400', selected);
-                    btn.classList.toggle('text-white', selected);
-                    btn.classList.toggle('bg-medical-900/60', selected);
-                });
-            }
-
-            function endProgram() {
-                state.program = { active: false, id: null, stepIndex: 0, awaitingNext: false };
-                state.sessionDataOverride = null;
-                hideProgramOverlay();
-                updateProgramStatus();
-                if(!state.active) setSession(state.session);
-            }
-
-            function setHypnosDuration(key) {
-                state.hypnosDuration = key;
-                userPreferences.save({ hypnosDuration: key });
-                applyHypnosDuration(key);
-                updateHypnosDurationUI();
-                if(state.session === 'hypnos' && !state.active) {
-                    els.timer.textContent = formatTime(sessions.hypnos.duration);
-                }
-            }
-
-            function updateHypnosDurationUI() {
-                const isHypnos = state.session === 'hypnos';
-                els.hypnosDurationCard.classList.toggle('hidden', !isHypnos);
-                els.hypnosDurationButtons.forEach(btn => {
-                    const selected = btn.dataset.duration === state.hypnosDuration;
-                    btn.classList.toggle('border-medical-400', selected);
-                    btn.classList.toggle('text-white', selected);
-                    btn.classList.toggle('bg-medical-900/60', selected);
-                });
             }
 
             function endProgram() {
