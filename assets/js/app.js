@@ -554,6 +554,12 @@ const sessions = {
                         const section = btn.closest('section') || btn.parentElement;
                         if(section && section.parentElement === els.leftPanel) section.remove();
                     });
+                    Array.from(els.leftPanel.querySelectorAll('section, .glass-panel')).forEach(section => {
+                        const text = (section.textContent || '').toLowerCase();
+                        if(text.includes('sekwencje kilku protokołów') || text.startsWith('programy')) {
+                            section.remove();
+                        }
+                    });
                 }
 
                 ensureProgramListAnchored();
@@ -701,6 +707,7 @@ const sessions = {
                 if(!els.programModal) return;
                 els.programModal.classList.add('hidden');
                 els.programModal.style.display = 'none';
+                removeLegacyProgramSidebar();
             }
 
             function updateProgramStatus() {

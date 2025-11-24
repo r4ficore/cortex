@@ -251,39 +251,21 @@
                             <div class="overflow-y-auto flex-1 p-1 space-y-1 custom-scroll" id="modeContainer"></div>
                         </section>
 
-                        <section class="glass-panel rounded-xl p-4 space-y-3 relative overflow-hidden shrink-0">
+                        <!-- Hypnos duration selection (visible only for Hypnos mode) -->
+                        <section id="hypnosDurationCard" class="glass-panel rounded-xl p-5 space-y-3 relative overflow-hidden shrink-0 hidden">
                             <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Programy</h2>
-                                    <p class="text-xs text-zinc-400">Sekwencje kilku protokołów z pauzą między krokami.</p>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Hypnos · Czas</h2>
+                                    <p class="text-xs text-zinc-400">Wybierz długość sesji i zachowaj w pamięci.</p>
                                 </div>
-                                <span id="programStatus" class="text-[10px] font-mono text-zinc-500">Brak aktywnego programu</span>
+                                <span class="text-[9px] text-medical-400 font-mono">Auto-stop</span>
                             </div>
-                            <div id="programList" class="space-y-3"></div>
-                        </section>
-
-                        <section class="glass-panel rounded-xl p-5 space-y-4 relative overflow-hidden shrink-0">
-                            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-medical-400/5 rounded-full blur-2xl"></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Dudnienie</span>
-                                    <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Tło</span>
-                                    <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
-                                </div>
-                            </div>
-                            <div class="pt-2 flex items-center justify-between">
-                                <label class="flex items-center gap-3 cursor-pointer group">
-                                    <div class="relative">
-                                        <input id="focusLockToggle" type="checkbox" class="sr-only peer">
-                                        <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
-                                    </div>
-                                    <span class="text-[10px] text-zinc-500 uppercase tracking-wider group-hover:text-zinc-300 transition-colors">Focus Lock</span>
-                                </label>
-                                <span class="text-[9px] text-zinc-700 font-mono">ESC aby przerwać</span>
+                            <div class="grid grid-cols-4 gap-2" id="hypnosDurationButtons">
+                                <button data-duration="30" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">30 min</button>
+                                <button data-duration="45" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">45 min</button>
+                                <button data-duration="90" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">90 min</button>
+                                <button data-duration="infinity" class="w-full py-2 text-xs rounded border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-medical-400/40 transition-all">∞ noc</button>
                             </div>
                         </section>
 
@@ -323,6 +305,31 @@
                                 <div class="space-y-2 max-w-xl">
                                     <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
+                                </div>
+                            </div>
+
+                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-xl">
+                                <div class="glass-panel rounded-xl border border-white/5 bg-black/70 backdrop-blur p-4 sm:p-5 shadow-lg">
+                                    <div class="grid grid-cols-2 gap-4 sm:gap-6 items-center">
+                                        <div>
+                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Dudnienie</span>
+                                            <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Tło</span>
+                                            <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
+                                        </div>
+                                    </div>
+                                    <div class="pt-3 flex items-center justify-between gap-3 flex-wrap text-left">
+                                        <label class="flex items-center gap-3 cursor-pointer group">
+                                            <div class="relative">
+                                                <input id="focusLockToggle" type="checkbox" class="sr-only peer">
+                                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                                            </div>
+                                            <span class="text-[10px] text-zinc-500 uppercase tracking-wider group-hover:text-zinc-300 transition-colors">Focus Lock</span>
+                                        </label>
+                                        <span class="text-[9px] text-zinc-700 font-mono">ESC aby przerwać</span>
+                                    </div>
                                 </div>
                             </div>
 

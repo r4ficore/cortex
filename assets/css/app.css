@@ -16,6 +16,16 @@
             .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
             .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
+            /* Hide any legacy program widgets that may linger in the sidebar layout */
+            #programSidebar,
+            #programsSidebar,
+            .program-sidebar,
+            .program-widget,
+            .programs-panel,
+            [data-legacy-program] {
+                display: none !important;
+            }
+
             .bg-grid {
                 background-size: 50px 50px;
                 mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
