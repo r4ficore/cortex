@@ -251,6 +251,18 @@
                             <div class="overflow-y-auto flex-1 p-1 space-y-1 custom-scroll" id="modeContainer"></div>
                         </section>
 
+                        <section class="glass-panel rounded-xl p-4 space-y-3 relative overflow-hidden shrink-0">
+                            <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Programy</h2>
+                                    <p class="text-xs text-zinc-400">Sekwencje kilku protokołów z pauzą między krokami.</p>
+                                </div>
+                                <span id="programStatus" class="text-[10px] font-mono text-zinc-500">Brak aktywnego programu</span>
+                            </div>
+                            <div id="programList" class="space-y-3"></div>
+                        </section>
+
                         <section class="glass-panel rounded-xl p-5 space-y-4 relative overflow-hidden shrink-0">
                             <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-medical-400/5 rounded-full blur-2xl"></div>
                             <div class="grid grid-cols-2 gap-4">
