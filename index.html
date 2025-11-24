@@ -1214,6 +1214,24 @@
                 }, 700);
             }
 
+            // Smooth Hypnos ramp-down before auto-stop
+            function startHypnosRampDown() {
+                if(state.hypnosRampTimer || !state.active) return;
+                const startGain = state.audio.gain?.gain.value ?? 0;
+                const startNoise = state.audio.noiseGain?.gain.value ?? 0;
+                state.hypnosRampProgress = 0;
+                state.hypnosRampTimer = setInterval(() => {
+                    state.hypnosRampProgress = Math.min(1, state.hypnosRampProgress + 0.1);
+                    if(state.audio.gain) state.audio.gain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(startNoise * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.hypnosRampProgress >= 1) {
+                        clearInterval(state.hypnosRampTimer);
+                        state.hypnosRampTimer = null;
+                        toggleSession();
+                    }
+                }, 700);
+            }
+
             async function playTestTone(pan) {
                 await Tone.start();
                 const synth = new Tone.Synth().toDestination();
@@ -1280,6 +1298,8 @@
 
                 bri = bri * (1 - state.hypnosRampProgress * 0.8);
                 bri = Math.min(bri, safeBrightnessCap);
+
+                bri = bri * (1 - state.hypnosRampProgress * 0.8);
 
                 if (bri > 0.001) {
                     const maxR = Math.sqrt(w*w + h*h) * 0.6;
