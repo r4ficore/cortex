@@ -347,6 +347,18 @@
                             <div class="overflow-y-auto flex-1 p-1 space-y-1 custom-scroll" id="modeContainer"></div>
                         </section>
 
+                        <section class="glass-panel rounded-xl p-4 space-y-3 relative overflow-hidden shrink-0">
+                            <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-medical-400/5 rounded-full blur-2xl"></div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Programy</h2>
+                                    <p class="text-xs text-zinc-400">Sekwencje kilku protokołów z pauzą między krokami.</p>
+                                </div>
+                                <span id="programStatus" class="text-[10px] font-mono text-zinc-500">Brak aktywnego programu</span>
+                            </div>
+                            <div id="programList" class="space-y-3"></div>
+                        </section>
+
                         <section class="glass-panel rounded-xl p-5 space-y-4 relative overflow-hidden shrink-0">
                             <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-medical-400/5 rounded-full blur-2xl"></div>
                             <div class="grid grid-cols-2 gap-4">
@@ -407,6 +419,29 @@
                                 <div class="space-y-2 max-w-xl">
                                     <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
+                                </div>
+                            </div>
+
+                            <div id="programOverlay" class="absolute inset-0 hidden flex items-center justify-center p-4 z-30">
+                                <div class="glass-panel rounded-xl border border-medical-400/20 bg-black/70 max-w-xl w-full p-6 space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-medical-900/60 border border-medical-500/50 flex items-center justify-center text-medical-400">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14" stroke-linecap="round" /></svg>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p id="programOverlayLabel" class="text-[11px] font-mono uppercase tracking-[0.2em] text-medical-400">Program</p>
+                                            <h3 id="programOverlayTitle" class="text-lg font-semibold text-white">Następny etap programu</h3>
+                                            <p id="programOverlayBody" class="text-sm text-zinc-300 leading-relaxed"></p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-zinc-900/40 border border-zinc-800 rounded-lg p-3">
+                                        <div id="programOverlayStep" class="text-sm text-white font-medium"></div>
+                                        <p id="programOverlayStepMeta" class="text-xs text-zinc-400"></p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 justify-end">
+                                        <button id="programEndBtn" class="px-3 py-2 text-xs uppercase tracking-wider border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-red-400/70 transition-colors">Zakończ program</button>
+                                        <button id="programContinueBtn" class="px-3 py-2 text-xs uppercase tracking-wider bg-medical-400 text-black rounded shadow-[0_0_14px_rgba(34,211,238,0.35)] hover:shadow-[0_0_18px_rgba(34,211,238,0.55)] transition-all">Start kolejnego etapu</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -776,6 +811,38 @@
                 }
             };
 
+            const programs = [
+                {
+                    id: 'flow90',
+                    name: 'Flow 90',
+                    description: 'Pełna ścieżka od pobudzenia do wyciszenia w 90 minut.',
+                    steps: [
+                        { sessionId: 'prime', durationMinutes: 5 },
+                        { sessionId: 'deepFocus', durationMinutes: 60 },
+                        { sessionId: 'genesis', durationMinutes: 10 },
+                        { sessionId: 'equilibrium', durationMinutes: 15 }
+                    ]
+                },
+                {
+                    id: 'socialUpgrade',
+                    name: 'Social Upgrade',
+                    description: 'Przygotowanie do spotkań – delikatne pobudzenie i uspokojenie.',
+                    steps: [
+                        { sessionId: 'presence', durationMinutes: 7 },
+                        { sessionId: 'equilibrium', durationMinutes: 10 }
+                    ]
+                },
+                {
+                    id: 'sleepReset',
+                    name: 'Sleep Reset',
+                    description: 'Wieczorna sekwencja do regeneracji i snu.',
+                    steps: [
+                        { sessionId: 'restoration', durationMinutes: 20 },
+                        { sessionId: 'hypnos', durationMinutes: 90 }
+                    ]
+                }
+            ];
+
             // User Preferences (localStorage) helper
             const defaultPreferences = {
                 lastSessionId: 'prime',
@@ -871,6 +938,8 @@
                 safeVisuals: !!userPreferences.data.safeVisuals,
                 audioOnly: !!userPreferences.data.audioOnly,
                 intensityLevel: userPreferences.data.intensityLevel || 'medium',
+                sessionDataOverride: null,
+                program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 hypnosRampProgress: 0,
                 hypnosRampTimer: null,
                 ctx: null,
@@ -914,6 +983,16 @@
                 intensityButtons: Array.from(document.querySelectorAll('#intensityButtons .intensity-btn')),
                 hypnosDurationCard: document.getElementById('hypnosDurationCard'),
                 hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
+                programList: document.getElementById('programList'),
+                programStatus: document.getElementById('programStatus'),
+                programOverlay: document.getElementById('programOverlay'),
+                programOverlayTitle: document.getElementById('programOverlayTitle'),
+                programOverlayBody: document.getElementById('programOverlayBody'),
+                programOverlayLabel: document.getElementById('programOverlayLabel'),
+                programOverlayStep: document.getElementById('programOverlayStep'),
+                programOverlayStepMeta: document.getElementById('programOverlayStepMeta'),
+                programContinueBtn: document.getElementById('programContinueBtn'),
+                programEndBtn: document.getElementById('programEndBtn'),
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
@@ -931,6 +1010,7 @@
                 // Initialization Logic
                 applyHypnosDuration(state.hypnosDuration);
                 renderModes();
+                renderPrograms();
                 setSession(state.session);
                 initCanvas();
                 updateNoiseUI();
@@ -940,6 +1020,7 @@
                 updateIntensityUI();
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
+                updateProgramStatus();
                 checkCircadianRhythm();
 
                 window.addEventListener('resize', resizeCanvas);
@@ -1038,6 +1119,9 @@
                 els.hypnosDurationButtons.forEach(btn => {
                     btn.addEventListener('click', () => setHypnosDuration(btn.dataset.duration));
                 });
+
+                els.programContinueBtn.addEventListener('click', () => startProgramStep(state.program.stepIndex));
+                els.programEndBtn.addEventListener('click', endProgram);
 
                 // Circadian Widget Click
                 els.circadianWidget.addEventListener('click', () => {
@@ -1174,6 +1258,170 @@
                 sessions.hypnos.phases = cloned;
             }
 
+            function getSessionData() {
+                return state.sessionDataOverride || sessions[state.session];
+            }
+
+            function cloneSessionWithDuration(sessionId, durationSeconds) {
+                const base = sessions[sessionId];
+                if(!base) return null;
+                if(durationSeconds === undefined || durationSeconds === null || durationSeconds === base.duration) return base;
+                const referenceDuration = base.duration === Infinity
+                    ? base.phases.reduce((max, p) => Math.max(max, p.end === Infinity ? p.start : p.end), 0)
+                    : base.duration;
+                const ratio = durationSeconds === Infinity || referenceDuration === 0 ? 1 : (durationSeconds / referenceDuration);
+                const phases = base.phases.map(p => ({
+                    ...p,
+                    start: p.start * ratio,
+                    end: p.end === Infinity ? Infinity : p.end * ratio,
+                    audio: { ...p.audio },
+                    visual: { ...p.visual }
+                }));
+                return { ...base, duration: durationSeconds, phases };
+            }
+
+            function getProgramById(id) {
+                return programs.find(p => p.id === id);
+            }
+
+            function formatProgramStep(step, idx, total) {
+                const sessionName = sessions[step.sessionId]?.name || step.sessionId;
+                const minutes = step.durationMinutes === Infinity ? '∞' : `${step.durationMinutes} min`;
+                return `${idx + 1}/${total}: ${sessionName} · ${minutes}`;
+            }
+
+            function renderPrograms() {
+                els.programList.innerHTML = '';
+                programs.forEach(program => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'border border-white/5 rounded-lg p-3 bg-zinc-950/40';
+                    const stepsText = program.steps.map((step, idx) => formatProgramStep(step, idx, program.steps.length)).join('<br>');
+                    wrapper.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-medical-400">${program.name}</span>
+                                    <span class="text-[10px] text-zinc-500">${program.steps.length} kroki</span>
+                                </div>
+                                <p class="text-xs text-zinc-300 leading-relaxed">${program.description}</p>
+                            </div>
+                            <button data-program="${program.id}" class="program-start px-3 py-2 text-[10px] uppercase tracking-wider bg-medical-400 text-black rounded hover:shadow-[0_0_14px_rgba(34,211,238,0.4)] transition-all">Start programu</button>
+                        </div>
+                        <div class="mt-2 text-[11px] text-zinc-400 leading-relaxed">${stepsText}</div>
+                    `;
+                    els.programList.appendChild(wrapper);
+                });
+
+                els.programList.querySelectorAll('.program-start').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.program;
+                        startProgram(id);
+                    });
+                });
+            }
+
+            function updateProgramStatus() {
+                if(!state.program.active) {
+                    els.programStatus.textContent = 'Brak aktywnego programu';
+                    return;
+                }
+                const program = getProgramById(state.program.id);
+                if(!program) {
+                    els.programStatus.textContent = 'Program nieznany';
+                    return;
+                }
+                const stepNo = Math.min(state.program.stepIndex + 1, program.steps.length);
+                const suffix = state.program.awaitingNext ? ' · pauza' : '';
+                els.programStatus.textContent = `${program.name}: krok ${stepNo}/${program.steps.length}${suffix}`;
+            }
+
+            function hideProgramOverlay() {
+                els.programOverlay.classList.add('hidden');
+            }
+
+            function showProgramOverlay(config) {
+                const { label, title, body, stepText, stepMeta, showContinue } = config;
+                els.programOverlayLabel.textContent = label;
+                els.programOverlayTitle.textContent = title;
+                els.programOverlayBody.textContent = body;
+                els.programOverlayStep.textContent = stepText;
+                els.programOverlayStepMeta.textContent = stepMeta;
+                els.programContinueBtn.classList.toggle('hidden', !showContinue);
+                els.programOverlay.classList.remove('hidden');
+            }
+
+            function resolveProgramDuration(step) {
+                if(step.durationMinutes === Infinity) return Infinity;
+                if(typeof step.durationMinutes === 'number') return step.durationMinutes * 60;
+                return null;
+            }
+
+            function startProgram(programId) {
+                const program = getProgramById(programId);
+                if(!program || state.active) return;
+                state.program = { active: true, id: programId, stepIndex: 0, awaitingNext: false };
+                updateProgramStatus();
+                startProgramStep(0);
+            }
+
+            function startProgramStep(index) {
+                const program = getProgramById(state.program.id);
+                if(!program) { endProgram(); return; }
+                const step = program.steps[index];
+                if(!step) { endProgram(); return; }
+                state.program.stepIndex = index;
+                state.program.awaitingNext = false;
+                const durationSeconds = resolveProgramDuration(step);
+                setSession(step.sessionId, { overrideDurationSeconds: durationSeconds, skipSave: true });
+                updateProgramStatus();
+                hideProgramOverlay();
+                if(!state.active) toggleSession('program-start');
+            }
+
+            function handleProgramAfterStep() {
+                if(!state.program.active) return;
+                const program = getProgramById(state.program.id);
+                if(!program) { endProgram(); return; }
+                const nextIndex = state.program.stepIndex + 1;
+                if(nextIndex >= program.steps.length) {
+                    state.program.active = false;
+                    state.program.awaitingNext = false;
+                    updateProgramStatus();
+                    showProgramOverlay({
+                        label: 'Program zakończony',
+                        title: `${program.name} ukończony`,
+                        body: 'Wszystkie etapy zostały wykonane. Możesz zakończyć program i wrócić do pojedynczych trybów.',
+                        stepText: `Zrealizowano ${program.steps.length} / ${program.steps.length} kroków`,
+                        stepMeta: '',
+                        showContinue: false
+                    });
+                } else {
+                    const nextStep = program.steps[nextIndex];
+                    const stepText = formatProgramStep(nextStep, nextIndex, program.steps.length);
+                    const minutes = nextStep.durationMinutes === Infinity ? '∞' : `${nextStep.durationMinutes} min`;
+                    const sessionName = sessions[nextStep.sessionId]?.name || nextStep.sessionId;
+                    state.program.awaitingNext = true;
+                    state.program.stepIndex = nextIndex;
+                    updateProgramStatus();
+                    showProgramOverlay({
+                        label: 'Następny etap programu',
+                        title: program.name,
+                        body: 'Rozpocznij kolejny etap lub zakończ program.',
+                        stepText,
+                        stepMeta: `${sessionName} · ${minutes}`,
+                        showContinue: true
+                    });
+                }
+            }
+
+            function endProgram() {
+                state.program = { active: false, id: null, stepIndex: 0, awaitingNext: false };
+                state.sessionDataOverride = null;
+                hideProgramOverlay();
+                updateProgramStatus();
+                if(!state.active) setSession(state.session);
+            }
+
             function setHypnosDuration(key) {
                 state.hypnosDuration = key;
                 userPreferences.save({ hypnosDuration: key });
@@ -1223,11 +1471,13 @@
                 });
             }
 
-            function setSession(id) {
+            function setSession(id, options = {}) {
                 if (state.active) return;
                 state.session = id;
-                userPreferences.save({ lastSessionId: id });
-                const data = sessions[id];
+                const overrideSeconds = options.overrideDurationSeconds ?? null;
+                state.sessionDataOverride = overrideSeconds ? cloneSessionWithDuration(id, overrideSeconds) : null;
+                if(!options.skipSave) userPreferences.save({ lastSessionId: id });
+                const data = getSessionData();
 
                 if(id === 'hypnos') {
                     setNoiseType('brown');
@@ -1263,17 +1513,17 @@
             async function startAudio() {
                 await Tone.start();
 
+                const data = getSessionData();
+
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: 'Kora Cortex',
                         artist: 'Bio-Entrainment System',
-                        album: sessions[state.session].name
+                        album: data.name
                     });
                     navigator.mediaSession.setActionHandler('play', toggleSession);
                     navigator.mediaSession.setActionHandler('pause', toggleSession);
                 }
-
-                const data = sessions[state.session];
                 const startPhase = data.phases[0];
                 const startL = startPhase.audio.l || 220;
                 const startR = startPhase.audio.r || 228;
@@ -1356,7 +1606,7 @@
                     if(state.hypnosRampProgress >= 1) {
                         clearInterval(state.hypnosRampTimer);
                         state.hypnosRampTimer = null;
-                        toggleSession();
+                        toggleSession('auto-complete');
                     }
                 }, 700);
             }
@@ -1514,7 +1764,7 @@
                 }
             }
 
-            async function toggleSession() {
+            async function toggleSession(reason = 'manual') {
                 if (state.active) {
                     state.active = false;
                     if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
@@ -1539,6 +1789,7 @@
 
                     disableFocusLock();
                     setSession(state.session);
+                    handleProgramAfterStep();
                 } else {
                     await startAudio();
                     state.active = true;
@@ -1582,13 +1833,13 @@
                 }
 
                 if (state.active || state.preview) {
-                    const data = sessions[state.session];
+                    const data = getSessionData();
                     const elapsed = (now - state.startTime) / 1000;
 
                     if (state.active && data.duration !== Infinity) {
                         if(state.session === 'hypnos') {
                             if(elapsed >= data.duration) { startHypnosRampDown(); }
-                        } else if (elapsed >= data.duration) { toggleSession(); return; }
+                        } else if (elapsed >= data.duration) { toggleSession('auto-complete'); return; }
                     }
 
                     let currentPhase = data.phases[data.phases.length-1];
