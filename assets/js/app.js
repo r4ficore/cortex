@@ -174,6 +174,9 @@ const sessions = {
                 breathPattern: 'auto',
                 hypnosDuration: 'infinity',
                 onboardingCompleted: false,
+                goal: null,
+                typicalTime: null,
+                sensitivity: null,
                 safeVisuals: false,
                 audioOnly: false,
                 intensityLevel: 'medium'
@@ -248,6 +251,27 @@ const sessions = {
 
             const hypnosBasePhases = JSON.parse(JSON.stringify(sessions.hypnos.phases));
 
+            const onboardingGoalMap = {
+                focus: 'deepFocus',
+                sleep: 'hypnos',
+                calm: 'equilibrium',
+                creative: 'genesis',
+                social: 'presence'
+            };
+
+            const onboardingTimeMap = {
+                morning: 'prime',
+                work: 'deepFocus',
+                evening: 'equilibrium',
+                'pre-sleep': 'hypnos'
+            };
+
+            const onboardingSensitivityMap = {
+                low: 'high',
+                medium: 'medium',
+                high: 'low'
+            };
+
             let state = {
                 active: false,
                 session: userPreferences.data.lastSessionId || 'prime',
@@ -320,6 +344,13 @@ const sessions = {
                 programOverlayStepMeta: document.getElementById('programOverlayStepMeta'),
                 programContinueBtn: document.getElementById('programContinueBtn'),
                 programEndBtn: document.getElementById('programEndBtn'),
+                onboardingModal: document.getElementById('onboardingModal'),
+                onboardingButtons: Array.from(document.querySelectorAll('.onboarding-option')),
+                onboardingError: document.getElementById('onboardingError'),
+                saveOnboarding: document.getElementById('saveOnboarding'),
+                closeOnboarding: document.getElementById('closeOnboarding'),
+                skipOnboarding: document.getElementById('skipOnboarding'),
+                restartOnboarding: document.getElementById('restartOnboarding'),
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
@@ -392,6 +423,9 @@ const sessions = {
                             requestAnimationFrame(() => {
                                 els.appInterface.style.opacity = '1';
                                 resizeCanvas();
+                                setTimeout(() => {
+                                    if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
+                                }, 300);
                             });
                         });
                     }, 500);
@@ -454,6 +488,15 @@ const sessions = {
 
                 els.programToggle.addEventListener('click', openProgramModal);
                 els.closeProgram.addEventListener('click', closeProgramModal);
+
+                // Onboarding
+                els.onboardingButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setOnboardingChoice(btn.dataset.group, btn.dataset.value));
+                });
+                els.saveOnboarding.addEventListener('click', () => completeOnboarding());
+                els.closeOnboarding.addEventListener('click', () => closeOnboardingModal());
+                els.skipOnboarding.addEventListener('click', () => completeOnboarding(true));
+                els.restartOnboarding.addEventListener('click', () => openOnboardingModal(true));
 
                 // Circadian Widget Click
                 els.circadianWidget.addEventListener('click', () => {
@@ -565,6 +608,86 @@ const sessions = {
                 }
 
                 ensureProgramListAnchored();
+            }
+
+            let onboardingState = {
+                goal: userPreferences.data.goal,
+                typicalTime: userPreferences.data.typicalTime,
+                sensitivity: userPreferences.data.sensitivity
+            };
+
+            function setOnboardingChoice(group, value) {
+                onboardingState[group] = value;
+                els.onboardingError.classList.add('hidden');
+                refreshOnboardingUI();
+            }
+
+            function refreshOnboardingUI() {
+                if(!els.onboardingButtons) return;
+                els.onboardingButtons.forEach(btn => {
+                    const active = onboardingState[btn.dataset.group] === btn.dataset.value;
+                    btn.classList.toggle('onboarding-option-active', active);
+                });
+            }
+
+            function resolveOnboardingSession() {
+                const goalPick = onboardingGoalMap[onboardingState.goal];
+                const timePick = onboardingTimeMap[onboardingState.typicalTime];
+                if(onboardingState.typicalTime === 'pre-sleep' && onboardingState.goal !== 'sleep') return timePick || goalPick || state.session;
+                if(onboardingState.goal === 'sleep' && onboardingState.typicalTime !== 'pre-sleep') return goalPick || timePick || state.session;
+                return goalPick || timePick || state.session;
+            }
+
+            function completeOnboarding(markOnly = false) {
+                if(markOnly) {
+                    userPreferences.save({ onboardingCompleted: true });
+                    closeOnboardingModal();
+                    return;
+                }
+                const { goal, typicalTime, sensitivity } = onboardingState;
+                if(!goal || !typicalTime || !sensitivity) {
+                    els.onboardingError.classList.remove('hidden');
+                    return;
+                }
+
+                const recommendedSession = resolveOnboardingSession();
+                const intensity = onboardingSensitivityMap[sensitivity] || 'medium';
+                const safeVisuals = sensitivity === 'high';
+
+                setSafeVisuals(safeVisuals);
+                setIntensity(intensity);
+                setSession(recommendedSession);
+
+                userPreferences.save({
+                    onboardingCompleted: true,
+                    goal,
+                    typicalTime,
+                    sensitivity,
+                    lastSessionId: recommendedSession,
+                    intensityLevel: intensity,
+                    safeVisuals
+                });
+
+                closeOnboardingModal();
+            }
+
+            function openOnboardingModal(fromSettings = false) {
+                if(!els.onboardingModal) return;
+                onboardingState = {
+                    goal: userPreferences.data.goal,
+                    typicalTime: userPreferences.data.typicalTime,
+                    sensitivity: userPreferences.data.sensitivity
+                };
+                refreshOnboardingUI();
+                els.onboardingError.classList.add('hidden');
+                els.onboardingModal.classList.remove('hidden');
+                els.onboardingModal.style.display = 'flex';
+            }
+
+            function closeOnboardingModal() {
+                if(!els.onboardingModal) return;
+                els.onboardingModal.classList.add('hidden');
+                els.onboardingModal.style.display = 'none';
             }
 
             function resolveBreathPattern() {

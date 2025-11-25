@@ -436,6 +436,16 @@
                             <button id="testRightButton" class="py-2 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">Prawy</button>
                         </div>
                     </div>
+
+                    <div class="border border-zinc-800 rounded-lg p-3 bg-zinc-900/50">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-1">Onboarding</p>
+                                <p class="text-[11px] text-zinc-400">Ustaw domyślny cel, wrażliwość i sugerowany protokół.</p>
+                            </div>
+                            <button id="restartOnboarding" class="text-[11px] uppercase tracking-wider px-3 py-2 bg-medical-400 text-black rounded shadow-[0_0_12px_rgba(34,211,238,0.35)] hover:shadow-[0_0_16px_rgba(34,211,238,0.5)] transition-all">Uruchom</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -562,6 +572,58 @@
                             <li>Testuj kanały L/R w ustawieniach przed dłuższymi sesjami.</li>
                         </ul>
                     </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- ONBOARDING MODAL -->
+        <div id="onboardingModal" class="fixed inset-0 z-[75] bg-black/90 backdrop-blur hidden items-center justify-center p-4 sm:p-8">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-4xl shadow-2xl relative flex flex-col ring-1 ring-white/10 p-6 sm:p-8 gap-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase text-medical-400 font-bold tracking-[0.3em]">Onboarding</p>
+                        <h3 class="text-2xl font-light text-white mt-1">Dopasuj Kora do swoich celów</h3>
+                        <p class="text-sm text-zinc-400">Ustaw domyślny protokół, poziom intensywności i tryb wizualny zanim rozpoczniesz pierwszą sesję.</p>
+                    </div>
+                    <button id="skipOnboarding" class="text-[11px] uppercase tracking-wider px-3 py-2 border border-zinc-700 rounded text-zinc-400 hover:text-white hover:border-zinc-500 transition-all">Pomiń na teraz</button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4" id="onboardingOptions">
+                    <div class="space-y-2">
+                        <p class="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">Główny cel</p>
+                        <div class="space-y-2">
+                            <button class="onboarding-option" data-group="goal" data-value="focus">Skupienie</button>
+                            <button class="onboarding-option" data-group="goal" data-value="sleep">Sen</button>
+                            <button class="onboarding-option" data-group="goal" data-value="calm">Redukcja napięcia</button>
+                            <button class="onboarding-option" data-group="goal" data-value="creative">Kreatywność</button>
+                            <button class="onboarding-option" data-group="goal" data-value="social">Social</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">Kiedy używasz Kory?</p>
+                        <div class="space-y-2">
+                            <button class="onboarding-option" data-group="typicalTime" data-value="morning">Poranek</button>
+                            <button class="onboarding-option" data-group="typicalTime" data-value="work">W pracy</button>
+                            <button class="onboarding-option" data-group="typicalTime" data-value="evening">Wieczorem</button>
+                            <button class="onboarding-option" data-group="typicalTime" data-value="pre-sleep">Przed snem</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">Wrażliwość</p>
+                        <div class="space-y-2">
+                            <button class="onboarding-option" data-group="sensitivity" data-value="low">Niska</button>
+                            <button class="onboarding-option" data-group="sensitivity" data-value="medium">Średnia</button>
+                            <button class="onboarding-option" data-group="sensitivity" data-value="high">Wysoka</button>
+                        </div>
+                        <p class="text-[11px] text-zinc-500">Wysoka wrażliwość automatycznie aktywuje łagodne wizualizacje.</p>
+                    </div>
+                </div>
+
+                <div id="onboardingError" class="text-red-400 text-[12px] hidden">Wybierz odpowiedź w każdej sekcji.</div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <button id="closeOnboarding" class="px-4 py-2 text-[11px] uppercase tracking-wider border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-zinc-500 transition-all">Anuluj</button>
+                    <button id="saveOnboarding" class="px-4 py-2 text-[11px] uppercase tracking-wider bg-medical-400 text-black rounded shadow-[0_0_14px_rgba(34,211,238,0.35)] hover:shadow-[0_0_18px_rgba(34,211,238,0.5)] transition-all">Zapisz preferencje</button>
                 </div>
             </div>
         </div>
