@@ -398,9 +398,11 @@ const sessions = {
                 });
 
                 els.mainBtn.addEventListener('click', toggleSession);
-                document.getElementById('previewButton').addEventListener('click', togglePreview);
+                const previewBtn = document.getElementById('previewButton');
+                if (previewBtn) previewBtn.addEventListener('click', togglePreview);
                 document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
-                document.getElementById('focusLockToggle').addEventListener('change', (e) => state.focusLock = e.target.checked);
+                const focusLockToggle = document.getElementById('focusLockToggle');
+                if (focusLockToggle) focusLockToggle.addEventListener('change', (e) => state.focusLock = e.target.checked);
 
                 // Settings
                 document.getElementById('settingsToggle').addEventListener('click', () => els.settingsModal.style.display = 'flex');
