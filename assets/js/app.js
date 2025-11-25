@@ -360,7 +360,7 @@ const sessions = {
                         // Wake up UI
                         els.appHeader.style.opacity = '1';
                         els.leftPanel.style.opacity = '1';
-                        els.controlPanel.style.opacity = '1';
+                        if (els.controlPanel) els.controlPanel.style.opacity = '1';
                         els.appFooter.style.opacity = '1';
                     });
                 });
@@ -1173,7 +1173,7 @@ const sessions = {
                     els.mainBtn.textContent = "URUCHOM";
                     els.mainBtn.classList.remove('bg-medical-400', 'text-black', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
                     els.mainBtn.classList.add('bg-zinc-100', 'text-black', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
-                    els.controlPanel.classList.remove('glow-box-cyan');
+                    if (els.controlPanel) els.controlPanel.classList.remove('glow-box-cyan');
                     els.timer.classList.remove('glow-text-cyan');
                     els.statusText.textContent = "Standby";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-zinc-600";
@@ -1181,7 +1181,7 @@ const sessions = {
 
                     els.appHeader.style.opacity = '1';
                     els.leftPanel.style.opacity = '1';
-                    els.controlPanel.style.opacity = '1';
+                    if (els.controlPanel) els.controlPanel.style.opacity = '1';
                     els.appFooter.style.opacity = '1';
 
                     disableFocusLock();
@@ -1199,7 +1199,7 @@ const sessions = {
                     els.mainBtn.textContent = "ZATRZYMAJ";
                     els.mainBtn.classList.remove('bg-zinc-100', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
                     els.mainBtn.classList.add('bg-medical-400', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
-                    els.controlPanel.classList.add('glow-box-cyan');
+                    if (els.controlPanel) els.controlPanel.classList.add('glow-box-cyan');
                     els.timer.classList.add('glow-text-cyan');
                     els.statusText.textContent = "ACTIVE";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
@@ -1224,7 +1224,7 @@ const sessions = {
                     if (now - state.lastInteraction > 5000) {
                         els.appHeader.style.opacity = '0.1';
                         els.leftPanel.style.opacity = '0.1';
-                        els.controlPanel.style.opacity = '0.1';
+                        if (els.controlPanel) els.controlPanel.style.opacity = '0.1';
                         els.appFooter.style.opacity = '0';
                     }
                 }

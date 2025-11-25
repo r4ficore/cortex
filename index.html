@@ -275,7 +275,7 @@
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
 
-                            <div id="visualAction" class="absolute inset-x-0 top-0 pt-6 flex justify-center z-30 pointer-events-none">
+                            <div id="visualAction" class="absolute bottom-4 right-4 z-30 pointer-events-none flex justify-end">
                                 <button id="mainActionBtn" class="pointer-events-auto px-6 sm:px-8 py-3 rounded-full bg-zinc-100 hover:bg-white active:scale-95 text-black text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,255,255,0.05)] flex items-center gap-2">
                                     Uruchom
                                 </button>
@@ -288,9 +288,13 @@
                                 </div>
                             </div>
 
-                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-xl">
+                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-3xl">
                                 <div class="glass-panel rounded-xl border border-white/5 bg-black/70 backdrop-blur p-4 sm:p-5 shadow-lg">
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 items-start">
+                                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6 items-start">
+                                        <div>
+                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Czas</span>
+                                            <div id="timer" class="font-mono text-xl sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                        </div>
                                         <div>
                                             <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-1">Aktualna Faza</span>
                                             <span id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</span>
@@ -304,13 +308,6 @@
                                             <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30">
-                                <div class="glass-panel rounded-lg border border-white/5 bg-black/70 backdrop-blur px-4 py-3 shadow-lg text-right">
-                                    <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-widest block mb-1">Czas</span>
-                                    <div id="timer" class="font-mono text-2xl sm:text-3xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
                                 </div>
                             </div>
 
@@ -347,15 +344,6 @@
                             </div>
                         </div>
 
-                        <div id="controlPanel" class="glass-panel rounded-2xl px-6 py-4 flex items-center justify-between gap-4 shrink-0 h-auto sm:h-24 flex-wrap sm:flex-nowrap transition-all duration-1000">
-                            <div class="flex flex-col text-left space-y-1">
-                                <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-widest">Sterowanie</span>
-                                <span class="text-xs text-zinc-400">Użyj przycisku w oknie wizualizacji, aby uruchomić lub zatrzymać sesję.</span>
-                            </div>
-                            <button id="previewButton" class="hidden px-5 py-3 rounded border border-zinc-700 text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all">
-                                Test Wizualny
-                            </button>
-                        </div>
                     </div>
                 </div>
 
