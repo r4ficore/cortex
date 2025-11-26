@@ -202,7 +202,32 @@ const sessions = {
                 }
             };
 
+            const sessionLogs = {
+                key: 'koraSessionLogs',
+                data: [],
+                load() {
+                    try {
+                        const raw = localStorage.getItem(this.key);
+                        this.data = raw ? JSON.parse(raw) : [];
+                        if(!Array.isArray(this.data)) this.data = [];
+                    } catch (e) {
+                        console.warn('Session logs load failed, resetting', e);
+                        this.data = [];
+                    }
+                    return this.data;
+                },
+                save(logs = this.data) {
+                    this.data = logs;
+                    try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { console.warn('Session logs save failed', e); }
+                },
+                add(entry) {
+                    this.data.unshift(entry);
+                    this.save(this.data.slice(0, 500));
+                }
+            };
+
             userPreferences.load();
+            sessionLogs.load();
 
             // Hypnos duration presets (values in minutes, converted to seconds later)
             const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
@@ -276,6 +301,7 @@ const sessions = {
                 active: false,
                 session: userPreferences.data.lastSessionId || 'prime',
                 startTime: 0,
+                sessionStartTs: null,
                 preview: false,
                 focusLock: false,
                 noiseType: userPreferences.data.preferredNoiseType || 'brown',
@@ -287,6 +313,7 @@ const sessions = {
                 intensityLevel: userPreferences.data.intensityLevel || 'medium',
                 sessionDataOverride: null,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
+                pendingFeedback: null,
                 hypnosRampProgress: 0,
                 hypnosRampTimer: null,
                 ctx: null,
@@ -344,6 +371,21 @@ const sessions = {
                 programOverlayStepMeta: document.getElementById('programOverlayStepMeta'),
                 programContinueBtn: document.getElementById('programContinueBtn'),
                 programEndBtn: document.getElementById('programEndBtn'),
+                statsToggle: document.getElementById('statsToggle'),
+                statsModal: document.getElementById('statsModal'),
+                closeStats: document.getElementById('closeStats'),
+                statsTotalTime: document.getElementById('statsTotalTime'),
+                statsAverageList: document.getElementById('statsAverageList'),
+                statsEmpty: document.getElementById('statsEmpty'),
+                statsTopProtocols: document.getElementById('statsTopProtocols'),
+                statsTimeOfDay: document.getElementById('statsTimeOfDay'),
+                feedbackModal: document.getElementById('feedbackModal'),
+                feedbackRatings: Array.from(document.querySelectorAll('#feedbackRatings .feedback-rating')),
+                feedbackFeelings: Array.from(document.querySelectorAll('#feedbackFeelings .feedback-feeling')),
+                submitFeedback: document.getElementById('submitFeedback'),
+                closeFeedback: document.getElementById('closeFeedback'),
+                skipFeedback: document.getElementById('skipFeedback'),
+                feedbackError: document.getElementById('feedbackError'),
                 onboardingModal: document.getElementById('onboardingModal'),
                 onboardingButtons: Array.from(document.querySelectorAll('.onboarding-option')),
                 onboardingError: document.getElementById('onboardingError'),
@@ -450,6 +492,12 @@ const sessions = {
                 document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
                 document.getElementById('closeSafety').addEventListener('click', () => els.safetyModal.style.display = 'none');
 
+                // Stats
+                if(els.statsToggle && els.statsModal) {
+                    els.statsToggle.addEventListener('click', openStatsModal);
+                    els.closeStats.addEventListener('click', closeStatsModal);
+                }
+
                 // Audio Tests
                 document.getElementById('testLeftButton').addEventListener('click', () => playTestTone(-1));
                 document.getElementById('testRightButton').addEventListener('click', () => playTestTone(1));
@@ -488,6 +536,15 @@ const sessions = {
 
                 els.programToggle.addEventListener('click', openProgramModal);
                 els.closeProgram.addEventListener('click', closeProgramModal);
+
+                // Feedback modal
+                if(els.feedbackModal) {
+                    els.feedbackRatings.forEach(btn => btn.addEventListener('click', () => selectFeedbackRating(parseInt(btn.dataset.rating, 10))));
+                    els.feedbackFeelings.forEach(btn => btn.addEventListener('click', () => selectFeedbackFeeling(btn.dataset.feeling)));
+                    els.submitFeedback.addEventListener('click', submitFeedback);
+                    els.closeFeedback.addEventListener('click', hideFeedbackModal);
+                    els.skipFeedback.addEventListener('click', hideFeedbackModal);
+                }
 
                 // Onboarding
                 els.onboardingButtons.forEach(btn => {
@@ -979,6 +1036,111 @@ const sessions = {
                 }, 30);
             }
 
+            function openStatsModal() {
+                renderStats();
+                els.statsModal.style.display = 'flex';
+            }
+
+            function closeStatsModal() {
+                els.statsModal.style.display = 'none';
+            }
+
+            function renderStats() {
+                const now = Date.now();
+                const windowStart = now - 7 * 24 * 3600 * 1000;
+                const logs = sessionLogs.data.filter(l => (l.endedAt ?? l.startedAt ?? 0) >= windowStart);
+
+                const totalSeconds = logs.reduce((acc, l) => acc + (l.durationSeconds || 0), 0);
+                els.statsTotalTime.textContent = totalSeconds > 0 ? formatDurationHuman(totalSeconds) : '0 min';
+
+                const ratingsByProtocol = {};
+                logs.forEach(l => {
+                    if(typeof l.rating === 'number') {
+                        if(!ratingsByProtocol[l.sessionId]) ratingsByProtocol[l.sessionId] = { sum: 0, count: 0 };
+                        ratingsByProtocol[l.sessionId].sum += l.rating;
+                        ratingsByProtocol[l.sessionId].count += 1;
+                    }
+                });
+
+                els.statsAverageList.innerHTML = '';
+                if(Object.keys(ratingsByProtocol).length === 0) {
+                    els.statsEmpty.classList.remove('hidden');
+                } else {
+                    els.statsEmpty.classList.add('hidden');
+                    Object.entries(ratingsByProtocol).forEach(([id, data]) => {
+                        const avg = (data.sum / data.count).toFixed(2);
+                        const name = sessions[id]?.name || id;
+                        const row = document.createElement('div');
+                        row.className = 'flex items-center justify-between text-sm text-zinc-200 bg-zinc-900/40 border border-white/5 rounded px-3 py-2';
+                        row.innerHTML = `<span class="font-medium">${name}</span><span class="font-mono text-medical-400">${avg}</span>`;
+                        els.statsAverageList.appendChild(row);
+                    });
+                }
+
+                const top = Object.entries(ratingsByProtocol)
+                    .map(([id, data]) => ({ id, avg: data.sum / data.count }))
+                    .sort((a,b) => b.avg - a.avg)
+                    .slice(0,3)
+                    .map(item => `${sessions[item.id]?.name || item.id} (${item.avg.toFixed(1)})`);
+                els.statsTopProtocols.textContent = top.length ? top.join(', ') : 'Brak danych';
+
+                const buckets = { morning: 0, midday: 0, evening: 0, night: 0 };
+                logs.forEach(l => {
+                    const hour = new Date(l.startedAt || l.endedAt || now).getHours();
+                    if(hour >= 6 && hour < 12) buckets.morning++;
+                    else if(hour >= 12 && hour < 18) buckets.midday++;
+                    else if(hour >= 18 && hour < 24) buckets.evening++;
+                    else buckets.night++;
+                });
+                const entries = Object.entries(buckets).filter(([,v]) => v > 0);
+                if(entries.length === 0) els.statsTimeOfDay.textContent = 'Brak danych';
+                else {
+                    const best = entries.sort((a,b) => b[1]-a[1])[0][0];
+                    const labelMap = { morning: 'Poranek (6–12)', midday: 'Dzień (12–18)', evening: 'Wieczór (18–24)', night: 'Noc (0–6)' };
+                    els.statsTimeOfDay.textContent = labelMap[best] || best;
+                }
+            }
+
+            function selectFeedbackRating(val) {
+                state.pendingFeedback = state.pendingFeedback || {};
+                state.pendingFeedback.rating = val;
+                els.feedbackRatings.forEach(btn => btn.classList.toggle('feedback-active', parseInt(btn.dataset.rating, 10) === val));
+                els.feedbackError.classList.add('hidden');
+            }
+
+            function selectFeedbackFeeling(val) {
+                state.pendingFeedback = state.pendingFeedback || {};
+                state.pendingFeedback.feeling = val;
+                els.feedbackFeelings.forEach(btn => btn.classList.toggle('feedback-active', btn.dataset.feeling === val));
+                els.feedbackError.classList.add('hidden');
+            }
+
+            function promptSessionFeedback(meta) {
+                state.pendingFeedback = { ...meta, rating: null, feeling: null };
+                els.feedbackRatings.forEach(btn => btn.classList.remove('feedback-active'));
+                els.feedbackFeelings.forEach(btn => btn.classList.remove('feedback-active'));
+                els.feedbackError.classList.add('hidden');
+                if(els.feedbackModal) els.feedbackModal.style.display = 'flex';
+            }
+
+            function hideFeedbackModal() {
+                if(els.feedbackModal) els.feedbackModal.style.display = 'none';
+                state.pendingFeedback = null;
+            }
+
+            function submitFeedback() {
+                if(!state.pendingFeedback) { hideFeedbackModal(); return; }
+                const { rating, feeling } = state.pendingFeedback;
+                if(typeof rating !== 'number' || !feeling) {
+                    els.feedbackError.classList.remove('hidden');
+                    return;
+                }
+                const entry = { ...state.pendingFeedback, rating, feeling };
+                sessionLogs.add(entry);
+                renderStats();
+                hideFeedbackModal();
+            }
+
             function renderModes() {
                 els.modeContainer.innerHTML = '';
                 Object.values(sessions).forEach(s => {
@@ -1286,6 +1448,9 @@ const sessions = {
 
             async function toggleSession(reason = 'manual') {
                 if (state.active) {
+                    const endTs = Date.now();
+                    const elapsed = Math.max(1, Math.round((endTs - (state.sessionStartTs || endTs)) / 1000));
+                    const feedbackMeta = { sessionId: state.session, startedAt: state.sessionStartTs || endTs, endedAt: endTs, durationSeconds: elapsed };
                     state.active = false;
                     if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
                     state.hypnosRampProgress = 0;
@@ -1308,11 +1473,14 @@ const sessions = {
                     els.appFooter.style.opacity = '1';
 
                     disableFocusLock();
+                    state.sessionStartTs = null;
                     setSession(state.session);
                     handleProgramAfterStep();
+                    promptSessionFeedback(feedbackMeta);
                 } else {
                     await startAudio();
                     state.active = true;
+                    state.sessionStartTs = Date.now();
                     state.startTime = performance.now();
                     state.hypnosRampProgress = 0;
                     state.lastInteraction = performance.now();
@@ -1390,6 +1558,14 @@ const sessions = {
                     }
                 }
                 requestAnimationFrame(loop);
+            }
+
+            function formatDurationHuman(seconds) {
+                if(!seconds || seconds <= 0) return '0 min';
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                if(hours > 0) return `${hours}h ${minutes.toString().padStart(2,'0')}m`;
+                return `${minutes} min`;
             }
 
             function formatTime(s) {
