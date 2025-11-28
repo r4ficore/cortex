@@ -270,11 +270,10 @@ const sessions = {
             releaseNotesPrefs.load();
             feedbackPulse.load();
 
+            const releaseNotesMeta = document.getElementById('releaseNotesCard')?.dataset || {};
+            const RELEASE_NOTES_VERSION = releaseNotesMeta.releaseVersion || '2.7.1';
             const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-            const RELEASE_NOTES_VERSION = '2.7.1';
             const THREE_DAYS_MS = 3 * 24 * 3600 * 1000;
-
-            const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
             // Hypnos duration presets (values in minutes, converted to seconds later)
             const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
@@ -463,6 +462,7 @@ const sessions = {
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
                 releaseNotesCard: document.getElementById('releaseNotesCard'),
+                releaseVersionLabel: document.getElementById('releaseVersionLabel'),
                 releaseAckBtn: document.getElementById('releaseAckBtn'),
                 releaseHideBtn: document.getElementById('releaseHideBtn'),
                 releaseSnoozeBtn: document.getElementById('releaseSnoozeBtn'),
@@ -509,6 +509,7 @@ const sessions = {
                 updateProgramStatus();
                 checkCircadianRhythm();
                 updatePersonalizationUI();
+                if(els.releaseVersionLabel) els.releaseVersionLabel.textContent = `v${RELEASE_NOTES_VERSION}`;
                 updateReleaseNotesUI();
                 updateNpsUI();
 
