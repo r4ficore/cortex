@@ -181,9 +181,9 @@ const sessions = {
                 audioOnly: false,
                 intensityLevel: 'medium',
                 reduceMotion: null,
-                masterVolume: 0.7,
-                beatVolume: 0.6,
-                noiseVolume: 0.5
+                masterVolume: 0.85,
+                beatVolume: 0.95,
+                noiseVolume: 0.75
             };
 
             const userPreferences = {
@@ -347,9 +347,9 @@ const sessions = {
             };
 
             const volumeDefaults = {
-                master: 0.7,
-                beat: 0.6,
-                noise: 0.5
+                master: 0.85,
+                beat: 0.95,
+                noise: 0.75
             };
 
             const audioBaseLevels = {
@@ -553,12 +553,11 @@ const sessions = {
                     });
                 });
 
-                if(els.visualizer) {
-                    ['mousemove', 'mousedown', 'touchstart', 'keydown', 'mouseenter', 'focusin'].forEach(evt => {
-                        els.visualizer.addEventListener(evt, wakeControls);
+                const visualizerEl = document.getElementById('visualizer');
+                if(visualizerEl) {
+                    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(evt => {
+                        visualizerEl.addEventListener(evt, wakeControls);
                     });
-                    els.visualizer.addEventListener('mouseleave', () => hideControlsAfterDelay());
-                    els.visualizer.addEventListener('focusout', () => hideControlsAfterDelay(200));
                 }
                 if(els.mainBtn) {
                     els.mainBtn.addEventListener('focus', wakeControls);
@@ -822,7 +821,7 @@ const sessions = {
                 els.noiseTypeDisplay.textContent = isPink ? "Pink Noise (Soft)" : "Brown Noise (Deep)";
             }
 
-            function clampVolume(val, min = 0, max = 1) {
+            function clampVolume(val, min = 0.1, max = 1.2) {
                 if(typeof val !== 'number' || Number.isNaN(val)) return min;
                 return Math.min(max, Math.max(min, val));
             }
@@ -836,53 +835,34 @@ const sessions = {
                 if(els.noiseVolumeValue) els.noiseVolumeValue.textContent = `${Math.round(state.noiseVolume * 100)}%`;
             }
 
-            let volumeUpdateFrame = null;
-            let pendingVolumeOptions = { ramp: true };
-
             function applyVolumeToAudio({ ramp = true } = {}) {
                 const time = ramp ? 0.35 : 0;
                 if(state.audio.masterGain) state.audio.masterGain.gain.rampTo(state.masterVolume, time);
                 if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, ramp ? 0.6 : 0);
-                const beatTarget = state.currentBeatBase ? state.currentBeatBase * state.beatVolume : state.audio.beatGain?.gain.value || 0;
+                const beatTarget = state.currentBeatBase ? state.currentBeatBase * state.beatVolume : state.audio.gain?.gain.value || 0;
                 state.currentBeatGain = beatTarget;
-                if(state.audio.beatGain) state.audio.beatGain.gain.rampTo(beatTarget, ramp ? 0.4 : 0);
-            }
-
-            function queueVolumeUpdate(options = {}) {
-                pendingVolumeOptions = { ...pendingVolumeOptions, ...options };
-                if(volumeUpdateFrame) return;
-                volumeUpdateFrame = requestAnimationFrame(() => {
-                    applyVolumeToAudio(pendingVolumeOptions);
-                    pendingVolumeOptions = { ramp: true };
-                    volumeUpdateFrame = null;
-                });
-            }
-
-            function cancelQueuedVolumeUpdate() {
-                if(volumeUpdateFrame) cancelAnimationFrame(volumeUpdateFrame);
-                volumeUpdateFrame = null;
-                pendingVolumeOptions = { ramp: true };
+                if(state.audio.gain) state.audio.gain.gain.rampTo(beatTarget, ramp ? 0.4 : 0);
             }
 
             function setMasterVolume(val) {
-                state.masterVolume = clampVolume(val / 100, 0, 1);
+                state.masterVolume = clampVolume(val / 100, 0.2, 1.1);
                 userPreferences.save({ masterVolume: state.masterVolume });
                 updateVolumeUI();
-                queueVolumeUpdate();
+                applyVolumeToAudio();
             }
 
             function setBeatVolume(val) {
-                state.beatVolume = clampVolume(val / 100, 0, 1);
+                state.beatVolume = clampVolume(val / 100, 0.2, 1.2);
                 userPreferences.save({ beatVolume: state.beatVolume });
                 updateVolumeUI();
-                queueVolumeUpdate();
+                applyVolumeToAudio();
             }
 
             function setNoiseVolume(val) {
-                state.noiseVolume = clampVolume(val / 100, 0, 1);
+                state.noiseVolume = clampVolume(val / 100, 0.1, 1.2);
                 userPreferences.save({ noiseVolume: state.noiseVolume });
                 updateVolumeUI();
-                queueVolumeUpdate();
+                applyVolumeToAudio();
             }
 
             function resetAudioSettings() {
@@ -895,7 +875,6 @@ const sessions = {
                     noiseVolume: state.noiseVolume
                 });
                 updateVolumeUI();
-                cancelQueuedVolumeUpdate();
                 applyVolumeToAudio({ ramp: false });
             }
 
@@ -1046,8 +1025,8 @@ const sessions = {
                 setSession(sessionId);
                 const session = sessions[sessionId];
                 if(session) {
-                    if (els.messageTitle) els.messageTitle.textContent = `${session.name} · tryb polecany`;
-                    if (els.desc) els.desc.textContent = session.desc || els.desc?.textContent;
+                    els.messageTitle.textContent = `${session.name} · tryb polecany`;
+                    els.desc.textContent = session.desc || els.desc.textContent;
                 }
             }
 
@@ -1734,9 +1713,19 @@ const sessions = {
                 els.modeContainer.innerHTML = '';
                 Object.values(sessions).forEach(s => {
                     const btn = document.createElement('button');
-                    btn.className = `mode-btn w-full text-left p-3 rounded border transition-all duration-200 flex flex-col gap-1 group relative overflow-hidden`;
+                    btn.className = `mode-btn w-full text-left p-3 rounded border transition-all duration-200 flex flex-col gap-1.5 group relative overflow-hidden`;
                     btn.dataset.id = s.id;
-                    btn.innerHTML = `<div class="flex items-center justify-between w-full relative z-10"><div class="flex items-center gap-3"><div class="text-zinc-500 group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div><span class="font-bold text-[11px] uppercase tracking-wider">${s.name}</span></div><span class="text-[9px] font-mono text-zinc-500">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span></div>`;
+                    btn.innerHTML = `
+                        <div class="flex items-center justify-between w-full relative z-10">
+                            <div class="flex items-center gap-3">
+                                <div class="text-zinc-500 group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div>
+                                <span class="font-bold text-[11px] uppercase tracking-wider">${s.name}</span>
+                            </div>
+                            <span class="text-[9px] font-mono text-zinc-500">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span>
+                        </div>
+                        <p class="mode-desc">${s.desc}</p>
+                        <p class="mode-meta">${s.baseHz || 'Hz niedostępne'}</p>
+                    `;
                     btn.addEventListener('click', () => setSession(s.id));
                     els.modeContainer.appendChild(btn);
                 });
@@ -1775,7 +1764,11 @@ const sessions = {
                 if (els.messageTitle) els.messageTitle.textContent = data.name;
                 if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
-                els.realtimeHz.textContent = "0.00 Hz";
+                const firstPhase = data.phases?.[0];
+                const startHz = firstPhase?.audio?.l && firstPhase?.audio?.r
+                    ? Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2) + ' Hz'
+                    : (data.baseHz || '0.00 Hz');
+                els.realtimeHz.textContent = startHz;
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
@@ -1793,22 +1786,17 @@ const sessions = {
             }
 
             function wakeControls() {
-                if(!els.visualizer) return;
+                if(!els.mainBtn) return;
                 clearTimeout(controlFadeTimer);
-                els.visualizer.classList.add('show-controls');
+                els.mainBtn.classList.remove('control-hidden');
+                els.mainBtn.classList.add('control-visible');
+                els.mainBtn.setAttribute('aria-hidden', 'false');
                 if(state.active) {
                     controlFadeTimer = setTimeout(() => {
-                        els.visualizer?.classList.remove('show-controls');
+                        els.mainBtn.classList.add('control-hidden');
+                        els.mainBtn.setAttribute('aria-hidden', 'true');
                     }, 2200);
                 }
-            }
-
-            function hideControlsAfterDelay(delay = 0) {
-                if(!els.visualizer || !state.active) return;
-                clearTimeout(controlFadeTimer);
-                controlFadeTimer = setTimeout(() => {
-                    els.visualizer?.classList.remove('show-controls');
-                }, delay);
             }
 
             async function startAudio() {
@@ -1831,9 +1819,9 @@ const sessions = {
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 state.audio.masterGain = new Tone.Gain(state.masterVolume).toDestination();
-                state.audio.beatGain = new Tone.Gain(0).connect(state.audio.masterGain);
-                const pL = new Tone.Panner(-1).connect(state.audio.beatGain);
-                const pR = new Tone.Panner(1).connect(state.audio.beatGain);
+                state.audio.gain = new Tone.Gain(0).connect(state.audio.masterGain);
+                const pL = new Tone.Panner(-1).connect(state.audio.gain);
+                const pR = new Tone.Panner(1).connect(state.audio.gain);
 
                 state.audio.oscL = new Tone.Oscillator(startL, "sine").connect(pL).start();
                 state.audio.oscR = new Tone.Oscillator(startR, "sine").connect(pR).start();
@@ -1846,7 +1834,7 @@ const sessions = {
                 state.currentBeatGain = beatBase * state.beatVolume;
 
                 state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, 2);
-                state.audio.beatGain.gain.rampTo(state.currentBeatGain, 1);
+                state.audio.gain.gain.rampTo(state.currentBeatGain, 1);
             }
 
             function stopAudio() {
@@ -1888,9 +1876,9 @@ const sessions = {
                 if (a.mod === 'iso') {
                     const rate = 2;
                     const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
-                    state.audio.beatGain.gain.value = beatGain * mod;
+                    state.audio.gain.gain.value = beatGain * mod;
                 } else {
-                    state.audio.beatGain.gain.value = beatGain;
+                    state.audio.gain.gain.value = beatGain;
                 }
 
                 const deltaFactor = intensity.delta || 1;
@@ -2112,15 +2100,13 @@ const sessions = {
                     state.hypnosRampProgress = 0;
                     stopAudio();
                     els.canvas.style.opacity = 0;
-                    if (els.msgBox) {
-                        els.msgBox.style.opacity = 1;
-                        els.msgBox.style.transform = "scale(1)";
-                    }
+                    els.msgBox.style.opacity = 1;
+                    els.msgBox.style.transform = "scale(1)";
                     els.timer.classList.remove('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "Standby";
                     if (els.statusDot) {
-                        els.statusDot.classList.remove('status-badge__dot--active', 'animate-pulse');
-                        els.statusDot.classList.add('status-badge__dot--idle');
+                        els.statusDot.className = "w-2 h-2 rounded-full bg-zinc-600 shadow-none";
+                        els.statusDot.style.boxShadow = 'none';
                     }
 
                     els.appHeader.style.opacity = '1';
@@ -2130,10 +2116,11 @@ const sessions = {
                     disableFocusLock();
                     state.sessionStartTs = null;
                     setSession(state.session);
-                    const programResult = completed ? handleProgramAfterStep() : null;
-                    const completedProgram = programResult?.programEnded && completed;
+                    const programResult = handleProgramAfterStep();
+                    const completedSession = reason === 'auto-complete';
+                    const completedProgram = programResult?.programEnded && completedSession;
                     const awaitingNextStep = programResult?.awaitingNext;
-                    if(completed && !awaitingNextStep) {
+                    if((completedSession || completedProgram) && !awaitingNextStep) {
                         promptSessionFeedback(feedbackMeta);
                     }
                     updateQuickActionsUI();
@@ -2151,16 +2138,14 @@ const sessions = {
                     state.hypnosRampProgress = 0;
                     state.lastInteraction = performance.now();
                     els.canvas.style.opacity = 1;
-                    if (els.msgBox) {
-                        els.msgBox.style.opacity = 0;
-                        els.msgBox.style.transform = "scale(0.95)";
-                    }
+                    els.msgBox.style.opacity = 0;
+                    els.msgBox.style.transform = "scale(0.95)";
                     els.mainBtn.setAttribute('title', 'Zatrzymaj');
                     els.timer.classList.add('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "ACTIVE";
                     if (els.statusDot) {
-                        els.statusDot.classList.remove('status-badge__dot--idle');
-                        els.statusDot.classList.add('status-badge__dot--active', 'animate-pulse');
+                        els.statusDot.className = "w-2 h-2 rounded-full bg-medical-400 animate-pulse";
+                        els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
                     }
                     if(state.focusLock) enableFocusLock();
                     updateQuickActionsUI();
@@ -2172,7 +2157,7 @@ const sessions = {
                 if (state.active) return;
                 state.preview = !state.preview;
                 els.canvas.style.opacity = state.preview ? 1 : 0;
-                if (els.msgBox) els.msgBox.style.opacity = state.preview ? 0 : 1;
+                els.msgBox.style.opacity = state.preview ? 0 : 1;
                 state.lastInteraction = performance.now();
                 state.startTime = performance.now();
                 if(state.preview) els.realtimeHz.textContent = "PREVIEW";
