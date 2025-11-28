@@ -356,13 +356,13 @@
                                     <span id="lastSessionLabel" class="font-mono">Ostatni: —</span>
                                 </div>
                             </div>
-                            <div class="flex flex-col lg:flex-row gap-3 lg:items-center">
-                                <div class="flex flex-1 flex-col sm:flex-row gap-3">
+                            <div class="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+                                <div class="flex flex-1 flex-col sm:flex-row flex-wrap gap-3">
                                     <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--lg flex-1 sm:flex-none justify-center" aria-live="polite">Uruchom</button>
                                     <button id="resumeLastBtn" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-label="Wznów ostatnią sesję">Ostatnia sesja</button>
                                     <button id="previewButton" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-pressed="false">Podgląd wizualizacji</button>
                                 </div>
-                                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                <div class="flex items-center gap-2 text-[11px] text-zinc-500 self-start xl:self-center">
                                     <span class="px-2 py-1 rounded-full bg-black/50 border border-zinc-800 uppercase tracking-[0.18em] font-mono">Stany</span>
                                     <span id="programStatus" class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">Brak aktywnego programu</span>
                                 </div>
