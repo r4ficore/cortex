@@ -274,6 +274,8 @@ const sessions = {
             const RELEASE_NOTES_VERSION = '2.7.1';
             const THREE_DAYS_MS = 3 * 24 * 3600 * 1000;
 
+            const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
             // Hypnos duration presets (values in minutes, converted to seconds later)
             const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
             const hypnosDurations = {
