@@ -198,6 +198,40 @@ body {
     box-shadow: none;
 }
 
+.modal-card {
+    width: min(100%, clamp(680px, 82vw, 1120px));
+    min-width: clamp(320px, 55vw, 480px);
+    max-width: clamp(720px, 88vw, 1180px);
+    padding: clamp(1.25rem, 1.25vw + 1rem, 2rem);
+}
+
+.modal-card--flush {
+    padding: 0;
+}
+
+.modal-card h1,
+.modal-card h2,
+.modal-card h3,
+.modal-card h4,
+.modal-card h5,
+.modal-card h6,
+.modal-card label {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.modal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: clamp(1rem, 1.4vw, 1.25rem);
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .modal-grid { grid-template-columns: 1fr; }
+}
+
 .app-grid {
     display: grid;
     gap: 1.25rem;
