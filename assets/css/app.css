@@ -80,7 +80,14 @@ body {
 
 @media (min-width: 1024px) {
     .app-grid {
-        grid-template-columns: minmax(360px, 1fr) minmax(0, 2fr);
+        grid-template-columns: minmax(360px, 0.95fr) minmax(640px, 1.35fr);
+        gap: 1.75rem;
+    }
+}
+
+@media (min-width: 1440px) {
+    .app-grid {
+        grid-template-columns: minmax(380px, 1fr) minmax(760px, 1.45fr);
     }
 }
 
@@ -321,12 +328,22 @@ body {
 .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
 .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
+#modeContainer {
+    max-height: calc(100vh - 240px);
+}
+
+@media (min-width: 1280px) {
+    #modeContainer {
+        max-height: calc(100vh - 220px);
+    }
+}
+
 #visualizer .control-visible { transition: opacity 200ms ease, transform 200ms ease; }
 #visualizer .control-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
 
 .control-button {
-    height: 40px;
-    width: 40px;
+    height: 36px;
+    width: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -344,7 +361,12 @@ body {
 .control-button:focus-visible { outline: 2px solid var(--accent-400); outline-offset: 3px; box-shadow: var(--focus-ring); }
 
 #visualizer {
-    min-height: clamp(520px, 60vh, 760px);
+    min-height: clamp(540px, 62vh, 780px);
+    aspect-ratio: 16 / 10;
+}
+
+#visualizer canvas {
+    object-fit: cover;
 }
 
 .onboarding-option {
