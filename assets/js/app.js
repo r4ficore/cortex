@@ -1227,10 +1227,19 @@ const sessions = {
                 });
             }
 
+            let entryInProgress = false;
+
             function startEntry({ demo = false } = {}) {
+                if (!els.landingPage || !els.appInterface || entryInProgress) return;
+
                 const content = els.landingPage.querySelector('.max-w-5xl');
-                content.style.opacity = '0';
-                content.style.transition = 'opacity 0.5s';
+                if(content) {
+                    content.style.opacity = '0';
+                    content.style.transition = 'opacity 0.5s';
+                }
+
+                entryInProgress = true;
+                toggleLandingCtas(true);
 
                 if(!demo) {
                     els.silentAudio.play().catch(e => console.log("Silent play prevented"));
@@ -1245,8 +1254,16 @@ const sessions = {
                 setTimeout(() => {
                     els.landingPage.style.display = 'none';
                     const calib = document.getElementById('calibrationOverlay');
-                    calib.style.display = 'flex';
-                    simulateCalibration(() => {
+                    const targetDuration = demo ? 6500 : 12000;
+                    if(calib) calib.style.display = 'flex';
+
+                    const finish = () => {
+                        entryInProgress = false;
+                        toggleLandingCtas(false);
+                        if(calib && calib.style.display !== 'none') {
+                            calib.style.opacity = 0;
+                            setTimeout(() => { calib.style.display = 'none'; }, 300);
+                        }
                         els.appInterface.style.display = 'block';
                         requestAnimationFrame(() => {
                             els.appInterface.style.opacity = '1';
@@ -1255,15 +1272,32 @@ const sessions = {
                                 if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
                             }, 300);
                         });
-                    }, { demo });
+                    };
+
+                    const failSafe = setTimeout(() => finish(), targetDuration + 1500);
+
+                    simulateCalibration(() => {
+                        clearTimeout(failSafe);
+                        finish();
+                    }, { demo, targetDuration });
                 }, 500);
             }
 
-            function simulateCalibration(callback, { demo = false } = {}) {
+            function toggleLandingCtas(disabled) {
+                [els.enterSystemBtn, els.enterDemoBtn].forEach(btn => {
+                    if(!btn) return;
+                    btn.disabled = disabled;
+                    btn.classList.toggle('is-loading', disabled);
+                    btn.setAttribute('aria-busy', disabled ? 'true' : 'false');
+                });
+            }
+
+            function simulateCalibration(callback, { demo = false, targetDuration } = {}) {
                 const overlay = document.getElementById('calibrationOverlay');
                 const bar = document.getElementById('calibBar');
                 const text = document.getElementById('calibText');
                 const perc = document.getElementById('calibPercent');
+                if(!overlay || !bar || !text || !perc) { if(callback) callback(); return; }
                 let p = 0;
                 const steps = demo ? [
                     { p: 20, t: "Sprawdzanie wizualizacji (demo)", s: 1 },
@@ -1277,9 +1311,9 @@ const sessions = {
                     { p: 100, t: "Audio + wizualizacje gotowe." , s: 4}
                 ];
                 let stepIdx = 0;
-                const targetDuration = demo ? 6500 : 12000;
+                const targetDurationMs = targetDuration || (demo ? 6500 : 12000);
                 const interval = setInterval(() => {
-                    const increment = 100 / (targetDuration / 120);
+                    const increment = 100 / (targetDurationMs / 120);
                     p += increment + Math.random() * 1.5;
                     if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx = Math.min(stepIdx + 1, steps.length - 1); updateCalibrationSteps(steps[stepIdx].s); }
                     if(p >= 100) {

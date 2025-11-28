@@ -134,6 +134,13 @@ body {
     transition: transform 150ms ease, box-shadow 200ms ease, border-color 200ms ease, background-color 200ms ease, color 150ms ease;
 }
 
+.ui-btn[disabled],
+.ui-btn.is-loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .ui-btn--neon {
     box-shadow: 0 12px 40px rgba(6, 182, 212, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(59, 130, 246, 0.12));
