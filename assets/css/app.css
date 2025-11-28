@@ -165,7 +165,7 @@ body {
 
 .ui-btn--sm { padding: var(--space-2) var(--space-4); font-size: 10px; }
 .ui-btn--lg { padding: var(--space-4) var(--space-7); font-size: var(--text-sm); border-radius: 12px; }
-.ui-btn--icon { width: 3rem; height: 3rem; padding: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.ui-btn--icon { width: 2.75rem; height: 2.75rem; padding: 0.65rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .ui-btn--mini { width: 2.75rem; height: 2.75rem; padding: 0.55rem; border-radius: 999px; }
 
 .ui-btn--primary {
@@ -349,9 +349,6 @@ body {
 .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
 .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-#visualizer .control-visible { transition: opacity 200ms ease, transform 200ms ease; }
-#visualizer .control-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
-
 .visual-control-bar {
     position: absolute;
     inset: auto 16px 16px 16px;
@@ -366,6 +363,26 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: 20;
+    transition: opacity 250ms ease, transform 250ms ease;
+}
+
+#visualizer .visual-control-bar .ui-btn {
+    height: 44px;
+    min-height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+#visualizer.is-playing:not(.show-controls) .visual-control-bar {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+}
+
+#visualizer.show-controls .visual-control-bar {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .onboarding-option {
