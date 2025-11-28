@@ -384,6 +384,7 @@ const sessions = {
                 statsEmpty: document.getElementById('statsEmpty'),
                 statsTopProtocols: document.getElementById('statsTopProtocols'),
                 statsTimeOfDay: document.getElementById('statsTimeOfDay'),
+                statsSparkline: document.getElementById('statsSparkline'),
                 feedbackModal: document.getElementById('feedbackModal'),
                 feedbackRatings: Array.from(document.querySelectorAll('#feedbackRatings .feedback-rating')),
                 feedbackFeelings: Array.from(document.querySelectorAll('#feedbackFeelings .feedback-feeling')),
@@ -1299,6 +1300,68 @@ const sessions = {
                     const labelMap = { morning: 'Poranek (6–12)', midday: 'Dzień (12–18)', evening: 'Wieczór (18–24)', night: 'Noc (0–6)' };
                     els.statsTimeOfDay.textContent = labelMap[best] || best;
                 }
+
+                renderStatsSparkline(logs);
+            }
+
+            function renderStatsSparkline(logs) {
+                if(!els.statsSparkline) return;
+                const dayMs = 24 * 3600 * 1000;
+                const today = new Date();
+                const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const buckets = Array.from({ length: 7 }, (_, idx) => ({
+                    dayLabel: `D-${6 - idx}`,
+                    totalMinutes: 0,
+                    date: new Date(startOfToday.getTime() - (6 - idx) * dayMs)
+                }));
+
+                logs.forEach(log => {
+                    const ts = log.startedAt || log.endedAt || Date.now();
+                    const dayStart = new Date(ts);
+                    dayStart.setHours(0,0,0,0);
+                    const diffDays = Math.round((startOfToday.getTime() - dayStart.getTime()) / dayMs);
+                    if(diffDays >= 0 && diffDays < 7) {
+                        const bucketIndex = 6 - diffDays;
+                        buckets[bucketIndex].totalMinutes += (log.durationSeconds || 0) / 60;
+                    }
+                });
+
+                const values = buckets.map(b => b.totalMinutes);
+                const max = Math.max(...values, 1);
+                const width = 260;
+                const height = 56;
+                const pad = 6;
+                const innerH = height - pad * 2;
+                const step = buckets.length > 1 ? (width - pad * 2) / (buckets.length - 1) : 0;
+
+                const points = values.map((v, idx) => {
+                    const x = pad + idx * step;
+                    const y = height - pad - (v / max) * innerH;
+                    return `${idx === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
+                }).join(' ');
+
+                const area = `${points} L ${pad + (values.length -1) * step},${height - pad} L ${pad},${height - pad} Z`;
+
+                const svg = `
+                    <svg viewBox="0 0 ${width} ${height}" role="presentation" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="sparkline-stroke" x1="0%" x2="100%" y1="0%" y2="0%">
+                                <stop offset="0%" stop-color="rgba(34, 211, 238, 0.95)" />
+                                <stop offset="50%" stop-color="rgba(244, 114, 182, 0.85)" />
+                                <stop offset="100%" stop-color="rgba(14, 165, 233, 0.9)" />
+                            </linearGradient>
+                            <linearGradient id="sparkline-fill" x1="0%" x2="0%" y1="0%" y2="100%">
+                                <stop offset="0%" stop-color="rgba(34, 211, 238, 0.25)" />
+                                <stop offset="100%" stop-color="rgba(6, 182, 212, 0.02)" />
+                            </linearGradient>
+                        </defs>
+                        <path d="${area}" fill="url(#sparkline-fill)" stroke="none" />
+                        <path d="${points}" fill="none" stroke="url(#sparkline-stroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>`;
+
+                els.statsSparkline.innerHTML = svg;
+                const readable = buckets.map(b => `${b.date.toLocaleDateString('pl-PL', { weekday: 'short' })}: ${Math.round(b.totalMinutes)} min`).join(', ');
+                els.statsSparkline.setAttribute('aria-label', `Aktywność z ostatnich 7 dni – ${readable}`);
             }
 
             function selectFeedbackRating(val) {
