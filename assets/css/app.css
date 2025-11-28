@@ -190,6 +190,55 @@ body {
     box-shadow: 0 0 12px rgba(34,211,238,0.25);
 }
 
+.pref-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid #27272a;
+    background: rgba(0, 0, 0, 0.6);
+    color: #e4e4e7;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.pref-chip__bullet {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: rgba(34, 211, 238, 0.8);
+}
+
+.pref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.5rem;
+}
+
+.recommend-card {
+    border: 1px solid #27272a;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.recommend-meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #71717a;
+}
+
+.recommend-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
 .calib-step {
     display: grid;
     grid-template-columns: auto 1fr auto;

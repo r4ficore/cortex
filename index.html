@@ -342,6 +342,44 @@
                     </div>
 
                     <div class="lg:col-span-9 flex flex-col gap-4 order-1 lg:order-2 h-full">
+                        <section id="personalizationCard" class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Personalizacja startu">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Polecany start</span>
+                                    <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                        <span id="personalizationSource" class="font-mono">Personalizacja aktywna</span>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-medical-400"></span>
+                                    </div>
+                                </div>
+                                <button id="editPersonalization" class="ui-btn ui-btn--ghost ui-btn--sm">Edytuj preferencje</button>
+                            </div>
+
+                            <div class="recommend-card">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <p class="recommend-meta" id="recommendedLabel">Na podstawie celów</p>
+                                        <h3 id="recommendedTitle" class="text-xl text-white font-semibold">Prime</h3>
+                                        <p id="recommendedDesc" class="text-sm text-zinc-400 leading-relaxed">Rozgrzewka neuronalna przed sesją właściwą.</p>
+                                    </div>
+                                    <div class="px-3 py-1 rounded-full bg-medical-900/40 border border-medical-500/30 text-medical-400 text-[10px] font-mono uppercase tracking-[0.2em]">Polecane</div>
+                                </div>
+                                <p id="recommendedReason" class="text-xs text-zinc-500">Cel: Skupienie · Pora: Poranek</p>
+                                <div class="recommend-actions">
+                                    <button id="applyRecommended" class="ui-btn ui-btn--primary ui-btn--md">Ustaw i uruchom</button>
+                                    <button id="previewRecommended" class="ui-btn ui-btn--ghost ui-btn--md">Pokaż parametry</button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Twoje ustawienia</p>
+                                <div class="pref-grid">
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefGoal">Cel: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefTime">Pora: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefSensitivity">Wrażliwość: —</span></span>
+                                </div>
+                            </div>
+                        </section>
+
                         <section class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Szybkie akcje">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div class="flex items-center gap-3">

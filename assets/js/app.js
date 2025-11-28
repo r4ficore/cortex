@@ -386,6 +386,17 @@ const sessions = {
                 closeFeedback: document.getElementById('closeFeedback'),
                 skipFeedback: document.getElementById('skipFeedback'),
                 feedbackError: document.getElementById('feedbackError'),
+                personalizationSource: document.getElementById('personalizationSource'),
+                recommendedLabel: document.getElementById('recommendedLabel'),
+                recommendedTitle: document.getElementById('recommendedTitle'),
+                recommendedDesc: document.getElementById('recommendedDesc'),
+                recommendedReason: document.getElementById('recommendedReason'),
+                applyRecommended: document.getElementById('applyRecommended'),
+                previewRecommended: document.getElementById('previewRecommended'),
+                editPersonalization: document.getElementById('editPersonalization'),
+                prefGoal: document.getElementById('prefGoal'),
+                prefTime: document.getElementById('prefTime'),
+                prefSensitivity: document.getElementById('prefSensitivity'),
                 onboardingModal: document.getElementById('onboardingModal'),
                 onboardingButtons: Array.from(document.querySelectorAll('.onboarding-option')),
                 onboardingError: document.getElementById('onboardingError'),
@@ -429,6 +440,7 @@ const sessions = {
                 updateHypnosDurationUI();
                 updateProgramStatus();
                 checkCircadianRhythm();
+                updatePersonalizationUI();
 
                 window.addEventListener('resize', resizeCanvas);
                 setInterval(checkCircadianRhythm, 60000);
@@ -541,6 +553,10 @@ const sessions = {
                 els.skipOnboarding.addEventListener('click', () => completeOnboarding(true));
                 els.restartOnboarding.addEventListener('click', () => openOnboardingModal(true));
 
+                if(els.applyRecommended) els.applyRecommended.addEventListener('click', handleApplyRecommended);
+                if(els.previewRecommended) els.previewRecommended.addEventListener('click', handlePreviewRecommended);
+                if(els.editPersonalization) els.editPersonalization.addEventListener('click', () => openOnboardingModal(true));
+
                 // Circadian Widget Click
                 els.circadianWidget.addEventListener('click', () => {
                     const recommended = els.circadianWidget.dataset.recommended;
@@ -564,6 +580,77 @@ const sessions = {
 
                 els.circadianTitle.textContent = recText;
                 els.circadianWidget.dataset.recommended = recId;
+                updatePersonalizationUI();
+            }
+
+            const onboardingLabels = {
+                goal: {
+                    focus: { label: 'Skupienie', note: 'Beta/Gamma' },
+                    sleep: { label: 'Sen', note: 'Delta/Theta' },
+                    calm: { label: 'Redukcja napięcia', note: 'Alpha 10Hz' },
+                    creative: { label: 'Kreatywność', note: 'Theta 6Hz' },
+                    social: { label: 'Social', note: 'Alpha 10Hz' }
+                },
+                typicalTime: {
+                    morning: { label: 'Poranek', note: 'Kortyzol start' },
+                    work: { label: 'W pracy', note: 'Beta stabilne' },
+                    evening: { label: 'Wieczór', note: 'Wind-down' },
+                    'pre-sleep': { label: 'Przed snem', note: 'Delta' }
+                },
+                sensitivity: {
+                    low: { label: 'Niska', note: 'Pełne wizualizacje' },
+                    medium: { label: 'Średnia', note: 'Domyślne ustawienia' },
+                    high: { label: 'Wysoka', note: 'Safe visuals + łagodne audio' }
+                }
+            };
+
+            function describePreference(group, key) {
+                return onboardingLabels[group]?.[key]?.label || '—';
+            }
+
+            function buildRecommendationContext() {
+                const hasFullPrefs = !!(userPreferences.data.onboardingCompleted && userPreferences.data.goal && userPreferences.data.typicalTime && userPreferences.data.sensitivity);
+                if(hasFullPrefs) {
+                    const sessionId = resolveOnboardingSession();
+                    const goalLabel = describePreference('goal', userPreferences.data.goal);
+                    const timeLabel = describePreference('typicalTime', userPreferences.data.typicalTime);
+                    const sensitivityLabel = describePreference('sensitivity', userPreferences.data.sensitivity);
+                    return {
+                        sessionId,
+                        label: 'Na podstawie celów',
+                        reason: `Cel: ${goalLabel} · Pora: ${timeLabel} · Wrażliwość: ${sensitivityLabel}`,
+                        source: 'personalization'
+                    };
+                }
+
+                const circadian = els.circadianWidget?.dataset.recommended || 'prime';
+                return {
+                    sessionId: circadian,
+                    label: 'Sugestia czasowa',
+                    reason: 'Dopasowane do rytmu dobowego (kliknij, aby uruchomić)',
+                    source: 'circadian'
+                };
+            }
+
+            function updatePreferenceBadges() {
+                if(!els.prefGoal || !els.prefTime || !els.prefSensitivity) return;
+                els.prefGoal.textContent = `Cel: ${describePreference('goal', userPreferences.data.goal)}`;
+                els.prefTime.textContent = `Pora: ${describePreference('typicalTime', userPreferences.data.typicalTime)}`;
+                els.prefSensitivity.textContent = `Wrażliwość: ${describePreference('sensitivity', userPreferences.data.sensitivity)}`;
+            }
+
+            function updatePersonalizationUI() {
+                if(!els.recommendedTitle) return;
+                const context = buildRecommendationContext();
+                const session = sessions[context.sessionId] || sessions[state.session];
+                els.recommendedLabel.textContent = context.label;
+                els.recommendedTitle.textContent = session?.name || 'Prime';
+                els.recommendedDesc.textContent = session?.desc || 'Personalizowany start na bazie Twoich wyborów.';
+                els.recommendedReason.textContent = context.reason;
+                els.personalizationSource.textContent = context.source === 'personalization' ? 'Personalizacja aktywna' : 'Auto · rytm dobowy';
+                if(els.applyRecommended) els.applyRecommended.dataset.sessionId = context.sessionId;
+                if(els.previewRecommended) els.previewRecommended.dataset.sessionId = context.sessionId;
+                updatePreferenceBadges();
             }
 
             function setNoiseType(type) {
@@ -685,6 +772,7 @@ const sessions = {
                 if(markOnly) {
                     userPreferences.save({ onboardingCompleted: true });
                     closeOnboardingModal();
+                    updatePersonalizationUI();
                     return;
                 }
                 const { goal, typicalTime, sensitivity } = onboardingState;
@@ -711,7 +799,26 @@ const sessions = {
                     safeVisuals
                 });
 
+                updatePersonalizationUI();
                 closeOnboardingModal();
+            }
+
+            function handleApplyRecommended() {
+                const sessionId = els.applyRecommended?.dataset.sessionId;
+                if(!sessionId) return;
+                setSession(sessionId);
+                if(!state.active) toggleSession('recommended-start');
+            }
+
+            function handlePreviewRecommended() {
+                const sessionId = els.previewRecommended?.dataset.sessionId;
+                if(!sessionId) return;
+                setSession(sessionId);
+                const session = sessions[sessionId];
+                if(session) {
+                    els.messageTitle.textContent = `${session.name} · tryb polecany`;
+                    els.desc.textContent = session.desc || els.desc.textContent;
+                }
             }
 
             function openOnboardingModal(fromSettings = false) {
