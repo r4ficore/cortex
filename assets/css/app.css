@@ -184,6 +184,55 @@ body {
     box-shadow: 0 0 12px rgba(34,211,238,0.25);
 }
 
+.calib-step {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(12, 12, 14, 0.7);
+    transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.calib-step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 2px solid rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.08);
+    background: rgba(34, 211, 238, 0.15);
+}
+
+.calib-step-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-500);
+    letter-spacing: 0.08em;
+}
+
+.calib-step.is-active {
+    border-color: rgba(34, 211, 238, 0.5);
+    background: rgba(6, 182, 212, 0.08);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.calib-step.is-complete {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.calib-step.is-complete .calib-step-dot {
+    background: var(--accent-400);
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
+    border-color: rgba(34, 211, 238, 0.7);
+}
+
+.calib-step.is-complete .calib-step-status {
+    color: var(--accent-300);
+}
+
             /* Hide any legacy program widgets that may linger in the sidebar layout */
             #programSidebar,
             #programsSidebar,
