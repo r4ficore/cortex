@@ -6,28 +6,21 @@
 - **Użyteczność pierwszego wejścia**: doprecyzowane CTA („Inicjuj sesję” + tryb demo), sekcja „Jak to działa”, widoczny wymóg słuchawek i rozszerzony overlay kalibracji.
 - **Architektura głównego interfejsu**: uporządkowany layout dashboardu z quick-actions, kartą parametrów sesji i responsywnym stackingiem bez kolizji elementów.
 - **Personalizacja / rekomendacje startu**: panel rekomendacji na podstawie onboarding/circadian, chipy preferencji, akcje podglądu i szybkiego zastosowania.
+- **Dostępność i ergonomia (Etap 6):** korekty kontrastu, focus outlines, respektowanie `prefers-reduced-motion`, custom scrollbary i statyczny wizualizer przy ograniczonym ruchu.
+- **Warstwa wizualna premium (Etap 7):** aurorowe gradienty, film grain, neonowe CTA, fluidalna typografia oraz sparkline w statystykach.
+- **Walidacja i iteracja ciągła (Etap 8):** release notes na ekranie startowym, inline NPS/feedback w dashboardzie, checklisty walidacyjne i cykliczna ankieta lokalna.
 
-## Kolejny rekomendowany krok (Etap 6 z planu)
-**Dostępność i ergonomia** – zaadresować WCAG, fokusy, klawiaturę i redukcję ruchu.
-
-**Cele:**
-1. **Kontrast i czytelność:** przegląd kolorów paneli glass i CTA pod kątem WCAG AA; korekty tokenów, jeśli tekst < 4.5:1.
-2. **Stany focus/klawiatura:** pełna obsługa klawiaturą dla przycisków, kart i przełączników; widoczny ring focus zgodny z tokenami.
-3. **Preferencje ruchu:** respektowanie `prefers-reduced-motion`, throttling animacji glitch/puls, możliwość wyłączenia animacji w ustawieniach.
-4. **Ujednolicone scrollbary/paddingi:** poprawa ergonomii list na desktop/mobile, spójne spacingi.
-5. **Walidacja:** szybki audyt dostępności (axe/lighthouse) na ekranach landing i dashboard oraz checklisty regresji.
-
-## Co pozostaje po tym kroku
-- **Warstwa wizualna premium (Etap 7):** subtelne gradienty/film grain, neonowe kontury CTA, spójny set ikon, mikro-charty w kartach statystyk, fluid typography.
-- **Walidacja i iteracja ciągła (Etap 8):** testy użyteczności (mobile/desktop), NPS/feedback inline, krótkie release notes na ekranie startowym.
+## Bieżący fokus
+- **Ciągła walidacja:** utrzymywać rytuał szybkich testów mobil/desktop (CTA, onboarding, kalibracja, start/stop, wizualizer) oraz przegląd danych z ankiet lokalnych.
+- **Raportowanie zmian:** krótkie release notes dla nowych iteracji i widoczna historia usprawnień (UI/UX, dostępność).
+- **Instrumentacja:** anonimowe zapisy ankiet (NPS, komentarze) i ewentualne rozszerzenie checklist regresji o nowe komponenty.
 
 ## Sugerowana kolejność realizacji
-1. Dostępność i ergonomia (Etap 6) — kluczowe dla jakości podstawowej.
-2. Warstwa wizualna premium (Etap 7) — podniesienie percepcji marki po zabezpieczeniu dostępności.
-3. Walidacja ciągła (Etap 8) — rytuał iteracji po wdrożeniu zmian.
+1. Stałe testy regresji dostępności (axe/Lighthouse) i mikro-iteracje UX na podstawie zebranych ankiet.
+2. Doszlifowanie ikonografii oraz ewentualne mikro-animacje w ramach guardrailów „reduce motion”.
+3. Dokumentowanie wniosków z ankiet/NPS i publikacja w kolejnych release notes.
 
-## Artefakty do przygotowania w następnym sprincie
-- Lista komponentów wymagających focus states/ARIA (CTA, karty presetów, przełączniki trybów, listy programów).
-- Tabela kontrastów dla tokenów akcentu i paneli glass (tekst główny/podtytuł/badge).
-- Profil animacji: czasy/krzywe + wariant redukcji ruchu.
-- Checklista regresji dostępności (desktop/mobile, ekran startowy + dashboard).
+## Artefakty do utrzymania
+- Aktualizowana checklista regresji (desktop/mobile) dla wejścia, kalibracji, dashboardu i statystyk.
+- Log zmian do kolejnych release notes (co nowego, poprawki, wpływ na dostępność).
+- Zanonimizowane dane z ankiet (NPS, komentarze) — krótkie podsumowania dla każdej iteracji.

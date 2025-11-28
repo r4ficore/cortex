@@ -227,8 +227,52 @@ const sessions = {
                 }
             };
 
+            const releaseNotesPrefs = {
+                key: 'koraReleaseNotes',
+                data: { acknowledgedVersion: null, snoozedUntil: null },
+                load() {
+                    try {
+                        const raw = localStorage.getItem(this.key);
+                        this.data = raw ? { ...this.data, ...JSON.parse(raw) } : { ...this.data };
+                    } catch (e) {
+                        console.warn('Release notes prefs load failed, resetting', e);
+                        this.data = { acknowledgedVersion: null, snoozedUntil: null };
+                    }
+                    return this.data;
+                },
+                save(patch = {}) {
+                    this.data = { ...this.data, ...patch };
+                    try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { console.warn('Release notes prefs save failed', e); }
+                }
+            };
+
+            const feedbackPulse = {
+                key: 'koraFeedbackPulse',
+                data: { lastNpsAt: null, lastNpsScore: null, lastNpsNote: '', snoozedUntil: null },
+                load() {
+                    try {
+                        const raw = localStorage.getItem(this.key);
+                        this.data = raw ? { ...this.data, ...JSON.parse(raw) } : { ...this.data };
+                    } catch (e) {
+                        console.warn('Feedback pulse load failed, resetting', e);
+                        this.data = { lastNpsAt: null, lastNpsScore: null, lastNpsNote: '', snoozedUntil: null };
+                    }
+                    return this.data;
+                },
+                save(patch = {}) {
+                    this.data = { ...this.data, ...patch };
+                    try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { console.warn('Feedback pulse save failed', e); }
+                }
+            };
+
             userPreferences.load();
             sessionLogs.load();
+            releaseNotesPrefs.load();
+            feedbackPulse.load();
+
+            const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+            const RELEASE_NOTES_VERSION = '2.7.1';
+            const THREE_DAYS_MS = 3 * 24 * 3600 * 1000;
 
             const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -318,6 +362,7 @@ const sessions = {
                 sessionDataOverride: null,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 pendingFeedback: null,
+                npsScore: null,
                 hypnosRampProgress: 0,
                 hypnosRampTimer: null,
                 ctx: null,
@@ -417,6 +462,10 @@ const sessions = {
                 appInterface: document.getElementById('appInterface'),
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
+                releaseNotesCard: document.getElementById('releaseNotesCard'),
+                releaseAckBtn: document.getElementById('releaseAckBtn'),
+                releaseHideBtn: document.getElementById('releaseHideBtn'),
+                releaseSnoozeBtn: document.getElementById('releaseSnoozeBtn'),
                 circadianWidget: document.getElementById('circadianWidget'),
                 circadianTitle: document.getElementById('circadianTitle'),
                 leftPanel: document.getElementById('leftPanel'),
@@ -427,7 +476,19 @@ const sessions = {
                 calibMode: document.getElementById('calibMode'),
                 resumeLastBtn: document.getElementById('resumeLastBtn'),
                 lastSessionLabel: document.getElementById('lastSessionLabel'),
-                previewBtn: document.getElementById('previewButton')
+                previewBtn: document.getElementById('previewButton'),
+                npsCard: document.getElementById('validationCard'),
+                npsScale: document.getElementById('npsScale'),
+                npsButtons: Array.from(document.querySelectorAll('#npsScale .nps-btn')),
+                npsComment: document.getElementById('npsComment'),
+                npsError: document.getElementById('npsError'),
+                npsThanks: document.getElementById('npsThanks'),
+                npsStatus: document.getElementById('npsStatus'),
+                npsSummary: document.getElementById('npsSummary'),
+                submitNps: document.getElementById('submitNps'),
+                snoozeNps: document.getElementById('snoozeNps'),
+                resetNps: document.getElementById('resetNps'),
+                openFeedbackFromNps: document.getElementById('openFeedbackFromNps')
             };
 
             function init() {
@@ -448,6 +509,8 @@ const sessions = {
                 updateProgramStatus();
                 checkCircadianRhythm();
                 updatePersonalizationUI();
+                updateReleaseNotesUI();
+                updateNpsUI();
 
                 window.addEventListener('resize', resizeCanvas);
                 setInterval(checkCircadianRhythm, 60000);
@@ -478,6 +541,11 @@ const sessions = {
                 if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => startEntry());
                 if (els.enterDemoBtn) els.enterDemoBtn.addEventListener('click', () => startEntry({ demo: true }));
 
+                // Release notes prompt
+                if (els.releaseAckBtn) els.releaseAckBtn.addEventListener('click', acknowledgeReleaseNotes);
+                if (els.releaseHideBtn) els.releaseHideBtn.addEventListener('click', hideReleaseNotes);
+                if (els.releaseSnoozeBtn) els.releaseSnoozeBtn.addEventListener('click', snoozeReleaseNotes);
+
                 els.mainBtn.addEventListener('click', toggleSession);
                 if (els.previewBtn) els.previewBtn.addEventListener('click', () => { togglePreview(); updateQuickActionsUI(); });
                 if (els.resumeLastBtn) els.resumeLastBtn.addEventListener('click', resumeLastSession);
@@ -496,6 +564,15 @@ const sessions = {
                 // Safety
                 document.getElementById('safetyToggle').addEventListener('click', () => els.safetyModal.style.display = 'flex');
                 document.getElementById('closeSafety').addEventListener('click', () => els.safetyModal.style.display = 'none');
+
+                // Inline NPS + feedback loop
+                if(els.npsButtons.length) {
+                    els.npsButtons.forEach(btn => btn.addEventListener('click', () => selectNpsScore(parseInt(btn.dataset.score, 10))));
+                }
+                if(els.submitNps) els.submitNps.addEventListener('click', submitNpsScore);
+                if(els.snoozeNps) els.snoozeNps.addEventListener('click', snoozeNpsPrompt);
+                if(els.resetNps) els.resetNps.addEventListener('click', resetNpsPrompt);
+                if(els.openFeedbackFromNps) els.openFeedbackFromNps.addEventListener('click', () => promptSessionFeedback({ sessionId: state.session || 'prime', startedAt: Date.now(), endedAt: Date.now(), durationSeconds: 0, source: 'inline-nps' }));
 
                 // Stats
                 if(els.statsToggle && els.statsModal) {
@@ -1402,6 +1479,100 @@ const sessions = {
                 sessionLogs.add(entry);
                 renderStats();
                 hideFeedbackModal();
+            }
+
+            function shouldShowReleaseNotes() {
+                if(!els.releaseNotesCard) return false;
+                const now = Date.now();
+                const { acknowledgedVersion, snoozedUntil } = releaseNotesPrefs.data;
+                if(acknowledgedVersion === RELEASE_NOTES_VERSION) return false;
+                if(snoozedUntil && now < snoozedUntil) return false;
+                return true;
+            }
+
+            function updateReleaseNotesUI() {
+                if(!els.releaseNotesCard) return;
+                const show = shouldShowReleaseNotes();
+                els.releaseNotesCard.classList.toggle('hidden', !show);
+            }
+
+            function acknowledgeReleaseNotes() {
+                releaseNotesPrefs.save({ acknowledgedVersion: RELEASE_NOTES_VERSION, snoozedUntil: null });
+                updateReleaseNotesUI();
+            }
+
+            function hideReleaseNotes() {
+                releaseNotesPrefs.save({ snoozedUntil: Date.now() + THREE_DAYS_MS });
+                updateReleaseNotesUI();
+            }
+
+            function snoozeReleaseNotes() {
+                releaseNotesPrefs.save({ snoozedUntil: Date.now() + THREE_DAYS_MS * 2 });
+                updateReleaseNotesUI();
+            }
+
+            function selectNpsScore(score) {
+                state.npsScore = score;
+                els.npsButtons.forEach(btn => btn.classList.toggle('nps-active', parseInt(btn.dataset.score, 10) === score));
+                if(els.npsError) els.npsError.classList.add('hidden');
+            }
+
+            function clearNpsSelection() {
+                state.npsScore = null;
+                els.npsButtons.forEach(btn => btn.classList.remove('nps-active'));
+                if(els.npsError) els.npsError.classList.add('hidden');
+            }
+
+            function shouldShowNpsPrompt() {
+                const now = Date.now();
+                const { lastNpsAt, snoozedUntil } = feedbackPulse.data;
+                if(snoozedUntil && now < snoozedUntil) return false;
+                if(!lastNpsAt) return true;
+                return (now - lastNpsAt) > THREE_DAYS_MS;
+            }
+
+            function updateNpsUI() {
+                if(!els.npsCard) return;
+                const showPrompt = shouldShowNpsPrompt();
+                const summaryText = feedbackPulse.data.lastNpsScore !== null ? `Ostatnia ocena: ${feedbackPulse.data.lastNpsScore}/10` : 'Odpowiedź zapisana';
+                if(els.npsStatus) els.npsStatus.textContent = showPrompt ? 'Otwarta' : 'Zapisano';
+
+                if(els.npsScale) els.npsScale.style.display = showPrompt ? 'grid' : 'none';
+                if(els.submitNps) els.submitNps.disabled = !showPrompt;
+                if(els.snoozeNps) els.snoozeNps.disabled = !showPrompt;
+                if(els.npsComment) {
+                    if(showPrompt) els.npsComment.value = feedbackPulse.data.lastNpsNote || '';
+                    els.npsComment.disabled = !showPrompt;
+                }
+                if(els.npsThanks) els.npsThanks.classList.toggle('hidden', showPrompt);
+                if(els.npsSummary) els.npsSummary.textContent = !showPrompt ? `${summaryText}${feedbackPulse.data.lastNpsNote ? ` · „${feedbackPulse.data.lastNpsNote}”` : ''}` : '—';
+                if(showPrompt) {
+                    clearNpsSelection();
+                } else if(feedbackPulse.data.lastNpsScore !== null) {
+                    selectNpsScore(feedbackPulse.data.lastNpsScore);
+                }
+            }
+
+            function submitNpsScore() {
+                if(typeof state.npsScore !== 'number') {
+                    if(els.npsError) els.npsError.classList.remove('hidden');
+                    return;
+                }
+                const note = (els.npsComment?.value || '').trim();
+                feedbackPulse.save({ lastNpsAt: Date.now(), lastNpsScore: state.npsScore, lastNpsNote: note, snoozedUntil: null });
+                updateNpsUI();
+            }
+
+            function snoozeNpsPrompt() {
+                feedbackPulse.save({ snoozedUntil: Date.now() + THREE_DAYS_MS });
+                updateNpsUI();
+            }
+
+            function resetNpsPrompt() {
+                feedbackPulse.save({ lastNpsAt: null, lastNpsScore: null, lastNpsNote: '', snoozedUntil: null });
+                clearNpsSelection();
+                if(els.npsComment) els.npsComment.value = '';
+                updateNpsUI();
             }
 
             function renderModes() {
