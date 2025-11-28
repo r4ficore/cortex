@@ -523,7 +523,7 @@ const sessions = {
                         // Wake up UI
                         els.appHeader.style.opacity = '1';
                         els.leftPanel.style.opacity = '1';
-                        if (els.controlPanel) els.controlPanel.style.opacity = '1';
+                        if (els.controlPanel) els.controlPanel.classList.remove('control-dock--dim');
                         els.appFooter.style.opacity = '1';
                     });
                 });
@@ -1973,7 +1973,10 @@ const sessions = {
                     els.canvas.style.opacity = 0;
                     els.msgBox.style.opacity = 1;
                     els.msgBox.style.transform = "scale(1)";
-                    if (els.controlPanel) els.controlPanel.classList.remove('glow-box-cyan');
+                    if (els.controlPanel) {
+                        els.controlPanel.classList.remove('glow-box-cyan');
+                        els.controlPanel.classList.remove('control-dock--dim');
+                    }
                     els.timer.classList.remove('glow-text-cyan');
                     els.statusText.textContent = "Standby";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-zinc-600";
@@ -1981,7 +1984,7 @@ const sessions = {
 
                     els.appHeader.style.opacity = '1';
                     els.leftPanel.style.opacity = '1';
-                    if (els.controlPanel) els.controlPanel.style.opacity = '1';
+                    if (els.controlPanel) els.controlPanel.classList.remove('control-dock--dim');
                     els.appFooter.style.opacity = '1';
 
                     disableFocusLock();
@@ -2001,7 +2004,10 @@ const sessions = {
                     els.msgBox.style.opacity = 0;
                     els.msgBox.style.transform = "scale(0.95)";
                     els.mainBtn.textContent = "Zatrzymaj";
-                    if (els.controlPanel) els.controlPanel.classList.add('glow-box-cyan');
+                    if (els.controlPanel) {
+                        els.controlPanel.classList.add('glow-box-cyan');
+                        els.controlPanel.classList.remove('control-dock--dim');
+                    }
                     els.timer.classList.add('glow-text-cyan');
                     els.statusText.textContent = "ACTIVE";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
@@ -2016,6 +2022,7 @@ const sessions = {
                 state.preview = !state.preview;
                 els.canvas.style.opacity = state.preview ? 1 : 0;
                 els.msgBox.style.opacity = state.preview ? 0 : 1;
+                state.lastInteraction = performance.now();
                 state.startTime = performance.now();
                 if(state.preview) els.realtimeHz.textContent = "PREVIEW";
                 updateQuickActionsUI();
@@ -2024,11 +2031,15 @@ const sessions = {
             function loop() {
                 const now = performance.now();
 
+                const shouldDimControls = (state.active || state.preview) && (now - state.lastInteraction > 4000);
+                if (els.controlPanel) {
+                    els.controlPanel.classList.toggle('control-dock--dim', shouldDimControls);
+                }
+
                 if (state.active && state.session === 'hypnos') {
                     if (now - state.lastInteraction > 5000) {
                         els.appHeader.style.opacity = '0.1';
                         els.leftPanel.style.opacity = '0.1';
-                        if (els.controlPanel) els.controlPanel.style.opacity = '0.1';
                         els.appFooter.style.opacity = '0';
                     }
                 }
