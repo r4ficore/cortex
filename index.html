@@ -77,7 +77,9 @@
     </head>
     <body class="min-h-screen flex flex-col selection:bg-medical-400 selection:text-black font-sans overflow-x-hidden">
 
+        <div class="premium-aurora" aria-hidden="true"></div>
         <div class="bg-grid bg-grid-pattern animate-breath-grid"></div>
+        <div class="film-grain" aria-hidden="true"></div>
 
         <!-- BACKGROUND AUDIO HELPER (For Mobile Lock Screen) -->
         <audio id="silentAudioLoop" loop style="display:none;">
@@ -111,9 +113,9 @@
                             <span class="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">System Online v2.7</span>
                         </div>
 
-                        <h1 class="text-6xl md:text-8xl font-bold tracking-tight text-white select-none">
+                        <h1 class="text-6xl md:text-8xl font-bold tracking-tight text-white select-none display-fluid">
                             <span class="block landing-glitch transition-colors duration-300">Kora Cortex</span>
-                            <span class="text-2xl md:text-3xl font-light text-zinc-500 tracking-[0.2em] mt-4 block font-mono">NEURAL ENTRAINMENT</span>
+                            <span class="text-2xl md:text-3xl font-light text-zinc-500 tracking-[0.2em] mt-4 block font-mono subhead-fluid">NEURAL ENTRAINMENT</span>
                         </h1>
 
                         <p class="text-sm md:text-base text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
@@ -151,17 +153,43 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col items-center gap-6 animate-fade-in-up" style="animation-delay: 0.5s;">
-                        <button id="enterSystemBtn" class="group relative inline-flex items-center justify-center px-12 py-5 font-mono font-bold text-black transition-all duration-300 bg-white text-sm rounded-sm uppercase tracking-[0.2em] hover:bg-medical-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] focus:outline-none">
-                            <span class="mr-2">Inicjuj System</span>
-                            <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            <span class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-black group-hover:border-white transition-colors"></span>
-                            <span class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-black group-hover:border-white transition-colors"></span>
-                        </button>
-                        <p class="text-[10px] text-zinc-600 font-mono uppercase flex items-center gap-2">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
-                            Wymagane słuchawki stereo
-                        </p>
+                    <div class="flex flex-col items-center gap-4 animate-fade-in-up" style="animation-delay: 0.5s;">
+                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
+                            <button id="enterSystemBtn" class="ui-btn ui-btn--primary ui-btn--neon ui-btn--lg group relative overflow-hidden tracking-[0.18em] w-full sm:w-auto">
+                                <span class="mr-2">Inicjuj sesję z dźwiękiem</span>
+                                <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                <span class="absolute inset-0 pointer-events-none bg-gradient-to-r from-white/10 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            </button>
+                            <button id="enterDemoBtn" class="ui-btn ui-btn--ghost ui-btn--lg w-full sm:w-auto" aria-label="Uruchom demo bez dźwięku">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10.5v-4a2.5 2.5 0 1 0-5 0v7a3.5 3.5 0 1 0 7 0v-5"/><path d="M19 10v3.5a7 7 0 1 1-14 0v-2.75"/></svg>
+                                <span>Demo (bez audio)</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-3 text-[11px] text-zinc-400">
+                            <div class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-zinc-900/70 border border-zinc-800 backdrop-blur">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                                <span class="font-mono uppercase tracking-[0.16em]">Najlepsze efekty w słuchawkach stereo</span>
+                            </div>
+                            <span class="text-zinc-600">lub zacznij od podglądu wizualizacji</span>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-3 md:gap-4 mt-4 animate-fade-in-up" style="animation-delay: 0.65s;">
+                        <div class="glass-panel rounded-xl p-5 border border-white/5 text-left">
+                            <p class="text-[10px] font-bold text-medical-400 uppercase tracking-[0.2em] mb-2">Jak to działa · 1</p>
+                            <h3 class="text-sm text-white font-semibold mb-1">Wybierz tryb</h3>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Skupienie, sen, relaks lub kreatywność. Karta pokaże spodziewany efekt i czas.</p>
+                        </div>
+                        <div class="glass-panel rounded-xl p-5 border border-white/5 text-left">
+                            <p class="text-[10px] font-bold text-medical-400 uppercase tracking-[0.2em] mb-2">Jak to działa · 2</p>
+                            <h3 class="text-sm text-white font-semibold mb-1">Szybka kalibracja</h3>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Kilka sekund na sprawdzenie kanałów L/R, balansu głośności i bezpiecznych efektów wizualnych.</p>
+                        </div>
+                        <div class="glass-panel rounded-xl p-5 border border-white/5 text-left">
+                            <p class="text-[10px] font-bold text-medical-400 uppercase tracking-[0.2em] mb-2">Jak to działa · 3</p>
+                            <h3 class="text-sm text-white font-semibold mb-1">Start i kontrola</h3>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Naciśnij „Uruchom” w panelu wizualizacji. W każdej chwili zatrzymasz sesję lub zmienisz intensywność.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -173,16 +201,65 @@
         </section>
 
         <!-- CALIBRATION OVERLAY -->
-        <div id="calibrationOverlay" class="fixed inset-0 z-[100] bg-black hidden flex-col items-center justify-center transition-opacity duration-1000">
-            <div class="w-64 space-y-4">
-                <div class="flex justify-between text-[10px] font-mono text-medical-400 uppercase tracking-widest">
-                    <span>System Check</span>
-                    <span id="calibPercent">0%</span>
+        <div id="calibrationOverlay" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm hidden flex-col items-center justify-center transition-opacity duration-1000 px-4">
+            <div class="max-w-xl w-full glass-panel rounded-2xl p-6 border border-white/10 space-y-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] font-mono text-medical-400 uppercase tracking-[0.22em] mb-1">Kalibracja</p>
+                        <h3 class="text-xl text-white font-semibold leading-tight">Synchronizacja audio + wizualizacje</h3>
+                        <p class="text-xs text-zinc-400">Sprawdzamy kanały L/R, balans głośności i bezpieczeństwo wizualne.</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="calibMode" class="text-[11px] text-zinc-400 font-medium">Pełna kalibracja</p>
+                        <p id="calibEta" class="text-[10px] text-zinc-500 font-mono">~12s</p>
+                    </div>
                 </div>
-                <div class="h-[2px] w-full bg-zinc-900 overflow-hidden">
-                    <div id="calibBar" class="h-full bg-medical-400 w-0 shadow-[0_0_10px_rgba(34,211,238,0.8)] transition-all duration-300 ease-out"></div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                        <span>Postęp</span>
+                        <span id="calibPercent">0%</span>
+                    </div>
+                    <div class="h-[3px] w-full bg-zinc-900 overflow-hidden rounded-full">
+                        <div id="calibBar" class="h-full bg-medical-400 w-0 shadow-[0_0_10px_rgba(34,211,238,0.8)] transition-all duration-300 ease-out rounded-full"></div>
+                    </div>
+                    <div class="text-[11px] font-mono text-zinc-400 h-4" id="calibText">Przygotowanie systemu...</div>
                 </div>
-                <div class="text-[10px] font-mono text-zinc-500 h-4" id="calibText">Initializing Neural Engine...</div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="calibStepList">
+                    <div class="calib-step" data-step="1">
+                        <div class="calib-step-dot"></div>
+                        <div class="calib-step-copy">
+                            <p class="text-sm text-white font-semibold">Kanały L/R</p>
+                            <p class="text-xs text-zinc-400">Potwierdzamy słyszalność obu stron.</p>
+                        </div>
+                        <span class="calib-step-status">—</span>
+                    </div>
+                    <div class="calib-step" data-step="2">
+                        <div class="calib-step-dot"></div>
+                        <div class="calib-step-copy">
+                            <p class="text-sm text-white font-semibold">Balans głośności</p>
+                            <p class="text-xs text-zinc-400">Dopasowanie poziomu i redukcja ryzyka.</p>
+                        </div>
+                        <span class="calib-step-status">—</span>
+                    </div>
+                    <div class="calib-step" data-step="3">
+                        <div class="calib-step-dot"></div>
+                        <div class="calib-step-copy">
+                            <p class="text-sm text-white font-semibold">Strojenie oscylatorów</p>
+                            <p class="text-xs text-zinc-400">Synchronizujemy fazy sygnału.</p>
+                        </div>
+                        <span class="calib-step-status">—</span>
+                    </div>
+                    <div class="calib-step" data-step="4">
+                        <div class="calib-step-dot"></div>
+                        <div class="calib-step-copy">
+                            <p class="text-sm text-white font-semibold">Bezpieczne wizualizacje</p>
+                            <p class="text-xs text-zinc-400">Redukcja migotania, przygotowanie canvasu.</p>
+                        </div>
+                        <span class="calib-step-status">—</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -202,30 +279,22 @@
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <button id="guideToggle" class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                        <button id="guideToggle" class="ui-btn ui-btn--ghost ui-btn--sm hidden sm:flex">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                             <span>Raport</span>
                         </button>
-                        <button id="programToggle" class="flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                        <button id="programToggle" class="ui-btn ui-btn--ghost ui-btn--sm flex">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9.5 5.5-9.5 5.5L2.5 8.5 12 3z"></path><path d="M2.5 15.5 12 21l9.5-5.5"></path><path d="m2.5 12 9.5 5.5 9.5-5.5"></path></svg>
                             <span>Programy</span>
                         </button>
-                        <button id="statsToggle" class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                        <button id="statsToggle" class="ui-btn ui-btn--ghost ui-btn--sm hidden sm:flex">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M7 13l3 3 4-8 5 9"></path><circle cx="7" cy="13" r="1"></circle><circle cx="14" cy="8" r="1"></circle><circle cx="19" cy="17" r="1"></circle></svg>
                             <span>Statystyki</span>
                         </button>
-                        <button id="safetyToggle" class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded px-3 py-1 hover:border-medical-400/50">
+                        <button id="safetyToggle" class="ui-btn ui-btn--ghost ui-btn--sm hidden sm:flex">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             <span>Bezpieczeństwo</span>
                         </button>
-                        <div class="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60">
-                            <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
-                            <span id="statusText" class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest w-16 text-center">Standby</span>
-                        </div>
-                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-925 border border-zinc-800/60 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-                            <span class="w-2 h-2 rounded-full bg-medical-900/70"></span>
-                            <span id="programStatus">Brak aktywnego programu</span>
-                        </div>
                         <button id="settingsToggle" class="p-2 text-zinc-400 hover:text-medical-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
@@ -237,7 +306,7 @@
                 <div class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow lg:min-h-[600px] lg:h-auto h-auto">
                     <div id="leftPanel" class="lg:col-span-3 flex flex-col gap-4 order-2 lg:order-1 h-full transition-opacity duration-1000">
 
-                        <section id="circadianWidget" class="glass-panel rounded-xl p-4 shrink-0 border-l-2 border-medical-400 flex items-center justify-between group cursor-pointer hover:bg-medical-900/20 transition-colors">
+                        <section id="circadianWidget" class="glass-panel rounded-xl p-4 shrink-0 border-l-2 border-medical-400 flex items-center justify-between group cursor-pointer hover:bg-medical-900/20 transition-colors" role="button" tabindex="0" aria-label="Sugestia rytmu dobowego">
                             <div>
                                 <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest block mb-1">Circadian Sync</span>
                                 <h3 id="circadianTitle" class="text-sm text-white font-mono">Analiza...</h3>
@@ -275,43 +344,79 @@
                     </div>
 
                     <div class="lg:col-span-9 flex flex-col gap-4 order-1 lg:order-2 h-full">
+                        <section id="personalizationCard" class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Personalizacja startu">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Polecany start</span>
+                                    <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                        <span id="personalizationSource" class="font-mono">Personalizacja aktywna</span>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-medical-400"></span>
+                                    </div>
+                                </div>
+                                <button id="editPersonalization" class="ui-btn ui-btn--ghost ui-btn--sm">Edytuj preferencje</button>
+                            </div>
+
+                            <div class="recommend-card">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <p class="recommend-meta" id="recommendedLabel">Na podstawie celów</p>
+                                        <h3 id="recommendedTitle" class="text-xl text-white font-semibold">Prime</h3>
+                                        <p id="recommendedDesc" class="text-sm text-zinc-400 leading-relaxed">Rozgrzewka neuronalna przed sesją właściwą.</p>
+                                    </div>
+                                    <div class="px-3 py-1 rounded-full bg-medical-900/40 border border-medical-500/30 text-medical-400 text-[10px] font-mono uppercase tracking-[0.2em]">Polecane</div>
+                                </div>
+                                <p id="recommendedReason" class="text-xs text-zinc-500">Cel: Skupienie · Pora: Poranek</p>
+                                <div class="recommend-actions">
+                                    <button id="applyRecommended" class="ui-btn ui-btn--primary ui-btn--md">Ustaw i uruchom</button>
+                                    <button id="previewRecommended" class="ui-btn ui-btn--ghost ui-btn--md">Pokaż parametry</button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Twoje ustawienia</p>
+                                <div class="pref-grid">
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefGoal">Cel: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefTime">Pora: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefSensitivity">Wrażliwość: —</span></span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Szybkie akcje">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="ui-section-label">Sterowanie</span>
+                                    <div class="ui-badge" aria-live="polite">
+                                        <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
+                                        <span id="statusText" class="text-[9px] font-mono uppercase tracking-widest">Standby</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                    <svg class="w-3.5 h-3.5 text-medical-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 2"/></svg>
+                                    <span id="lastSessionLabel" class="font-mono">Ostatni: —</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+                                <div class="flex flex-1 flex-col sm:flex-row flex-wrap gap-3">
+                                    <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--lg flex-1 sm:flex-none justify-center" aria-live="polite">Uruchom</button>
+                                    <button id="resumeLastBtn" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-label="Wznów ostatnią sesję">Ostatnia sesja</button>
+                                    <button id="previewButton" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-pressed="false">Podgląd wizualizacji</button>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-zinc-500 self-start xl:self-center">
+                                    <span class="px-2 py-1 rounded-full bg-black/50 border border-zinc-800 uppercase tracking-[0.18em] font-mono">Stany</span>
+                                    <span id="programStatus" class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">Brak aktywnego programu</span>
+                                </div>
+                            </div>
+                        </section>
+
                         <div id="visualizer" class="relative w-full flex-1 min-h-[300px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl group ring-1 ring-white/5 aspect-square sm:aspect-video lg:aspect-auto">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
-
-                            <div id="visualAction" class="absolute bottom-4 right-4 z-30 pointer-events-none flex justify-end">
-                                <button id="mainActionBtn" class="pointer-events-auto px-5 sm:px-6 py-2.5 rounded-full bg-zinc-100 hover:bg-white active:scale-95 text-black text-[11px] font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,255,255,0.05)] flex items-center gap-2">
-                                    Uruchom
-                                </button>
-                            </div>
 
                             <div id="message-box" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-black/40 backdrop-blur-sm transition-all duration-700">
                                 <div class="space-y-2 max-w-xl">
                                     <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
-                                </div>
-                            </div>
-
-                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-3xl">
-                                <div class="glass-panel rounded-xl border border-white/5 bg-black/70 backdrop-blur p-4 sm:p-5 shadow-lg">
-                                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 items-start">
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Czas</span>
-                                            <div id="timer" class="font-mono text-lg sm:text-xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Aktualna Faza</span>
-                                            <span id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Dudnienie</span>
-                                            <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Tło</span>
-                                            <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -343,10 +448,31 @@
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                                 </button>
                             </div>
-                            <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-zinc-900 z-20">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.8)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
                         </div>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
 
                     </div>
                 </div>
@@ -399,7 +525,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
                             <div class="relative">
                                 <input id="safeVisualsToggle" type="checkbox" class="sr-only peer">
@@ -419,6 +545,17 @@
                             <div>
                                 <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Tryb Tylko Audio</span>
                                 <span class="block text-[9px] text-zinc-500 mt-0.5">Statyczne tło bez animacji.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="reduceMotionToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Redukuj ruch</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Szanuje systemowe prefers-reduced-motion.</span>
                             </div>
                         </label>
                     </div>
@@ -731,6 +868,13 @@
                             <p class="stat-label">Najczęstsza pora</p>
                             <p id="statsTimeOfDay" class="stat-value text-sm leading-relaxed text-zinc-200">—</p>
                         </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="stat-label">Aktywność 7-dniowa (min)</p>
+                            <span class="text-[10px] text-zinc-500 font-mono">Sparkline</span>
+                        </div>
+                        <div id="statsSparkline" class="sparkline" role="img" aria-label="Wykres minut sesji z ostatnich 7 dni"></div>
                     </div>
                     <div class="glass-panel rounded-xl border border-white/5 p-4 space-y-3">
                         <div class="flex items-center justify-between">
