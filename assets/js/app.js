@@ -180,7 +180,10 @@ const sessions = {
                 safeVisuals: false,
                 audioOnly: false,
                 intensityLevel: 'medium',
-                reduceMotion: null
+                reduceMotion: null,
+                masterVolume: 0.85,
+                beatVolume: 0.95,
+                noiseVolume: 0.75
             };
 
             const userPreferences = {
@@ -343,6 +346,17 @@ const sessions = {
                 high: 'low'
             };
 
+            const volumeDefaults = {
+                master: 0.85,
+                beat: 0.95,
+                noise: 0.75
+            };
+
+            const audioBaseLevels = {
+                beat: 0.18,
+                noise: 0.12
+            };
+
             let state = {
                 active: false,
                 session: userPreferences.data.lastSessionId || 'prime',
@@ -358,6 +372,9 @@ const sessions = {
                 audioOnly: !!userPreferences.data.audioOnly,
                 intensityLevel: userPreferences.data.intensityLevel || 'medium',
                 reduceMotion: typeof userPreferences.data.reduceMotion === 'boolean' ? userPreferences.data.reduceMotion : systemMotionQuery.matches,
+                masterVolume: typeof userPreferences.data.masterVolume === 'number' ? userPreferences.data.masterVolume : volumeDefaults.master,
+                beatVolume: typeof userPreferences.data.beatVolume === 'number' ? userPreferences.data.beatVolume : volumeDefaults.beat,
+                noiseVolume: typeof userPreferences.data.noiseVolume === 'number' ? userPreferences.data.noiseVolume : volumeDefaults.noise,
                 sessionDataOverride: null,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 pendingFeedback: null,
@@ -370,9 +387,12 @@ const sessions = {
                     oscR: null,
                     gain: null,
                     noise: null,
-                    noiseGain: null
+                    noiseGain: null,
+                    masterGain: null
                 },
                 analyser: null,
+                currentBeatGain: 0,
+                currentBeatBase: 0,
                 lastInteraction: 0 // For UI dimming
             };
 
@@ -405,6 +425,13 @@ const sessions = {
                 safeVisualsToggle: document.getElementById('safeVisualsToggle'),
                 audioOnlyToggle: document.getElementById('audioOnlyToggle'),
                 reduceMotionToggle: document.getElementById('reduceMotionToggle'),
+                masterVolumeSlider: document.getElementById('masterVolume'),
+                beatVolumeSlider: document.getElementById('beatVolume'),
+                noiseVolumeSlider: document.getElementById('noiseVolume'),
+                masterVolumeValue: document.getElementById('masterVolumeValue'),
+                beatVolumeValue: document.getElementById('beatVolumeValue'),
+                noiseVolumeValue: document.getElementById('noiseVolumeValue'),
+                resetAudioSettings: document.getElementById('resetAudioSettings'),
                 intensityButtons: Array.from(document.querySelectorAll('#intensityButtons .intensity-btn')),
                 hypnosDurationCard: document.getElementById('hypnosDurationCard'),
                 hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
@@ -494,6 +521,7 @@ const sessions = {
                 setSession(state.session);
                 initCanvas();
                 updateNoiseUI();
+                updateVolumeUI();
                 els.breathToggle.checked = state.breathingPacer;
                 els.safeVisualsToggle.checked = state.safeVisuals;
                 els.audioOnlyToggle.checked = state.audioOnly;
@@ -519,8 +547,20 @@ const sessions = {
                         els.appHeader.style.opacity = '1';
                         els.leftPanel.style.opacity = '1';
                         els.appFooter.style.opacity = '1';
+                        wakeControls();
                     });
                 });
+
+                const visualizerEl = document.getElementById('visualizer');
+                if(visualizerEl) {
+                    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(evt => {
+                        visualizerEl.addEventListener(evt, wakeControls);
+                    });
+                }
+                if(els.mainBtn) {
+                    els.mainBtn.addEventListener('focus', wakeControls);
+                    els.mainBtn.addEventListener('blur', () => { if(state.active) wakeControls(); });
+                }
 
                 // Interactive Glow on Landing
                 document.addEventListener('mousemove', (e) => {
@@ -579,6 +619,11 @@ const sessions = {
                 // Noise Selection
                 els.btnPink.addEventListener('click', () => setNoiseType('pink'));
                 els.btnBrown.addEventListener('click', () => setNoiseType('brown'));
+
+                if(els.masterVolumeSlider) els.masterVolumeSlider.addEventListener('input', (e) => setMasterVolume(parseInt(e.target.value, 10)));
+                if(els.beatVolumeSlider) els.beatVolumeSlider.addEventListener('input', (e) => setBeatVolume(parseInt(e.target.value, 10)));
+                if(els.noiseVolumeSlider) els.noiseVolumeSlider.addEventListener('input', (e) => setNoiseVolume(parseInt(e.target.value, 10)));
+                if(els.resetAudioSettings) els.resetAudioSettings.addEventListener('click', resetAudioSettings);
 
                 // Breathing Pacer
                 els.breathToggle.addEventListener('change', (e) => {
@@ -772,6 +817,63 @@ const sessions = {
                 setState(els.btnPink, isPink);
                 setState(els.btnBrown, !isPink);
                 els.noiseTypeDisplay.textContent = isPink ? "Pink Noise (Soft)" : "Brown Noise (Deep)";
+            }
+
+            function clampVolume(val, min = 0.1, max = 1.2) {
+                if(typeof val !== 'number' || Number.isNaN(val)) return min;
+                return Math.min(max, Math.max(min, val));
+            }
+
+            function updateVolumeUI() {
+                if(els.masterVolumeSlider) els.masterVolumeSlider.value = Math.round(state.masterVolume * 100);
+                if(els.beatVolumeSlider) els.beatVolumeSlider.value = Math.round(state.beatVolume * 100);
+                if(els.noiseVolumeSlider) els.noiseVolumeSlider.value = Math.round(state.noiseVolume * 100);
+                if(els.masterVolumeValue) els.masterVolumeValue.textContent = `${Math.round(state.masterVolume * 100)}%`;
+                if(els.beatVolumeValue) els.beatVolumeValue.textContent = `${Math.round(state.beatVolume * 100)}%`;
+                if(els.noiseVolumeValue) els.noiseVolumeValue.textContent = `${Math.round(state.noiseVolume * 100)}%`;
+            }
+
+            function applyVolumeToAudio({ ramp = true } = {}) {
+                const time = ramp ? 0.35 : 0;
+                if(state.audio.masterGain) state.audio.masterGain.gain.rampTo(state.masterVolume, time);
+                if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, ramp ? 0.6 : 0);
+                const beatTarget = state.currentBeatBase ? state.currentBeatBase * state.beatVolume : state.audio.gain?.gain.value || 0;
+                state.currentBeatGain = beatTarget;
+                if(state.audio.gain) state.audio.gain.gain.rampTo(beatTarget, ramp ? 0.4 : 0);
+            }
+
+            function setMasterVolume(val) {
+                state.masterVolume = clampVolume(val / 100, 0.2, 1.1);
+                userPreferences.save({ masterVolume: state.masterVolume });
+                updateVolumeUI();
+                applyVolumeToAudio();
+            }
+
+            function setBeatVolume(val) {
+                state.beatVolume = clampVolume(val / 100, 0.2, 1.2);
+                userPreferences.save({ beatVolume: state.beatVolume });
+                updateVolumeUI();
+                applyVolumeToAudio();
+            }
+
+            function setNoiseVolume(val) {
+                state.noiseVolume = clampVolume(val / 100, 0.1, 1.2);
+                userPreferences.save({ noiseVolume: state.noiseVolume });
+                updateVolumeUI();
+                applyVolumeToAudio();
+            }
+
+            function resetAudioSettings() {
+                state.masterVolume = volumeDefaults.master;
+                state.beatVolume = volumeDefaults.beat;
+                state.noiseVolume = volumeDefaults.noise;
+                userPreferences.save({
+                    masterVolume: state.masterVolume,
+                    beatVolume: state.beatVolume,
+                    noiseVolume: state.noiseVolume
+                });
+                updateVolumeUI();
+                applyVolumeToAudio({ ramp: false });
             }
 
             function applyMotionPreference(reduce) {
@@ -1151,13 +1253,16 @@ const sessions = {
             }
 
             function handleProgramAfterStep() {
-                if(!state.program.active) return;
+                let programEnded = false;
+                let awaitingNext = false;
+                if(!state.program.active) return { programEnded, awaitingNext };
                 const program = getProgramById(state.program.id);
-                if(!program) { endProgram(); return; }
+                if(!program) { endProgram(); return { programEnded: true, awaitingNext }; }
                 const nextIndex = state.program.stepIndex + 1;
                 if(nextIndex >= program.steps.length) {
                     state.program.active = false;
                     state.program.awaitingNext = false;
+                    programEnded = true;
                     updateProgramStatus();
                     showProgramOverlay({
                         label: 'Program zakończony',
@@ -1173,6 +1278,7 @@ const sessions = {
                     const minutes = nextStep.durationMinutes === Infinity ? '∞' : `${nextStep.durationMinutes} min`;
                     const sessionName = sessions[nextStep.sessionId]?.name || nextStep.sessionId;
                     state.program.awaitingNext = true;
+                    awaitingNext = true;
                     state.program.stepIndex = nextIndex;
                     updateProgramStatus();
                     showProgramOverlay({
@@ -1184,6 +1290,7 @@ const sessions = {
                         showContinue: true
                     });
                 }
+                return { programEnded, awaitingNext };
             }
 
             function endProgram() {
@@ -1216,6 +1323,7 @@ const sessions = {
             }
 
             let entryInProgress = false;
+            let controlFadeTimer = null;
 
             function startEntry({ demo = false } = {}) {
                 if (!els.landingPage || !els.appInterface || entryInProgress) return;
@@ -1660,6 +1768,20 @@ const sessions = {
                 }
             }
 
+            function wakeControls() {
+                if(!els.mainBtn) return;
+                clearTimeout(controlFadeTimer);
+                els.mainBtn.classList.remove('control-hidden');
+                els.mainBtn.classList.add('control-visible');
+                els.mainBtn.setAttribute('aria-hidden', 'false');
+                if(state.active) {
+                    controlFadeTimer = setTimeout(() => {
+                        els.mainBtn.classList.add('control-hidden');
+                        els.mainBtn.setAttribute('aria-hidden', 'true');
+                    }, 2200);
+                }
+            }
+
             async function startAudio() {
                 await Tone.start();
 
@@ -1679,18 +1801,23 @@ const sessions = {
                 const startR = startPhase.audio.r || 228;
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
-                state.audio.gain = new Tone.Gain(0).toDestination();
+                state.audio.masterGain = new Tone.Gain(state.masterVolume).toDestination();
+                state.audio.gain = new Tone.Gain(0).connect(state.audio.masterGain);
                 const pL = new Tone.Panner(-1).connect(state.audio.gain);
                 const pR = new Tone.Panner(1).connect(state.audio.gain);
 
                 state.audio.oscL = new Tone.Oscillator(startL, "sine").connect(pL).start();
                 state.audio.oscR = new Tone.Oscillator(startR, "sine").connect(pR).start();
 
-                state.audio.noiseGain = new Tone.Gain(0).toDestination();
+                state.audio.noiseGain = new Tone.Gain(0).connect(state.audio.masterGain);
                 state.audio.noise = new Tone.Noise(state.noiseType).connect(state.audio.noiseGain).start();
 
-                state.audio.noiseGain.gain.rampTo(0.08, 3);
-                state.audio.gain.gain.rampTo(0.1 * (intensity.gain || 1), 1);
+                const beatBase = audioBaseLevels.beat * (intensity.gain || 1);
+                state.currentBeatBase = beatBase;
+                state.currentBeatGain = beatBase * state.beatVolume;
+
+                state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, 2);
+                state.audio.gain.gain.rampTo(state.currentBeatGain, 1);
             }
 
             function stopAudio() {
@@ -1699,6 +1826,7 @@ const sessions = {
                 if (state.audio.gain) { state.audio.gain.dispose(); state.audio.gain = null; }
                 if (state.audio.noise) { state.audio.noise.dispose(); state.audio.noise = null; }
                 if (state.audio.noiseGain) { state.audio.noiseGain.dispose(); state.audio.noiseGain = null; }
+                if (state.audio.masterGain) { state.audio.masterGain.dispose(); state.audio.masterGain = null; }
             }
 
             function updateAudio(phase, progress, t) {
@@ -1722,14 +1850,18 @@ const sessions = {
                 vol = vol * (intensity.gain || 1);
 
                 const rampFactor = 1 - (state.hypnosRampProgress * 0.9);
-                vol = Math.max(0, vol * rampFactor);
+                const beatBase = Math.max(0, vol * rampFactor);
+                state.currentBeatBase = beatBase;
+
+                const beatGain = beatBase * state.beatVolume;
+                state.currentBeatGain = beatGain;
 
                 if (a.mod === 'iso') {
                     const rate = 2;
                     const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
-                    state.audio.gain.gain.value = vol * mod;
+                    state.audio.gain.gain.value = beatGain * mod;
                 } else {
-                    state.audio.gain.gain.value = vol;
+                    state.audio.gain.gain.value = beatGain;
                 }
 
                 const deltaFactor = intensity.delta || 1;
@@ -1955,9 +2087,15 @@ const sessions = {
                     disableFocusLock();
                     state.sessionStartTs = null;
                     setSession(state.session);
-                    handleProgramAfterStep();
-                    promptSessionFeedback(feedbackMeta);
+                    const programResult = handleProgramAfterStep();
+                    const completedSession = reason === 'auto-complete';
+                    const completedProgram = programResult?.programEnded && completedSession;
+                    const awaitingNextStep = programResult?.awaitingNext;
+                    if((completedSession || completedProgram) && !awaitingNextStep) {
+                        promptSessionFeedback(feedbackMeta);
+                    }
                     updateQuickActionsUI();
+                    wakeControls();
                 } else {
                     await startAudio();
                     state.active = true;
@@ -1977,6 +2115,7 @@ const sessions = {
                     }
                     if(state.focusLock) enableFocusLock();
                     updateQuickActionsUI();
+                    wakeControls();
                 }
             }
 

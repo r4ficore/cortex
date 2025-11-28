@@ -381,6 +381,20 @@
                             </div>
                         </section>
 
+                        <div id="visualizer" class="relative w-full flex-1 min-h-[500px] sm:min-h-[560px] lg:min-h-[600px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group">
+                            <div class="scanline absolute inset-0 pointer-events-none"></div>
+                            <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
+
+                            <div class="space-y-2">
+                                <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Twoje ustawienia</p>
+                                <div class="pref-grid">
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefGoal">Cel: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefTime">Pora: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefSensitivity">Wrażliwość: —</span></span>
+                                </div>
+                            </div>
+                        </section>
+
                         <div id="visualizer" class="relative w-full flex-1 min-h-[420px] sm:min-h-[520px] lg:min-h-[560px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
@@ -391,7 +405,6 @@
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
                                 </div>
                             </div>
-                        </section>
 
                             <div id="programOverlay" class="absolute inset-0 hidden flex items-center justify-center p-4 z-30">
                                 <div class="glass-panel rounded-xl border border-medical-400/20 bg-black/70 max-w-xl w-full p-6 space-y-4">
@@ -421,13 +434,12 @@
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                                 </button>
                             </div>
-                        </div>
 
-                        <div id="controlRow" class="flex items-center gap-3 mt-3 bg-black/40 border border-white/5 rounded-xl px-4 py-3 backdrop-blur">
-                            <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--icon" aria-label="Uruchom">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            </button>
-                            <p class="text-xs text-zinc-400">Uruchom program z poziomu wizualizacji. Kontrolki wygasną po starcie, ale pojawią się przy interakcji.</p>
+                            <div class="absolute bottom-4 left-4 z-30">
+                                <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--icon ui-btn--mini control-visible" aria-label="Uruchom" aria-live="polite">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                </button>
+                            </div>
                         </div>
 
                         <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
@@ -502,6 +514,31 @@
                         <div class="grid grid-cols-2 gap-3">
                             <button id="setPinkNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all active-noise">Różowy</button>
                             <button id="setBrownNoise" class="noise-btn py-3 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:text-white transition-all">Brązowy</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                <span>Głośność ogólna</span>
+                                <span id="masterVolumeValue" class="text-[10px] text-zinc-400 font-mono">80%</span>
+                            </div>
+                            <input id="masterVolume" type="range" min="20" max="110" step="1" class="w-full accent-medical-400 bg-zinc-800/70 rounded-lg" />
+
+                            <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                <span>Dudnienie</span>
+                                <span id="beatVolumeValue" class="text-[10px] text-zinc-400 font-mono">90%</span>
+                            </div>
+                            <input id="beatVolume" type="range" min="20" max="120" step="1" class="w-full accent-medical-400 bg-zinc-800/70 rounded-lg" />
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                <span>Szum</span>
+                                <span id="noiseVolumeValue" class="text-[10px] text-zinc-400 font-mono">70%</span>
+                            </div>
+                            <input id="noiseVolume" type="range" min="10" max="120" step="1" class="w-full accent-medical-400 bg-zinc-800/70 rounded-lg" />
+
+                            <button id="resetAudioSettings" class="mt-6 ui-btn ui-btn--ghost ui-btn--sm w-full">Reset ustawień</button>
                         </div>
                     </div>
 
