@@ -362,7 +362,7 @@ const sessions = {
                 session: userPreferences.data.lastSessionId || 'prime',
                 startTime: 0,
                 sessionStartTs: null,
-                preview: false,
+                preview: true,
                 focusLock: false,
                 noiseType: userPreferences.data.preferredNoiseType || 'brown',
                 breathingPacer: !!userPreferences.data.breathEnabled,
@@ -537,6 +537,7 @@ const sessions = {
                 if(els.releaseVersionLabel) els.releaseVersionLabel.textContent = `v${RELEASE_NOTES_VERSION}`;
                 updateReleaseNotesUI();
                 updateNpsUI();
+                enableIdlePreview();
 
                 window.addEventListener('resize', resizeCanvas);
                 setInterval(checkCircadianRhythm, 60000);
@@ -1765,9 +1766,14 @@ const sessions = {
                 if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
                 const firstPhase = data.phases?.[0];
-                const startHz = firstPhase?.audio?.l && firstPhase?.audio?.r
-                    ? Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2) + ' Hz'
-                    : (data.baseHz || '0.00 Hz');
+                let startHz = '-- Hz';
+                if(firstPhase?.audio?.l && firstPhase?.audio?.r) {
+                    startHz = `${Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2)} Hz`;
+                } else if(typeof data.baseHz === 'number') {
+                    startHz = `${data.baseHz.toFixed(2)} Hz`;
+                } else if(typeof data.baseHz === 'string') {
+                    startHz = data.baseHz;
+                }
                 els.realtimeHz.textContent = startHz;
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
@@ -1783,6 +1789,15 @@ const sessions = {
                     els.mainBtn.setAttribute('aria-pressed', state.active ? 'true' : 'false');
                     els.mainBtn.setAttribute('title', state.active ? 'Zatrzymaj' : 'Uruchom');
                 }
+            }
+
+            function enableIdlePreview() {
+                if(state.active) return;
+                state.preview = true;
+                state.startTime = performance.now();
+                state.lastInteraction = performance.now();
+                if(els.canvas) els.canvas.style.opacity = 1;
+                if(els.msgBox) els.msgBox.style.opacity = 0;
             }
 
             function wakeControls() {
@@ -2099,9 +2114,7 @@ const sessions = {
                     if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
                     state.hypnosRampProgress = 0;
                     stopAudio();
-                    els.canvas.style.opacity = 0;
-                    els.msgBox.style.opacity = 1;
-                    els.msgBox.style.transform = "scale(1)";
+                    enableIdlePreview();
                     els.timer.classList.remove('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "Standby";
                     if (els.statusDot) {
@@ -2127,6 +2140,7 @@ const sessions = {
                     wakeControls();
                 } else {
                     await startAudio();
+                    state.preview = false;
                     state.active = true;
                     state.completed = false;
                     if (els.visualizer) {
