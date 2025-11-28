@@ -401,6 +401,7 @@ const sessions = {
                 timer: document.getElementById('timer'),
                 progressBar: document.getElementById('progressBar'),
                 mainBtn: document.getElementById('mainActionBtn'),
+                visualizer: document.getElementById('visualizer'),
                 modeContainer: document.getElementById('modeContainer'),
                 msgBox: document.getElementById('message-box'),
                 desc: document.getElementById('modeDesc'),
@@ -551,11 +552,12 @@ const sessions = {
                     });
                 });
 
-                const visualizerEl = document.getElementById('visualizer');
-                if(visualizerEl) {
-                    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(evt => {
-                        visualizerEl.addEventListener(evt, wakeControls);
+                if(els.visualizer) {
+                    ['mousemove', 'mousedown', 'touchstart', 'keydown', 'mouseenter', 'focusin'].forEach(evt => {
+                        els.visualizer.addEventListener(evt, wakeControls);
                     });
+                    els.visualizer.addEventListener('mouseleave', () => hideControlsAfterDelay());
+                    els.visualizer.addEventListener('focusout', () => hideControlsAfterDelay(200));
                 }
                 if(els.mainBtn) {
                     els.mainBtn.addEventListener('focus', wakeControls);
@@ -1023,8 +1025,8 @@ const sessions = {
                 setSession(sessionId);
                 const session = sessions[sessionId];
                 if(session) {
-                    els.messageTitle.textContent = `${session.name} · tryb polecany`;
-                    els.desc.textContent = session.desc || els.desc.textContent;
+                    if (els.messageTitle) els.messageTitle.textContent = `${session.name} · tryb polecany`;
+                    if (els.desc) els.desc.textContent = session.desc || els.desc?.textContent;
                 }
             }
 
@@ -1209,16 +1211,17 @@ const sessions = {
             }
 
             function hideProgramOverlay() {
-                els.programOverlay.classList.add('hidden');
+                if (els.programOverlay) els.programOverlay.classList.add('hidden');
             }
 
             function showProgramOverlay(config) {
+                if (!els.programOverlay || !els.programContinueBtn) return;
                 const { label, title, body, stepText, stepMeta, showContinue } = config;
-                els.programOverlayLabel.textContent = label;
-                els.programOverlayTitle.textContent = title;
-                els.programOverlayBody.textContent = body;
-                els.programOverlayStep.textContent = stepText;
-                els.programOverlayStepMeta.textContent = stepMeta;
+                if (els.programOverlayLabel) els.programOverlayLabel.textContent = label;
+                if (els.programOverlayTitle) els.programOverlayTitle.textContent = title;
+                if (els.programOverlayBody) els.programOverlayBody.textContent = body;
+                if (els.programOverlayStep) els.programOverlayStep.textContent = stepText;
+                if (els.programOverlayStepMeta) els.programOverlayStepMeta.textContent = stepMeta;
                 els.programContinueBtn.classList.toggle('hidden', !showContinue);
                 els.programOverlay.classList.remove('hidden');
             }
@@ -1748,8 +1751,8 @@ const sessions = {
                         icon.classList.remove('text-medical-400');
                     }
                 });
-                els.messageTitle.textContent = data.name;
-                els.desc.textContent = data.desc;
+                if (els.messageTitle) els.messageTitle.textContent = data.name;
+                if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
                 els.realtimeHz.textContent = "0.00 Hz";
                 els.phaseName.textContent = "Gotowy";
@@ -1769,17 +1772,22 @@ const sessions = {
             }
 
             function wakeControls() {
-                if(!els.mainBtn) return;
+                if(!els.visualizer) return;
                 clearTimeout(controlFadeTimer);
-                els.mainBtn.classList.remove('control-hidden');
-                els.mainBtn.classList.add('control-visible');
-                els.mainBtn.setAttribute('aria-hidden', 'false');
+                els.visualizer.classList.add('show-controls');
                 if(state.active) {
                     controlFadeTimer = setTimeout(() => {
-                        els.mainBtn.classList.add('control-hidden');
-                        els.mainBtn.setAttribute('aria-hidden', 'true');
+                        els.visualizer?.classList.remove('show-controls');
                     }, 2200);
                 }
+            }
+
+            function hideControlsAfterDelay(delay = 0) {
+                if(!els.visualizer || !state.active) return;
+                clearTimeout(controlFadeTimer);
+                controlFadeTimer = setTimeout(() => {
+                    els.visualizer?.classList.remove('show-controls');
+                }, delay);
             }
 
             async function startAudio() {
@@ -2067,12 +2075,19 @@ const sessions = {
                     const elapsed = Math.max(1, Math.round((endTs - (state.sessionStartTs || endTs)) / 1000));
                     const feedbackMeta = { sessionId: state.session, startedAt: state.sessionStartTs || endTs, endedAt: endTs, durationSeconds: elapsed };
                     state.active = false;
+                    if (els.visualizer) {
+                        els.visualizer.classList.remove('is-playing');
+                        els.visualizer.classList.add('show-controls');
+                    }
+                    clearTimeout(controlFadeTimer);
                     if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
                     state.hypnosRampProgress = 0;
                     stopAudio();
                     els.canvas.style.opacity = 0;
-                    els.msgBox.style.opacity = 1;
-                    els.msgBox.style.transform = "scale(1)";
+                    if (els.msgBox) {
+                        els.msgBox.style.opacity = 1;
+                        els.msgBox.style.transform = "scale(1)";
+                    }
                     els.timer.classList.remove('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "Standby";
                     if (els.statusDot) {
@@ -2099,13 +2114,19 @@ const sessions = {
                 } else {
                     await startAudio();
                     state.active = true;
+                    if (els.visualizer) {
+                        els.visualizer.classList.add('is-playing');
+                        els.visualizer.classList.add('show-controls');
+                    }
                     state.sessionStartTs = Date.now();
                     state.startTime = performance.now();
                     state.hypnosRampProgress = 0;
                     state.lastInteraction = performance.now();
                     els.canvas.style.opacity = 1;
-                    els.msgBox.style.opacity = 0;
-                    els.msgBox.style.transform = "scale(0.95)";
+                    if (els.msgBox) {
+                        els.msgBox.style.opacity = 0;
+                        els.msgBox.style.transform = "scale(0.95)";
+                    }
                     els.mainBtn.setAttribute('title', 'Zatrzymaj');
                     els.timer.classList.add('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "ACTIVE";
@@ -2123,7 +2144,7 @@ const sessions = {
                 if (state.active) return;
                 state.preview = !state.preview;
                 els.canvas.style.opacity = state.preview ? 1 : 0;
-                els.msgBox.style.opacity = state.preview ? 0 : 1;
+                if (els.msgBox) els.msgBox.style.opacity = state.preview ? 0 : 1;
                 state.lastInteraction = performance.now();
                 state.startTime = performance.now();
                 if(state.preview) els.realtimeHz.textContent = "PREVIEW";

@@ -381,43 +381,13 @@
                     </div>
 
                     <div class="app-grid__visual">
-                        <div id="visualizer" class="relative w-full flex-1 visualizer-panel rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group">
+                        <div id="visualizer" class="relative w-full flex-1 visualizer-panel rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group show-controls">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
 
-                            <div id="message-box" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-black/40 backdrop-blur-sm transition-all duration-700">
-                                <div class="space-y-2 max-w-xl">
-                                    <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
-                                    <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
-                                </div>
-                            </div>
-
-                            <div id="programOverlay" class="absolute inset-0 hidden flex items-center justify-center p-4 z-30">
-                                <div class="glass-panel rounded-xl border border-medical-400/20 bg-black/70 max-w-xl w-full p-6 space-y-4">
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-medical-900/60 border border-medical-500/50 flex items-center justify-center text-medical-400">
-                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14" stroke-linecap="round" /></svg>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <p id="programOverlayLabel" class="text-[11px] font-mono uppercase tracking-[0.2em] text-medical-400">Program</p>
-                                            <h3 id="programOverlayTitle" class="text-lg font-semibold text-white">Następny etap programu</h3>
-                                            <p id="programOverlayBody" class="text-sm text-zinc-300 leading-relaxed"></p>
-                                        </div>
-                                    </div>
-                                    <div class="bg-zinc-900/40 border border-zinc-800 rounded-lg p-3">
-                                        <div id="programOverlayStep" class="text-sm text-white font-medium"></div>
-                                        <p id="programOverlayStepMeta" class="text-xs text-zinc-400"></p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 justify-end">
-                                        <button id="programEndBtn" class="px-3 py-2 text-xs uppercase tracking-wider border border-zinc-700 rounded text-zinc-300 hover:text-white hover:border-red-400/70 transition-colors">Zakończ program</button>
-                                        <button id="programContinueBtn" class="px-3 py-2 text-xs uppercase tracking-wider bg-medical-400 text-black rounded shadow-[0_0_14px_rgba(34,211,238,0.35)] hover:shadow-[0_0_18px_rgba(34,211,238,0.55)] transition-all">Start kolejnego etapu</button>
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="visual-control-bar">
                                 <div class="flex items-center gap-2">
-                                    <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--md control-visible" aria-label="Uruchom" aria-live="polite">
+                                    <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--md" aria-label="Uruchom" aria-live="polite">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                         <span>Start</span>
                                     </button>
