@@ -160,17 +160,12 @@
                                 <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 <span class="absolute inset-0 pointer-events-none bg-gradient-to-r from-white/10 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                             </button>
-                            <button id="enterDemoBtn" class="ui-btn ui-btn--ghost ui-btn--lg w-full sm:w-auto" aria-label="Uruchom demo bez dźwięku">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10.5v-4a2.5 2.5 0 1 0-5 0v7a3.5 3.5 0 1 0 7 0v-5"/><path d="M19 10v3.5a7 7 0 1 1-14 0v-2.75"/></svg>
-                                <span>Demo (bez audio)</span>
-                            </button>
                         </div>
                         <div class="flex flex-col sm:flex-row items-center gap-3 text-[11px] text-zinc-400">
                             <div class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-zinc-900/70 border border-zinc-800 backdrop-blur">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
                                 <span class="font-mono uppercase tracking-[0.16em]">Najlepsze efekty w słuchawkach stereo</span>
                             </div>
-                            <span class="text-zinc-600">lub zacznij od podglądu wizualizacji</span>
                         </div>
                     </div>
 
@@ -295,6 +290,10 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             <span>Bezpieczeństwo</span>
                         </button>
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-[0.18em]" id="statusBadge" aria-live="polite">
+                            <span id="statusDot" class="w-2 h-2 rounded-full bg-zinc-600 shadow-none"></span>
+                            <span id="statusText" class="text-zinc-300">Standby</span>
+                        </div>
                         <button id="settingsToggle" class="p-2 text-zinc-400 hover:text-medical-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
@@ -382,38 +381,9 @@
                             </div>
                         </section>
 
-                        <div id="visualizer" class="relative w-full flex-1 min-h-[300px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl group ring-1 ring-white/5 aspect-square sm:aspect-video lg:aspect-auto">
+                        <div id="visualizer" class="relative w-full flex-1 min-h-[420px] sm:min-h-[520px] lg:min-h-[560px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
-
-                            <div id="controlPanel" class="control-dock" aria-label="Sterowanie sesją">
-                                <div class="flex flex-col gap-3">
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3">
-                                            <span class="ui-section-label">Sterowanie</span>
-                                            <div class="ui-badge" aria-live="polite">
-                                                <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
-                                                <span id="statusText" class="text-[9px] font-mono uppercase tracking-widest">Standby</span>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                                            <svg class="w-3.5 h-3.5 text-medical-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 2"/></svg>
-                                            <span id="lastSessionLabel" class="font-mono">Ostatni: —</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-                                        <div class="flex flex-1 flex-col sm:flex-row flex-wrap gap-3">
-                                            <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--lg flex-1 sm:flex-none justify-center" aria-live="polite">Uruchom</button>
-                                            <button id="resumeLastBtn" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-label="Wznów ostatnią sesję">Ostatnia sesja</button>
-                                            <button id="previewButton" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-pressed="false">Podgląd wizualizacji</button>
-                                        </div>
-                                        <div class="flex items-center gap-2 text-[11px] text-zinc-500 lg:self-center">
-                                            <span class="px-2 py-1 rounded-full bg-white/5 border border-white/10 uppercase tracking-[0.18em] font-mono">Stany</span>
-                                            <span id="programStatus" class="text-[10px] uppercase tracking-[0.16em] text-zinc-300">Brak aktywnego programu</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div id="message-box" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-black/40 backdrop-blur-sm transition-all duration-700">
                                 <div class="space-y-2 max-w-xl">
@@ -421,6 +391,11 @@
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
                                 </div>
                             </div>
+                        </section>
+
+                        <div id="visualizer" class="relative w-full flex-1 min-h-[300px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl group ring-1 ring-white/5 aspect-square sm:aspect-video lg:aspect-auto">
+                            <div class="scanline absolute inset-0 pointer-events-none"></div>
+                            <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
 
                             <div id="programOverlay" class="absolute inset-0 hidden flex items-center justify-center p-4 z-30">
                                 <div class="glass-panel rounded-xl border border-medical-400/20 bg-black/70 max-w-xl w-full p-6 space-y-4">
@@ -450,6 +425,13 @@
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                                 </button>
                             </div>
+                        </div>
+
+                        <div id="controlRow" class="flex items-center gap-3 mt-3 bg-black/40 border border-white/5 rounded-xl px-4 py-3 backdrop-blur">
+                            <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--icon" aria-label="Uruchom">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </button>
+                            <p class="text-xs text-zinc-400">Uruchom program z poziomu wizualizacji. Kontrolki wygasną po starcie, ale pojawią się przy interakcji.</p>
                         </div>
 
                         <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">

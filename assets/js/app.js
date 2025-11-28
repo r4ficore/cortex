@@ -395,7 +395,6 @@ const sessions = {
                 safetyModal: document.getElementById('safetyModal'),
                 programToggle: document.getElementById('programToggle'),
                 closeProgram: document.getElementById('closeProgram'),
-                controlPanel: document.getElementById('controlPanel'),
                 noiseTypeDisplay: document.getElementById('noiseTypeDisplay'),
                 btnPink: document.getElementById('setPinkNoise'),
                 btnBrown: document.getElementById('setBrownNoise'),
@@ -410,7 +409,6 @@ const sessions = {
                 hypnosDurationCard: document.getElementById('hypnosDurationCard'),
                 hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
                 programList: document.getElementById('programList'),
-                programStatus: document.getElementById('programStatus'),
                 programStatusModal: document.getElementById('programStatusModal'),
                 programOverlay: document.getElementById('programOverlay'),
                 programOverlayTitle: document.getElementById('programOverlayTitle'),
@@ -474,9 +472,6 @@ const sessions = {
                 calibStepList: document.getElementById('calibStepList'),
                 calibEta: document.getElementById('calibEta'),
                 calibMode: document.getElementById('calibMode'),
-                resumeLastBtn: document.getElementById('resumeLastBtn'),
-                lastSessionLabel: document.getElementById('lastSessionLabel'),
-                previewBtn: document.getElementById('previewButton'),
                 npsCard: document.getElementById('validationCard'),
                 npsScale: document.getElementById('npsScale'),
                 npsButtons: Array.from(document.querySelectorAll('#npsScale .nps-btn')),
@@ -523,7 +518,6 @@ const sessions = {
                         // Wake up UI
                         els.appHeader.style.opacity = '1';
                         els.leftPanel.style.opacity = '1';
-                        if (els.controlPanel) els.controlPanel.classList.remove('control-dock--dim');
                         els.appFooter.style.opacity = '1';
                     });
                 });
@@ -540,7 +534,6 @@ const sessions = {
 
                 // Landing Page Logic
                 if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => startEntry());
-                if (els.enterDemoBtn) els.enterDemoBtn.addEventListener('click', () => startEntry({ demo: true }));
 
                 // Release notes prompt
                 if (els.releaseAckBtn) els.releaseAckBtn.addEventListener('click', acknowledgeReleaseNotes);
@@ -548,8 +541,6 @@ const sessions = {
                 if (els.releaseSnoozeBtn) els.releaseSnoozeBtn.addEventListener('click', snoozeReleaseNotes);
 
                 els.mainBtn.addEventListener('click', toggleSession);
-                if (els.previewBtn) els.previewBtn.addEventListener('click', () => { togglePreview(); updateQuickActionsUI(); });
-                if (els.resumeLastBtn) els.resumeLastBtn.addEventListener('click', resumeLastSession);
                 document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
                 const focusLockToggle = document.getElementById('focusLockToggle');
                 if (focusLockToggle) focusLockToggle.addEventListener('change', (e) => state.focusLock = e.target.checked);
@@ -1101,20 +1092,17 @@ const sessions = {
 
             function updateProgramStatus() {
                 if(!state.program.active) {
-                    els.programStatus.textContent = 'Brak aktywnego programu';
                     if(els.programStatusModal) els.programStatusModal.textContent = 'Brak aktywnego programu';
                     return;
                 }
                 const program = getProgramById(state.program.id);
                 if(!program) {
-                    els.programStatus.textContent = 'Program nieznany';
                     if(els.programStatusModal) els.programStatusModal.textContent = 'Program nieznany';
                     return;
                 }
                 const stepNo = Math.min(state.program.stepIndex + 1, program.steps.length);
                 const suffix = state.program.awaitingNext ? ' · pauza' : '';
                 const label = `${program.name}: krok ${stepNo}/${program.steps.length}${suffix}`;
-                els.programStatus.textContent = label;
                 if(els.programStatusModal) els.programStatusModal.textContent = label;
             }
 
@@ -1284,7 +1272,7 @@ const sessions = {
             }
 
             function toggleLandingCtas(disabled) {
-                [els.enterSystemBtn, els.enterDemoBtn].forEach(btn => {
+                [els.enterSystemBtn].forEach(btn => {
                     if(!btn) return;
                     btn.disabled = disabled;
                     btn.classList.toggle('is-loading', disabled);
@@ -1662,33 +1650,13 @@ const sessions = {
                 updateQuickActionsUI();
             }
 
-            function resumeLastSession() {
-                if (state.active) return;
-                const lastId = userPreferences.data.lastSessionId || 'prime';
-                if(!sessions[lastId]) return;
-                setSession(lastId, { skipSave: true });
-                toggleSession('resume-last');
-            }
-
             function updateQuickActionsUI() {
-                const lastId = userPreferences.data.lastSessionId || 'prime';
-                const lastSession = sessions[lastId];
-                if(els.lastSessionLabel) {
-                    els.lastSessionLabel.textContent = lastSession ? `Ostatni: ${lastSession.name}` : 'Ostatni: —';
-                }
-                if(els.resumeLastBtn) {
-                    els.resumeLastBtn.disabled = state.active;
-                    els.resumeLastBtn.classList.toggle('opacity-60', state.active);
-                    els.resumeLastBtn.classList.toggle('cursor-not-allowed', state.active);
-                    els.resumeLastBtn.setAttribute('aria-disabled', state.active ? 'true' : 'false');
-                }
-                if(els.previewBtn) {
-                    els.previewBtn.setAttribute('aria-pressed', state.preview ? 'true' : 'false');
-                    els.previewBtn.textContent = state.preview ? 'Zakończ podgląd' : 'Podgląd wizualizacji';
-                }
                 if(els.mainBtn) {
-                    els.mainBtn.textContent = state.active ? 'Zatrzymaj' : 'Uruchom';
+                    els.mainBtn.innerHTML = state.active
+                        ? '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg><span class="sr-only">Zatrzymaj</span>'
+                        : '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span class="sr-only">Uruchom</span>';
                     els.mainBtn.setAttribute('aria-pressed', state.active ? 'true' : 'false');
+                    els.mainBtn.setAttribute('title', state.active ? 'Zatrzymaj' : 'Uruchom');
                 }
             }
 
@@ -1973,18 +1941,15 @@ const sessions = {
                     els.canvas.style.opacity = 0;
                     els.msgBox.style.opacity = 1;
                     els.msgBox.style.transform = "scale(1)";
-                    if (els.controlPanel) {
-                        els.controlPanel.classList.remove('glow-box-cyan');
-                        els.controlPanel.classList.remove('control-dock--dim');
-                    }
                     els.timer.classList.remove('glow-text-cyan');
-                    els.statusText.textContent = "Standby";
-                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-zinc-600";
-                    els.statusDot.style.boxShadow = 'none';
+                    if (els.statusText) els.statusText.textContent = "Standby";
+                    if (els.statusDot) {
+                        els.statusDot.className = "w-2 h-2 rounded-full bg-zinc-600 shadow-none";
+                        els.statusDot.style.boxShadow = 'none';
+                    }
 
                     els.appHeader.style.opacity = '1';
                     els.leftPanel.style.opacity = '1';
-                    if (els.controlPanel) els.controlPanel.classList.remove('control-dock--dim');
                     els.appFooter.style.opacity = '1';
 
                     disableFocusLock();
@@ -2003,15 +1968,13 @@ const sessions = {
                     els.canvas.style.opacity = 1;
                     els.msgBox.style.opacity = 0;
                     els.msgBox.style.transform = "scale(0.95)";
-                    els.mainBtn.textContent = "Zatrzymaj";
-                    if (els.controlPanel) {
-                        els.controlPanel.classList.add('glow-box-cyan');
-                        els.controlPanel.classList.remove('control-dock--dim');
-                    }
+                    els.mainBtn.setAttribute('title', 'Zatrzymaj');
                     els.timer.classList.add('glow-text-cyan');
-                    els.statusText.textContent = "ACTIVE";
-                    els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
-                    els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
+                    if (els.statusText) els.statusText.textContent = "ACTIVE";
+                    if (els.statusDot) {
+                        els.statusDot.className = "w-2 h-2 rounded-full bg-medical-400 animate-pulse";
+                        els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
+                    }
                     if(state.focusLock) enableFocusLock();
                     updateQuickActionsUI();
                 }
