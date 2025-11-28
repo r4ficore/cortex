@@ -293,14 +293,6 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             <span>Bezpieczeństwo</span>
                         </button>
-                        <div class="ui-badge hidden sm:flex">
-                            <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
-                            <span id="statusText" class="text-[9px] font-mono uppercase tracking-widest w-16 text-center">Standby</span>
-                        </div>
-                        <div class="ui-badge hidden sm:flex">
-                            <span class="w-2 h-2 rounded-full bg-medical-900/70"></span>
-                            <span id="programStatus">Brak aktywnego programu</span>
-                        </div>
                         <button id="settingsToggle" class="p-2 text-zinc-400 hover:text-medical-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
@@ -350,43 +342,41 @@
                     </div>
 
                     <div class="lg:col-span-9 flex flex-col gap-4 order-1 lg:order-2 h-full">
+                        <section class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Szybkie akcje">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="ui-section-label">Sterowanie</span>
+                                    <div class="ui-badge" aria-live="polite">
+                                        <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors duration-500"></div>
+                                        <span id="statusText" class="text-[9px] font-mono uppercase tracking-widest">Standby</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                    <svg class="w-3.5 h-3.5 text-medical-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 2"/></svg>
+                                    <span id="lastSessionLabel" class="font-mono">Ostatni: —</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+                                <div class="flex flex-1 flex-col sm:flex-row gap-3">
+                                    <button id="mainActionBtn" class="ui-btn ui-btn--primary ui-btn--lg flex-1 sm:flex-none justify-center" aria-live="polite">Uruchom</button>
+                                    <button id="resumeLastBtn" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-label="Wznów ostatnią sesję">Ostatnia sesja</button>
+                                    <button id="previewButton" class="ui-btn ui-btn--ghost ui-btn--lg flex-1 sm:flex-none" aria-pressed="false">Podgląd wizualizacji</button>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                    <span class="px-2 py-1 rounded-full bg-black/50 border border-zinc-800 uppercase tracking-[0.18em] font-mono">Stany</span>
+                                    <span id="programStatus" class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">Brak aktywnego programu</span>
+                                </div>
+                            </div>
+                        </section>
+
                         <div id="visualizer" class="relative w-full flex-1 min-h-[300px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl group ring-1 ring-white/5 aspect-square sm:aspect-video lg:aspect-auto">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
-
-                            <div id="visualAction" class="absolute bottom-4 right-4 z-30 pointer-events-none flex justify-end">
-                                <button id="mainActionBtn" class="pointer-events-auto px-5 sm:px-6 py-2.5 rounded-full bg-zinc-100 hover:bg-white active:scale-95 text-black text-[11px] font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,255,255,0.05)] flex items-center gap-2">
-                                    Uruchom
-                                </button>
-                            </div>
 
                             <div id="message-box" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-black/40 backdrop-blur-sm transition-all duration-700">
                                 <div class="space-y-2 max-w-xl">
                                     <h1 id="messageTitle" class="text-2xl font-light text-white tracking-tight">Kora <span class="font-bold text-medical-400">Cortex</span></h1>
                                     <p id="modeDesc" class="text-sm text-zinc-300 leading-relaxed font-light">System gotowy. Wymagane słuchawki stereo.</p>
-                                </div>
-                            </div>
-
-                            <div id="sessionInfoOverlay" class="absolute left-3 right-3 sm:left-5 sm:right-auto bottom-4 z-20 max-w-3xl">
-                                <div class="glass-panel rounded-xl border border-white/5 bg-black/70 backdrop-blur p-4 sm:p-5 shadow-lg">
-                                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 items-start">
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Czas</span>
-                                            <div id="timer" class="font-mono text-lg sm:text-xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Aktualna Faza</span>
-                                            <span id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Dudnienie</span>
-                                            <span id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block mb-0.5">Tło</span>
-                                            <span id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -418,10 +408,31 @@
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                                 </button>
                             </div>
-                            <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-zinc-900 z-20">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.8)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
                         </div>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
 
                     </div>
                 </div>

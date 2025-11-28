@@ -407,7 +407,10 @@ const sessions = {
                 appHeader: document.getElementById('appHeader'),
                 calibStepList: document.getElementById('calibStepList'),
                 calibEta: document.getElementById('calibEta'),
-                calibMode: document.getElementById('calibMode')
+                calibMode: document.getElementById('calibMode'),
+                resumeLastBtn: document.getElementById('resumeLastBtn'),
+                lastSessionLabel: document.getElementById('lastSessionLabel'),
+                previewBtn: document.getElementById('previewButton')
             };
 
             function init() {
@@ -457,8 +460,8 @@ const sessions = {
                 if (els.enterDemoBtn) els.enterDemoBtn.addEventListener('click', () => startEntry({ demo: true }));
 
                 els.mainBtn.addEventListener('click', toggleSession);
-                const previewBtn = document.getElementById('previewButton');
-                if (previewBtn) previewBtn.addEventListener('click', togglePreview);
+                if (els.previewBtn) els.previewBtn.addEventListener('click', () => { togglePreview(); updateQuickActionsUI(); });
+                if (els.resumeLastBtn) els.resumeLastBtn.addEventListener('click', resumeLastSession);
                 document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
                 const focusLockToggle = document.getElementById('focusLockToggle');
                 if (focusLockToggle) focusLockToggle.addEventListener('change', (e) => state.focusLock = e.target.checked);
@@ -1245,6 +1248,37 @@ const sessions = {
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
+                updateQuickActionsUI();
+            }
+
+            function resumeLastSession() {
+                if (state.active) return;
+                const lastId = userPreferences.data.lastSessionId || 'prime';
+                if(!sessions[lastId]) return;
+                setSession(lastId, { skipSave: true });
+                toggleSession('resume-last');
+            }
+
+            function updateQuickActionsUI() {
+                const lastId = userPreferences.data.lastSessionId || 'prime';
+                const lastSession = sessions[lastId];
+                if(els.lastSessionLabel) {
+                    els.lastSessionLabel.textContent = lastSession ? `Ostatni: ${lastSession.name}` : 'Ostatni: —';
+                }
+                if(els.resumeLastBtn) {
+                    els.resumeLastBtn.disabled = state.active;
+                    els.resumeLastBtn.classList.toggle('opacity-60', state.active);
+                    els.resumeLastBtn.classList.toggle('cursor-not-allowed', state.active);
+                    els.resumeLastBtn.setAttribute('aria-disabled', state.active ? 'true' : 'false');
+                }
+                if(els.previewBtn) {
+                    els.previewBtn.setAttribute('aria-pressed', state.preview ? 'true' : 'false');
+                    els.previewBtn.textContent = state.preview ? 'Zakończ podgląd' : 'Podgląd wizualizacji';
+                }
+                if(els.mainBtn) {
+                    els.mainBtn.textContent = state.active ? 'Zatrzymaj' : 'Uruchom';
+                    els.mainBtn.setAttribute('aria-pressed', state.active ? 'true' : 'false');
+                }
             }
 
             async function startAudio() {
@@ -1513,9 +1547,6 @@ const sessions = {
                     els.canvas.style.opacity = 0;
                     els.msgBox.style.opacity = 1;
                     els.msgBox.style.transform = "scale(1)";
-                    els.mainBtn.textContent = "URUCHOM";
-                    els.mainBtn.classList.remove('bg-medical-400', 'text-black', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
-                    els.mainBtn.classList.add('bg-zinc-100', 'text-black', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
                     if (els.controlPanel) els.controlPanel.classList.remove('glow-box-cyan');
                     els.timer.classList.remove('glow-text-cyan');
                     els.statusText.textContent = "Standby";
@@ -1532,6 +1563,7 @@ const sessions = {
                     setSession(state.session);
                     handleProgramAfterStep();
                     promptSessionFeedback(feedbackMeta);
+                    updateQuickActionsUI();
                 } else {
                     await startAudio();
                     state.active = true;
@@ -1542,15 +1574,14 @@ const sessions = {
                     els.canvas.style.opacity = 1;
                     els.msgBox.style.opacity = 0;
                     els.msgBox.style.transform = "scale(0.95)";
-                    els.mainBtn.textContent = "ZATRZYMAJ";
-                    els.mainBtn.classList.remove('bg-zinc-100', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
-                    els.mainBtn.classList.add('bg-medical-400', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
+                    els.mainBtn.textContent = "Zatrzymaj";
                     if (els.controlPanel) els.controlPanel.classList.add('glow-box-cyan');
                     els.timer.classList.add('glow-text-cyan');
                     els.statusText.textContent = "ACTIVE";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
                     els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
                     if(state.focusLock) enableFocusLock();
+                    updateQuickActionsUI();
                 }
             }
 
@@ -1561,6 +1592,7 @@ const sessions = {
                 els.msgBox.style.opacity = state.preview ? 0 : 1;
                 state.startTime = performance.now();
                 if(state.preview) els.realtimeHz.textContent = "PREVIEW";
+                updateQuickActionsUI();
             }
 
             function loop() {

@@ -128,6 +128,12 @@ body {
     box-shadow: var(--focus-ring);
 }
 
+.ui-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .ui-badge {
     display: inline-flex;
     align-items: center;
