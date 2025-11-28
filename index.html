@@ -174,29 +174,6 @@
                         </div>
                     </div>
 
-                    <div id="releaseNotesCard" class="release-card animate-fade-in-up hidden" data-release-version="2.7.1" style="animation-delay: 0.7s;">
-                        <div class="release-card__header">
-                            <div class="release-pill">Release Notes · <span id="releaseVersionLabel">v2.7.1</span></div>
-                            <button id="releaseSnoozeBtn" class="release-link">Przypomnij później</button>
-                        </div>
-                        <div class="release-card__body">
-                            <div>
-                                <p class="release-title">Co nowego w tej wersji?</p>
-                                <p class="release-sub">Szybkie podsumowanie zmian od ostatniej wizyty.</p>
-                            </div>
-                            <ul class="release-list">
-                                <li>Warstwa premium: aurorowe gradienty, film grain i neonowe CTA z fluidalną typografią.</li>
-                                <li>Dostępność: tryb „Reduce motion”, statyczny wizualizer i lepsze fokusy klawiatury.</li>
-                                <li>Statystyki: 7-dniowy sparkline, rekomendacje startu oraz odświeżone chipy preferencji.</li>
-                            </ul>
-                        </div>
-                        <div class="release-card__actions">
-                            <button id="releaseAckBtn" class="ui-btn ui-btn--primary ui-btn--sm">OK, mam to</button>
-                            <button id="releaseHideBtn" class="ui-btn ui-btn--ghost ui-btn--sm">Ukryj</button>
-                        </div>
-                        <p class="release-footnote">Podsumowanie wersji zapisujemy lokalnie, by nie wyświetlać go po akceptacji.</p>
-                    </div>
-
                     <div class="grid md:grid-cols-3 gap-3 md:gap-4 mt-4 animate-fade-in-up" style="animation-delay: 0.65s;">
                         <div class="glass-panel rounded-xl p-5 border border-white/5 text-left">
                             <p class="text-[10px] font-bold text-medical-400 uppercase tracking-[0.2em] mb-2">Jak to działa · 1</p>
@@ -432,70 +409,6 @@
                             </div>
                         </section>
 
-                        <section id="validationCard" class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Walidacja i opinie">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Pętla feedbacku</span>
-                                    <p class="text-sm text-zinc-400 leading-relaxed">Twoja ocena pomaga priorytetyzować kolejne iteracje.</p>
-                                </div>
-                                <div class="flex items-center gap-2 text-[10px] text-zinc-500">
-                                    <span class="px-2 py-1 rounded-full bg-black/50 border border-zinc-800 uppercase tracking-[0.18em] font-mono">NPS</span>
-                                    <span id="npsStatus" class="font-mono">Otwarta</span>
-                                </div>
-                            </div>
-
-                            <div id="npsScale" class="nps-scale" role="group" aria-label="Oceń prawdopodobieństwo polecenia Kora (0-10)">
-                                <button class="nps-btn" data-score="0">0</button>
-                                <button class="nps-btn" data-score="1">1</button>
-                                <button class="nps-btn" data-score="2">2</button>
-                                <button class="nps-btn" data-score="3">3</button>
-                                <button class="nps-btn" data-score="4">4</button>
-                                <button class="nps-btn" data-score="5">5</button>
-                                <button class="nps-btn" data-score="6">6</button>
-                                <button class="nps-btn" data-score="7">7</button>
-                                <button class="nps-btn" data-score="8">8</button>
-                                <button class="nps-btn" data-score="9">9</button>
-                                <button class="nps-btn" data-score="10">10</button>
-                            </div>
-                            <div id="npsError" class="text-[12px] text-red-400 hidden">Wybierz ocenę 0–10, aby zapisać.</div>
-
-                            <div class="space-y-2">
-                                <label for="npsComment" class="text-[11px] uppercase text-zinc-500 tracking-[0.2em] font-bold">Krótki komentarz (opcjonalnie)</label>
-                                <textarea id="npsComment" rows="3" class="w-full bg-black/50 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-medical-400/40 custom-scroll" placeholder="Co poprawić lub utrzymać? (mobil/desktop, onboarding, wizualizacje)"></textarea>
-                            </div>
-
-                            <div class="flex flex-wrap gap-3">
-                                <button id="submitNps" class="ui-btn ui-btn--primary ui-btn--sm">Wyślij</button>
-                                <button id="snoozeNps" class="ui-btn ui-btn--ghost ui-btn--sm">Za 3 dni</button>
-                                <button id="openFeedbackFromNps" class="ui-btn ui-btn--ghost ui-btn--sm">Feedback po sesji</button>
-                                <button id="resetNps" class="ui-btn ui-btn--ghost ui-btn--sm">Wyczyść</button>
-                            </div>
-
-                            <div id="npsThanks" class="nps-thanks hidden">
-                                <div>
-                                    <p class="text-sm text-white font-semibold">Dziękujemy za ocenę!</p>
-                                    <p class="text-xs text-zinc-400">Twoja odpowiedź została zapisana lokalnie. Wracamy z ankietą co kilka dni.</p>
-                                </div>
-                                <div class="flex items-center gap-2 text-[10px] text-zinc-500">
-                                    <span class="w-2 h-2 rounded-full bg-medical-400"></span>
-                                    <span id="npsSummary">—</span>
-                                </div>
-                            </div>
-
-                            <div class="validation-checklist">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Mini checklista walidacyjna</p>
-                                    <span class="text-[10px] text-zinc-600 font-mono">mobile + desktop</span>
-                                </div>
-                                <ul class="validation-list">
-                                    <li>Wejście: CTA + sekcja „Jak to działa” z czytelnymi stanami przycisków.</li>
-                                    <li>Kalibracja: progres + statusy kroków, tryb demo i wymóg słuchawek.</li>
-                                    <li>Dashboard: start/stop, podgląd wizualizacji i rekomendacja startowa działają na klawiaturze.</li>
-                                    <li>Statystyki: sparkline z opisem ARIA + uśrednione oceny protokołów.</li>
-                                </ul>
-                            </div>
-                        </section>
-
                         <div id="visualizer" class="relative w-full flex-1 min-h-[300px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl group ring-1 ring-white/5 aspect-square sm:aspect-video lg:aspect-auto">
                             <div class="scanline absolute inset-0 pointer-events-none"></div>
                             <canvas id="visualCanvas" class="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-1000"></canvas>
@@ -574,7 +487,7 @@
 
         <!-- SETTINGS MODAL -->
         <div id="settingsModal" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur hidden items-center justify-center p-4">
-            <div class="bg-zinc-900 border border-zinc-700 rounded-lg w-full max-w-sm p-6 shadow-2xl relative">
+            <div class="bg-zinc-900 border border-zinc-700 rounded-lg w-full max-w-3xl p-6 shadow-2xl relative">
                 <button id="closeSettings" class="absolute top-4 right-4 text-zinc-500 hover:text-white">✕</button>
                 <h3 class="text-sm font-bold text-white uppercase tracking-widest mb-6 border-b border-zinc-800 pb-2">Konfiguracja</h3>
 
@@ -657,21 +570,37 @@
                         <p class="text-[10px] text-zinc-500 mt-2">Skaluje głośność kanałów L/R i separację częstotliwości.</p>
                     </div>
 
-                    <div>
-                        <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-3">Kalibracja Audio</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button id="testLeftButton" class="py-2 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">Lewy</button>
-                            <button id="testRightButton" class="py-2 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">Prawy</button>
-                        </div>
-                    </div>
-
-                    <div class="border border-zinc-800 rounded-lg p-3 bg-zinc-900/50">
-                        <div class="flex items-start justify-between gap-3">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="space-y-4">
                             <div>
-                                <p class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-1">Onboarding</p>
-                                <p class="text-[11px] text-zinc-400">Ustaw domyślny cel, wrażliwość i sugerowany protokół.</p>
+                                <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-3">Kalibracja Audio</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button id="testLeftButton" class="py-2 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">Lewy</button>
+                                    <button id="testRightButton" class="py-2 border border-zinc-700 bg-zinc-800 rounded text-xs text-zinc-300 hover:bg-zinc-700 transition-colors">Prawy</button>
+                                </div>
                             </div>
-                            <button id="restartOnboarding" class="text-[11px] uppercase tracking-wider px-3 py-2 bg-medical-400 text-black rounded shadow-[0_0_12px_rgba(34,211,238,0.35)] hover:shadow-[0_0_16px_rgba(34,211,238,0.5)] transition-all">Uruchom</button>
+
+                            <div class="border border-zinc-800 rounded-lg p-3 bg-zinc-900/50">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-1">Onboarding</p>
+                                        <p class="text-[11px] text-zinc-400 leading-relaxed">Ustaw domyślny cel, wrażliwość i sugerowany protokół.</p>
+                                    </div>
+                                    <button id="restartOnboarding" class="text-[11px] uppercase tracking-wider px-3 py-2 bg-medical-400 text-black rounded shadow-[0_0_12px_rgba(34,211,238,0.35)] hover:shadow-[0_0_16px_rgba(34,211,238,0.5)] transition-all">Uruchom</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest block mb-3">Profil sesji</label>
+                                <p class="text-[11px] text-zinc-400 leading-relaxed">Dostosuj intensywność i tryb wizualizacji zanim rozpoczniesz dowolny protokół. Ustawienia zapisujemy lokalnie.</p>
+                            </div>
+
+                            <div class="border border-zinc-800 rounded-lg p-3 bg-zinc-900/50">
+                                <p class="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-2">Wskazówki</p>
+                                <p class="text-[11px] text-zinc-400 leading-relaxed">Zmiany wprowadzone tutaj od razu synchronizują się z rekomendacjami i trybem demo, więc możesz szybko sprawdzić różnice bez opuszczania sesji.</p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1065,7 +1065,7 @@ const sessions = {
                                 </div>
                                 <p class="text-xs text-zinc-300 leading-relaxed">${program.description}</p>
                             </div>
-                            <button data-program="${program.id}" class="program-start px-3 py-2 text-[10px] uppercase tracking-wider bg-medical-400 text-black rounded hover:shadow-[0_0_14px_rgba(34,211,238,0.4)] transition-all">Start programu</button>
+                            <button data-program="${program.id}" class="program-start px-3 py-2 text-[10px] uppercase tracking-wider bg-medical-400 text-black rounded hover:shadow-[0_0_14px_rgba(34,211,238,0.4)] transition-all">Start</button>
                         </div>
                         <ul class="mt-1 text-[11px] text-zinc-300 leading-relaxed space-y-1 list-disc list-inside">${stepsText}</ul>
                     `;
