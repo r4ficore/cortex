@@ -179,7 +179,8 @@ const sessions = {
                 sensitivity: null,
                 safeVisuals: false,
                 audioOnly: false,
-                intensityLevel: 'medium'
+                intensityLevel: 'medium',
+                reduceMotion: null
             };
 
             const userPreferences = {
@@ -228,6 +229,8 @@ const sessions = {
 
             userPreferences.load();
             sessionLogs.load();
+
+            const systemMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
             // Hypnos duration presets (values in minutes, converted to seconds later)
             const HYPNOS_TEST_ACCELERATION = 1; // Set to 60 to make "1s = 1min" for quick manual tests
@@ -311,6 +314,7 @@ const sessions = {
                 safeVisuals: !!userPreferences.data.safeVisuals,
                 audioOnly: !!userPreferences.data.audioOnly,
                 intensityLevel: userPreferences.data.intensityLevel || 'medium',
+                reduceMotion: typeof userPreferences.data.reduceMotion === 'boolean' ? userPreferences.data.reduceMotion : systemMotionQuery.matches,
                 sessionDataOverride: null,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 pendingFeedback: null,
@@ -357,6 +361,7 @@ const sessions = {
                 breathPatternHelper: document.getElementById('breathPatternHelper'),
                 safeVisualsToggle: document.getElementById('safeVisualsToggle'),
                 audioOnlyToggle: document.getElementById('audioOnlyToggle'),
+                reduceMotionToggle: document.getElementById('reduceMotionToggle'),
                 intensityButtons: Array.from(document.querySelectorAll('#intensityButtons .intensity-btn')),
                 hypnosDurationCard: document.getElementById('hypnosDurationCard'),
                 hypnosDurationButtons: Array.from(document.querySelectorAll('#hypnosDurationButtons button')),
@@ -435,6 +440,7 @@ const sessions = {
                 els.breathToggle.checked = state.breathingPacer;
                 els.safeVisualsToggle.checked = state.safeVisuals;
                 els.audioOnlyToggle.checked = state.audioOnly;
+                applyMotionPreference(state.reduceMotion);
                 updateIntensityUI();
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
@@ -562,6 +568,28 @@ const sessions = {
                     const recommended = els.circadianWidget.dataset.recommended;
                     if(recommended) setSession(recommended);
                 });
+                els.circadianWidget.addEventListener('keydown', (e) => {
+                    if(e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const recommended = els.circadianWidget.dataset.recommended;
+                        if(recommended) setSession(recommended);
+                    }
+                });
+
+                if(els.reduceMotionToggle) {
+                    els.reduceMotionToggle.checked = state.reduceMotion;
+                    els.reduceMotionToggle.addEventListener('change', (e) => {
+                        const value = e.target.checked;
+                        userPreferences.save({ reduceMotion: value });
+                        applyMotionPreference(value);
+                    });
+                }
+
+                systemMotionQuery.addEventListener('change', (event) => {
+                    if(typeof userPreferences.data.reduceMotion !== 'boolean') {
+                        applyMotionPreference(event.matches);
+                    }
+                });
 
                 requestAnimationFrame(loop);
             }
@@ -674,6 +702,13 @@ const sessions = {
                 setState(els.btnPink, isPink);
                 setState(els.btnBrown, !isPink);
                 els.noiseTypeDisplay.textContent = isPink ? "Pink Noise (Soft)" : "Brown Noise (Deep)";
+            }
+
+            function applyMotionPreference(reduce) {
+                const shouldReduce = !!reduce;
+                state.reduceMotion = shouldReduce;
+                document.documentElement.classList.toggle('reduce-motion', shouldReduce);
+                if(els.reduceMotionToggle) els.reduceMotionToggle.checked = shouldReduce;
             }
 
             // UI + storage: safe visuals and audio-only toggles with intensity selection
@@ -1514,6 +1549,21 @@ const sessions = {
                 const w = els.canvas.width;
                 const h = els.canvas.height;
                 const v = phase.visual || { f: 1, mod: 'soft', bri: 0.5 };
+
+                if(state.reduceMotion) {
+                    ctx.fillStyle = '#050505';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.strokeStyle = 'rgba(34, 211, 238, 0.35)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, Math.min(w, h) * 0.28, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(228, 228, 231, 0.8)';
+                    ctx.font = '12px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Ograniczone animacje · tryb bez ruchu', w / 2, h / 2 + 6);
+                    return;
+                }
 
                 if(state.audioOnly) {
                     const grad = ctx.createLinearGradient(0, 0, 0, h);

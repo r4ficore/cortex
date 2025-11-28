@@ -10,9 +10,9 @@
     /* Base surfaces */
     --bg-dark: #050505;
     --surface-900: #0b0c10;
-    --surface-800: rgba(17, 17, 23, 0.85);
-    --surface-700: rgba(39, 39, 42, 0.8);
-    --panel-bg: rgba(15, 15, 18, 0.85);
+    --surface-800: rgba(22, 22, 27, 0.9);
+    --surface-700: rgba(39, 39, 42, 0.82);
+    --panel-bg: rgba(15, 15, 18, 0.9);
 
     /* Accent & semantic palette */
     --accent-300: #22d3ee;
@@ -23,9 +23,9 @@
     --warning-500: #f97316;
     --danger-500: #f43f5e;
     --muted-100: #f4f4f5;
-    --muted-300: #d4d4d8;
-    --muted-500: #a1a1aa;
-    --muted-700: #52525b;
+    --muted-300: #e4e4e7;
+    --muted-500: #c5c6d0;
+    --muted-700: #5f616a;
     --muted-900: #18181b;
 
     /* Typography scale */
@@ -159,6 +159,66 @@ body {
     letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--muted-500);
+}
+
+.mode-btn:focus-visible,
+.glass-panel:focus-visible,
+.ui-card:focus-visible {
+    outline: 2px solid var(--accent-400);
+    outline-offset: 3px;
+    box-shadow: var(--focus-ring);
+}
+
+.custom-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 #0b0b0f;
+}
+
+.custom-scroll::-webkit-scrollbar { width: 10px; }
+.custom-scroll::-webkit-scrollbar-track { background: #0b0b0f; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 6px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+.reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+}
+
+.reduce-motion .bg-grid,
+.reduce-motion .landing-glitch,
+.reduce-motion .scanline,
+.reduce-motion .animate-ping,
+.reduce-motion .animate-breath-grid,
+.reduce-motion .animate-fade-in-up {
+    animation: none !important;
+    text-shadow: none !important;
+}
+
+.reduce-motion .glass-panel,
+.reduce-motion .ui-card,
+.reduce-motion .ui-btn {
+    transition-duration: 140ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body *,
+    .reduce-motion * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 120ms !important;
+        scroll-behavior: auto !important;
+    }
+    body .bg-grid,
+    body .landing-glitch,
+    body .scanline,
+    body .animate-ping,
+    body .animate-breath-grid,
+    body .animate-fade-in-up {
+        animation: none !important;
+        text-shadow: none !important;
+    }
 }
 
 .doc-scroll::-webkit-scrollbar { width: 8px; }

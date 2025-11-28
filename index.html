@@ -304,7 +304,7 @@
                 <div class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow lg:min-h-[600px] lg:h-auto h-auto">
                     <div id="leftPanel" class="lg:col-span-3 flex flex-col gap-4 order-2 lg:order-1 h-full transition-opacity duration-1000">
 
-                        <section id="circadianWidget" class="glass-panel rounded-xl p-4 shrink-0 border-l-2 border-medical-400 flex items-center justify-between group cursor-pointer hover:bg-medical-900/20 transition-colors">
+                        <section id="circadianWidget" class="glass-panel rounded-xl p-4 shrink-0 border-l-2 border-medical-400 flex items-center justify-between group cursor-pointer hover:bg-medical-900/20 transition-colors" role="button" tabindex="0" aria-label="Sugestia rytmu dobowego">
                             <div>
                                 <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest block mb-1">Circadian Sync</span>
                                 <h3 id="circadianTitle" class="text-sm text-white font-mono">Analiza...</h3>
@@ -523,7 +523,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
                             <div class="relative">
                                 <input id="safeVisualsToggle" type="checkbox" class="sr-only peer">
@@ -543,6 +543,17 @@
                             <div>
                                 <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Tryb Tylko Audio</span>
                                 <span class="block text-[9px] text-zinc-500 mt-0.5">Statyczne tło bez animacji.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 border border-zinc-800 bg-zinc-900/50 rounded-lg hover:border-zinc-700 transition-colors">
+                            <div class="relative">
+                                <input id="reduceMotionToggle" type="checkbox" class="sr-only peer">
+                                <div class="w-8 h-4 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-medical-400/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-medical-900 peer-checked:after:bg-medical-400"></div>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-zinc-200 group-hover:text-white transition-colors">Redukuj ruch</span>
+                                <span class="block text-[9px] text-zinc-500 mt-0.5">Szanuje systemowe prefers-reduced-motion.</span>
                             </div>
                         </label>
                     </div>
