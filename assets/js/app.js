@@ -386,6 +386,17 @@ const sessions = {
                 closeFeedback: document.getElementById('closeFeedback'),
                 skipFeedback: document.getElementById('skipFeedback'),
                 feedbackError: document.getElementById('feedbackError'),
+                personalizationSource: document.getElementById('personalizationSource'),
+                recommendedLabel: document.getElementById('recommendedLabel'),
+                recommendedTitle: document.getElementById('recommendedTitle'),
+                recommendedDesc: document.getElementById('recommendedDesc'),
+                recommendedReason: document.getElementById('recommendedReason'),
+                applyRecommended: document.getElementById('applyRecommended'),
+                previewRecommended: document.getElementById('previewRecommended'),
+                editPersonalization: document.getElementById('editPersonalization'),
+                prefGoal: document.getElementById('prefGoal'),
+                prefTime: document.getElementById('prefTime'),
+                prefSensitivity: document.getElementById('prefSensitivity'),
                 onboardingModal: document.getElementById('onboardingModal'),
                 onboardingButtons: Array.from(document.querySelectorAll('.onboarding-option')),
                 onboardingError: document.getElementById('onboardingError'),
@@ -396,6 +407,7 @@ const sessions = {
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
+                enterDemoBtn: document.getElementById('enterDemoBtn'),
                 appInterface: document.getElementById('appInterface'),
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
@@ -403,7 +415,13 @@ const sessions = {
                 circadianTitle: document.getElementById('circadianTitle'),
                 leftPanel: document.getElementById('leftPanel'),
                 appFooter: document.getElementById('appFooter'),
-                appHeader: document.getElementById('appHeader')
+                appHeader: document.getElementById('appHeader'),
+                calibStepList: document.getElementById('calibStepList'),
+                calibEta: document.getElementById('calibEta'),
+                calibMode: document.getElementById('calibMode'),
+                resumeLastBtn: document.getElementById('resumeLastBtn'),
+                lastSessionLabel: document.getElementById('lastSessionLabel'),
+                previewBtn: document.getElementById('previewButton')
             };
 
             function init() {
@@ -422,6 +440,7 @@ const sessions = {
                 updateHypnosDurationUI();
                 updateProgramStatus();
                 checkCircadianRhythm();
+                updatePersonalizationUI();
 
                 window.addEventListener('resize', resizeCanvas);
                 setInterval(checkCircadianRhythm, 60000);
@@ -449,33 +468,12 @@ const sessions = {
                 });
 
                 // Landing Page Logic
-                els.enterSystemBtn.addEventListener('click', () => {
-                    const content = els.landingPage.querySelector('.max-w-5xl');
-                    content.style.opacity = '0';
-                    content.style.transition = 'opacity 0.5s';
-
-                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
-
-                    setTimeout(() => {
-                        els.landingPage.style.display = 'none';
-                        const calib = document.getElementById('calibrationOverlay');
-                        calib.style.display = 'flex';
-                        simulateCalibration(() => {
-                            els.appInterface.style.display = 'block';
-                            requestAnimationFrame(() => {
-                                els.appInterface.style.opacity = '1';
-                                resizeCanvas();
-                                setTimeout(() => {
-                                    if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
-                                }, 300);
-                            });
-                        });
-                    }, 500);
-                });
+                if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => startEntry());
+                if (els.enterDemoBtn) els.enterDemoBtn.addEventListener('click', () => startEntry({ demo: true }));
 
                 els.mainBtn.addEventListener('click', toggleSession);
-                const previewBtn = document.getElementById('previewButton');
-                if (previewBtn) previewBtn.addEventListener('click', togglePreview);
+                if (els.previewBtn) els.previewBtn.addEventListener('click', () => { togglePreview(); updateQuickActionsUI(); });
+                if (els.resumeLastBtn) els.resumeLastBtn.addEventListener('click', resumeLastSession);
                 document.getElementById('fullscreenButton').addEventListener('click', toggleFullscreen);
                 const focusLockToggle = document.getElementById('focusLockToggle');
                 if (focusLockToggle) focusLockToggle.addEventListener('change', (e) => state.focusLock = e.target.checked);
@@ -555,6 +553,10 @@ const sessions = {
                 els.skipOnboarding.addEventListener('click', () => completeOnboarding(true));
                 els.restartOnboarding.addEventListener('click', () => openOnboardingModal(true));
 
+                if(els.applyRecommended) els.applyRecommended.addEventListener('click', handleApplyRecommended);
+                if(els.previewRecommended) els.previewRecommended.addEventListener('click', handlePreviewRecommended);
+                if(els.editPersonalization) els.editPersonalization.addEventListener('click', () => openOnboardingModal(true));
+
                 // Circadian Widget Click
                 els.circadianWidget.addEventListener('click', () => {
                     const recommended = els.circadianWidget.dataset.recommended;
@@ -578,6 +580,77 @@ const sessions = {
 
                 els.circadianTitle.textContent = recText;
                 els.circadianWidget.dataset.recommended = recId;
+                updatePersonalizationUI();
+            }
+
+            const onboardingLabels = {
+                goal: {
+                    focus: { label: 'Skupienie', note: 'Beta/Gamma' },
+                    sleep: { label: 'Sen', note: 'Delta/Theta' },
+                    calm: { label: 'Redukcja napięcia', note: 'Alpha 10Hz' },
+                    creative: { label: 'Kreatywność', note: 'Theta 6Hz' },
+                    social: { label: 'Social', note: 'Alpha 10Hz' }
+                },
+                typicalTime: {
+                    morning: { label: 'Poranek', note: 'Kortyzol start' },
+                    work: { label: 'W pracy', note: 'Beta stabilne' },
+                    evening: { label: 'Wieczór', note: 'Wind-down' },
+                    'pre-sleep': { label: 'Przed snem', note: 'Delta' }
+                },
+                sensitivity: {
+                    low: { label: 'Niska', note: 'Pełne wizualizacje' },
+                    medium: { label: 'Średnia', note: 'Domyślne ustawienia' },
+                    high: { label: 'Wysoka', note: 'Safe visuals + łagodne audio' }
+                }
+            };
+
+            function describePreference(group, key) {
+                return onboardingLabels[group]?.[key]?.label || '—';
+            }
+
+            function buildRecommendationContext() {
+                const hasFullPrefs = !!(userPreferences.data.onboardingCompleted && userPreferences.data.goal && userPreferences.data.typicalTime && userPreferences.data.sensitivity);
+                if(hasFullPrefs) {
+                    const sessionId = resolveOnboardingSession();
+                    const goalLabel = describePreference('goal', userPreferences.data.goal);
+                    const timeLabel = describePreference('typicalTime', userPreferences.data.typicalTime);
+                    const sensitivityLabel = describePreference('sensitivity', userPreferences.data.sensitivity);
+                    return {
+                        sessionId,
+                        label: 'Na podstawie celów',
+                        reason: `Cel: ${goalLabel} · Pora: ${timeLabel} · Wrażliwość: ${sensitivityLabel}`,
+                        source: 'personalization'
+                    };
+                }
+
+                const circadian = els.circadianWidget?.dataset.recommended || 'prime';
+                return {
+                    sessionId: circadian,
+                    label: 'Sugestia czasowa',
+                    reason: 'Dopasowane do rytmu dobowego (kliknij, aby uruchomić)',
+                    source: 'circadian'
+                };
+            }
+
+            function updatePreferenceBadges() {
+                if(!els.prefGoal || !els.prefTime || !els.prefSensitivity) return;
+                els.prefGoal.textContent = `Cel: ${describePreference('goal', userPreferences.data.goal)}`;
+                els.prefTime.textContent = `Pora: ${describePreference('typicalTime', userPreferences.data.typicalTime)}`;
+                els.prefSensitivity.textContent = `Wrażliwość: ${describePreference('sensitivity', userPreferences.data.sensitivity)}`;
+            }
+
+            function updatePersonalizationUI() {
+                if(!els.recommendedTitle) return;
+                const context = buildRecommendationContext();
+                const session = sessions[context.sessionId] || sessions[state.session];
+                els.recommendedLabel.textContent = context.label;
+                els.recommendedTitle.textContent = session?.name || 'Prime';
+                els.recommendedDesc.textContent = session?.desc || 'Personalizowany start na bazie Twoich wyborów.';
+                els.recommendedReason.textContent = context.reason;
+                els.personalizationSource.textContent = context.source === 'personalization' ? 'Personalizacja aktywna' : 'Auto · rytm dobowy';
+                if(els.applyRecommended) els.applyRecommended.dataset.sessionId = context.sessionId;
+                if(els.previewRecommended) els.previewRecommended.dataset.sessionId = context.sessionId;
+                updatePreferenceBadges();
             }
 
             function setNoiseType(type) {
@@ -699,6 +772,7 @@ const sessions = {
                 if(markOnly) {
                     userPreferences.save({ onboardingCompleted: true });
                     closeOnboardingModal();
+                    updatePersonalizationUI();
                     return;
                 }
                 const { goal, typicalTime, sensitivity } = onboardingState;
@@ -725,7 +799,26 @@ const sessions = {
                     safeVisuals
                 });
 
+                updatePersonalizationUI();
                 closeOnboardingModal();
+            }
+
+            function handleApplyRecommended() {
+                const sessionId = els.applyRecommended?.dataset.sessionId;
+                if(!sessionId) return;
+                setSession(sessionId);
+                if(!state.active) toggleSession('recommended-start');
+            }
+
+            function handlePreviewRecommended() {
+                const sessionId = els.previewRecommended?.dataset.sessionId;
+                if(!sessionId) return;
+                setSession(sessionId);
+                const session = sessions[sessionId];
+                if(session) {
+                    els.messageTitle.textContent = `${session.name} · tryb polecany`;
+                    els.desc.textContent = session.desc || els.desc.textContent;
+                }
             }
 
             function openOnboardingModal(fromSettings = false) {
@@ -1020,20 +1113,92 @@ const sessions = {
                 });
             }
 
-            function simulateCalibration(callback) {
+            function startEntry({ demo = false } = {}) {
+                const content = els.landingPage.querySelector('.max-w-5xl');
+                content.style.opacity = '0';
+                content.style.transition = 'opacity 0.5s';
+
+                if(!demo) {
+                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
+                } else {
+                    state.audioOnly = true;
+                    userPreferences.save({ audioOnly: true });
+                    if (els.audioOnlyToggle) els.audioOnlyToggle.checked = true;
+                }
+
+                setCalibrationContext(demo);
+
+                setTimeout(() => {
+                    els.landingPage.style.display = 'none';
+                    const calib = document.getElementById('calibrationOverlay');
+                    calib.style.display = 'flex';
+                    simulateCalibration(() => {
+                        els.appInterface.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            els.appInterface.style.opacity = '1';
+                            resizeCanvas();
+                            setTimeout(() => {
+                                if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
+                            }, 300);
+                        });
+                    }, { demo });
+                }, 500);
+            }
+
+            function simulateCalibration(callback, { demo = false } = {}) {
                 const overlay = document.getElementById('calibrationOverlay');
                 const bar = document.getElementById('calibBar');
                 const text = document.getElementById('calibText');
                 const perc = document.getElementById('calibPercent');
                 let p = 0;
-                const steps = [{p: 20, t: "Loading Audio Drivers..."}, {p: 45, t: "Calibrating Oscillators..."}, {p: 70, t: "Initializing Noise Engine..."}, {p: 100, t: "System Ready."}];
+                const steps = demo ? [
+                    { p: 20, t: "Sprawdzanie wizualizacji (demo)", s: 1 },
+                    { p: 50, t: "Redukcja migotania", s: 2 },
+                    { p: 80, t: "Strojenie płynności animacji", s: 3 },
+                    { p: 100, t: "Tryb demo gotowy." , s: 4}
+                ] : [
+                    { p: 18, t: "Sprawdzanie kanałów L/R", s: 1 },
+                    { p: 44, t: "Kalibracja balansu głośności", s: 2 },
+                    { p: 72, t: "Strojenie oscylatorów", s: 3 },
+                    { p: 100, t: "Audio + wizualizacje gotowe." , s: 4}
+                ];
                 let stepIdx = 0;
+                const targetDuration = demo ? 6500 : 12000;
                 const interval = setInterval(() => {
-                    p += Math.random() * 5;
-                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx++; }
-                    if(p >= 100) { p = 100; clearInterval(interval); setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 1000); }, 500); }
+                    const increment = 100 / (targetDuration / 120);
+                    p += increment + Math.random() * 1.5;
+                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx = Math.min(stepIdx + 1, steps.length - 1); updateCalibrationSteps(steps[stepIdx].s); }
+                    if(p >= 100) {
+                        p = 100;
+                        clearInterval(interval);
+                        updateCalibrationSteps(steps[steps.length - 1].s + 1, true);
+                        setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 800); }, 500);
+                    }
                     bar.style.width = p + "%"; perc.textContent = Math.floor(p) + "%";
-                }, 30);
+                }, 120);
+            }
+
+            function setCalibrationContext(demo) {
+                if (!els.calibEta || !els.calibMode) return;
+                els.calibMode.textContent = demo ? 'Podgląd wizualizacji' : 'Pełna kalibracja audio';
+                els.calibEta.textContent = demo ? '~6s' : '~12s';
+                updateCalibrationSteps(1);
+            }
+
+            function updateCalibrationSteps(activeStep, forceComplete = false) {
+                if(!els.calibStepList) return;
+                const steps = Array.from(els.calibStepList.querySelectorAll('[data-step]'));
+                steps.forEach(node => {
+                    const step = Number(node.dataset.step);
+                    const status = node.querySelector('.calib-step-status');
+                    const isComplete = forceComplete ? step <= activeStep : step < activeStep;
+                    const isActive = !forceComplete && step === activeStep;
+                    node.classList.toggle('is-active', isActive);
+                    node.classList.toggle('is-complete', isComplete);
+                    if(status) {
+                        status.textContent = isComplete ? 'OK' : isActive ? '...': '—';
+                    }
+                });
             }
 
             function openStatsModal() {
@@ -1190,6 +1355,37 @@ const sessions = {
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
+                updateQuickActionsUI();
+            }
+
+            function resumeLastSession() {
+                if (state.active) return;
+                const lastId = userPreferences.data.lastSessionId || 'prime';
+                if(!sessions[lastId]) return;
+                setSession(lastId, { skipSave: true });
+                toggleSession('resume-last');
+            }
+
+            function updateQuickActionsUI() {
+                const lastId = userPreferences.data.lastSessionId || 'prime';
+                const lastSession = sessions[lastId];
+                if(els.lastSessionLabel) {
+                    els.lastSessionLabel.textContent = lastSession ? `Ostatni: ${lastSession.name}` : 'Ostatni: —';
+                }
+                if(els.resumeLastBtn) {
+                    els.resumeLastBtn.disabled = state.active;
+                    els.resumeLastBtn.classList.toggle('opacity-60', state.active);
+                    els.resumeLastBtn.classList.toggle('cursor-not-allowed', state.active);
+                    els.resumeLastBtn.setAttribute('aria-disabled', state.active ? 'true' : 'false');
+                }
+                if(els.previewBtn) {
+                    els.previewBtn.setAttribute('aria-pressed', state.preview ? 'true' : 'false');
+                    els.previewBtn.textContent = state.preview ? 'Zakończ podgląd' : 'Podgląd wizualizacji';
+                }
+                if(els.mainBtn) {
+                    els.mainBtn.textContent = state.active ? 'Zatrzymaj' : 'Uruchom';
+                    els.mainBtn.setAttribute('aria-pressed', state.active ? 'true' : 'false');
+                }
             }
 
             async function startAudio() {
@@ -1458,9 +1654,6 @@ const sessions = {
                     els.canvas.style.opacity = 0;
                     els.msgBox.style.opacity = 1;
                     els.msgBox.style.transform = "scale(1)";
-                    els.mainBtn.textContent = "URUCHOM";
-                    els.mainBtn.classList.remove('bg-medical-400', 'text-black', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
-                    els.mainBtn.classList.add('bg-zinc-100', 'text-black', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
                     if (els.controlPanel) els.controlPanel.classList.remove('glow-box-cyan');
                     els.timer.classList.remove('glow-text-cyan');
                     els.statusText.textContent = "Standby";
@@ -1477,6 +1670,7 @@ const sessions = {
                     setSession(state.session);
                     handleProgramAfterStep();
                     promptSessionFeedback(feedbackMeta);
+                    updateQuickActionsUI();
                 } else {
                     await startAudio();
                     state.active = true;
@@ -1487,15 +1681,14 @@ const sessions = {
                     els.canvas.style.opacity = 1;
                     els.msgBox.style.opacity = 0;
                     els.msgBox.style.transform = "scale(0.95)";
-                    els.mainBtn.textContent = "ZATRZYMAJ";
-                    els.mainBtn.classList.remove('bg-zinc-100', 'shadow-[0_0_20px_rgba(255,255,255,0.05)]');
-                    els.mainBtn.classList.add('bg-medical-400', 'shadow-[0_0_20px_rgba(34,211,238,0.4)]');
+                    els.mainBtn.textContent = "Zatrzymaj";
                     if (els.controlPanel) els.controlPanel.classList.add('glow-box-cyan');
                     els.timer.classList.add('glow-text-cyan');
                     els.statusText.textContent = "ACTIVE";
                     els.statusDot.className = "w-1.5 h-1.5 rounded-full bg-medical-400 animate-pulse";
                     els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
                     if(state.focusLock) enableFocusLock();
+                    updateQuickActionsUI();
                 }
             }
 
@@ -1506,6 +1699,7 @@ const sessions = {
                 els.msgBox.style.opacity = state.preview ? 0 : 1;
                 state.startTime = performance.now();
                 if(state.preview) els.realtimeHz.textContent = "PREVIEW";
+                updateQuickActionsUI();
             }
 
             function loop() {
