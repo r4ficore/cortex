@@ -2091,8 +2091,8 @@ const sessions = {
                     els.timer.classList.remove('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "Standby";
                     if (els.statusDot) {
-                        els.statusDot.className = "w-2 h-2 rounded-full bg-zinc-600 shadow-none";
-                        els.statusDot.style.boxShadow = 'none';
+                        els.statusDot.classList.remove('status-badge__dot--active', 'animate-pulse');
+                        els.statusDot.classList.add('status-badge__dot--idle');
                     }
 
                     els.appHeader.style.opacity = '1';
@@ -2131,8 +2131,8 @@ const sessions = {
                     els.timer.classList.add('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = "ACTIVE";
                     if (els.statusDot) {
-                        els.statusDot.className = "w-2 h-2 rounded-full bg-medical-400 animate-pulse";
-                        els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
+                        els.statusDot.classList.remove('status-badge__dot--idle');
+                        els.statusDot.classList.add('status-badge__dot--active', 'animate-pulse');
                     }
                     if(state.focusLock) enableFocusLock();
                     updateQuickActionsUI();
