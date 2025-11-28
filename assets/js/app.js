@@ -376,6 +376,7 @@ const sessions = {
                 beatVolume: typeof userPreferences.data.beatVolume === 'number' ? userPreferences.data.beatVolume : volumeDefaults.beat,
                 noiseVolume: typeof userPreferences.data.noiseVolume === 'number' ? userPreferences.data.noiseVolume : volumeDefaults.noise,
                 sessionDataOverride: null,
+                completed: false,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 pendingFeedback: null,
                 npsScore: null,
@@ -385,7 +386,7 @@ const sessions = {
                 audio: {
                     oscL: null,
                     oscR: null,
-                    gain: null,
+                    beatGain: null,
                     noise: null,
                     noiseGain: null,
                     masterGain: null
@@ -401,6 +402,7 @@ const sessions = {
                 timer: document.getElementById('timer'),
                 progressBar: document.getElementById('progressBar'),
                 mainBtn: document.getElementById('mainActionBtn'),
+                visualizer: document.getElementById('visualizer'),
                 modeContainer: document.getElementById('modeContainer'),
                 msgBox: document.getElementById('message-box'),
                 desc: document.getElementById('modeDesc'),
@@ -482,6 +484,7 @@ const sessions = {
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
+                enterDemoBtn: document.getElementById('enterDemoBtn'),
                 appInterface: document.getElementById('appInterface'),
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
@@ -1209,16 +1212,17 @@ const sessions = {
             }
 
             function hideProgramOverlay() {
-                els.programOverlay.classList.add('hidden');
+                if (els.programOverlay) els.programOverlay.classList.add('hidden');
             }
 
             function showProgramOverlay(config) {
+                if (!els.programOverlay || !els.programContinueBtn) return;
                 const { label, title, body, stepText, stepMeta, showContinue } = config;
-                els.programOverlayLabel.textContent = label;
-                els.programOverlayTitle.textContent = title;
-                els.programOverlayBody.textContent = body;
-                els.programOverlayStep.textContent = stepText;
-                els.programOverlayStepMeta.textContent = stepMeta;
+                if (els.programOverlayLabel) els.programOverlayLabel.textContent = label;
+                if (els.programOverlayTitle) els.programOverlayTitle.textContent = title;
+                if (els.programOverlayBody) els.programOverlayBody.textContent = body;
+                if (els.programOverlayStep) els.programOverlayStep.textContent = stepText;
+                if (els.programOverlayStepMeta) els.programOverlayStepMeta.textContent = stepMeta;
                 els.programContinueBtn.classList.toggle('hidden', !showContinue);
                 els.programOverlay.classList.remove('hidden');
             }
@@ -1758,8 +1762,8 @@ const sessions = {
                         icon.classList.remove('text-medical-400');
                     }
                 });
-                els.messageTitle.textContent = data.name;
-                els.desc.textContent = data.desc;
+                if (els.messageTitle) els.messageTitle.textContent = data.name;
+                if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
                 const firstPhase = data.phases?.[0];
                 let startHz = '-- Hz';
@@ -1851,14 +1855,14 @@ const sessions = {
             function stopAudio() {
                 if (state.audio.oscL) { state.audio.oscL.dispose(); state.audio.oscL = null; }
                 if (state.audio.oscR) { state.audio.oscR.dispose(); state.audio.oscR = null; }
-                if (state.audio.gain) { state.audio.gain.dispose(); state.audio.gain = null; }
+                if (state.audio.beatGain) { state.audio.beatGain.dispose(); state.audio.beatGain = null; }
                 if (state.audio.noise) { state.audio.noise.dispose(); state.audio.noise = null; }
                 if (state.audio.noiseGain) { state.audio.noiseGain.dispose(); state.audio.noiseGain = null; }
                 if (state.audio.masterGain) { state.audio.masterGain.dispose(); state.audio.masterGain = null; }
             }
 
             function updateAudio(phase, progress, t) {
-                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
+                if (!state.audio.beatGain || !state.audio.oscL || !state.audio.oscR) return;
                 const a = phase.audio || {};
                 if (a.l) state.audio.oscL.frequency.value = a.l;
                 if (a.r) state.audio.oscR.frequency.value = a.r;
@@ -1906,16 +1910,17 @@ const sessions = {
             // Smooth Hypnos ramp-down before auto-stop
             function startHypnosRampDown() {
                 if(state.hypnosRampTimer || !state.active) return;
-                const startGain = state.audio.gain?.gain.value ?? 0;
+                const startGain = state.audio.beatGain?.gain.value ?? 0;
                 const startNoise = state.audio.noiseGain?.gain.value ?? 0;
                 state.hypnosRampProgress = 0;
                 state.hypnosRampTimer = setInterval(() => {
                     state.hypnosRampProgress = Math.min(1, state.hypnosRampProgress + 0.1);
-                    if(state.audio.gain) state.audio.gain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.audio.beatGain) state.audio.beatGain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
                     if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(startNoise * (1 - state.hypnosRampProgress), 0.3);
                     if(state.hypnosRampProgress >= 1) {
                         clearInterval(state.hypnosRampTimer);
                         state.hypnosRampTimer = null;
+                        state.completed = true;
                         toggleSession('auto-complete');
                     }
                 }, 700);
@@ -2094,7 +2099,18 @@ const sessions = {
                     const endTs = Date.now();
                     const elapsed = Math.max(1, Math.round((endTs - (state.sessionStartTs || endTs)) / 1000));
                     const feedbackMeta = { sessionId: state.session, startedAt: state.sessionStartTs || endTs, endedAt: endTs, durationSeconds: elapsed };
+                    const data = getSessionData();
+                    const duration = data?.duration ?? Infinity;
+                    const completedByDuration = duration !== Infinity && elapsed >= duration;
+                    const program = state.program.active ? getProgramById(state.program.id) : null;
+                    const isLastProgramStep = !!program && state.program.stepIndex >= program.steps.length - 1;
+                    const completed = (state.completed || completedByDuration) && (completedByDuration || isLastProgramStep);
                     state.active = false;
+                    if (els.visualizer) {
+                        els.visualizer.classList.remove('is-playing');
+                        els.visualizer.classList.add('show-controls');
+                    }
+                    clearTimeout(controlFadeTimer);
                     if(state.hypnosRampTimer) { clearInterval(state.hypnosRampTimer); state.hypnosRampTimer = null; }
                     state.hypnosRampProgress = 0;
                     stopAudio();
@@ -2126,6 +2142,11 @@ const sessions = {
                     await startAudio();
                     state.preview = false;
                     state.active = true;
+                    state.completed = false;
+                    if (els.visualizer) {
+                        els.visualizer.classList.add('is-playing');
+                        els.visualizer.classList.add('show-controls');
+                    }
                     state.sessionStartTs = Date.now();
                     state.startTime = performance.now();
                     state.hypnosRampProgress = 0;
@@ -2160,6 +2181,11 @@ const sessions = {
             function loop() {
                 const now = performance.now();
 
+                const shouldDimControls = (state.active || state.preview) && (now - state.lastInteraction > 4000);
+                if (els.controlPanel) {
+                    els.controlPanel.classList.toggle('control-dock--dim', shouldDimControls);
+                }
+
                 if (state.active && state.session === 'hypnos') {
                     if (now - state.lastInteraction > 5000) {
                         els.appHeader.style.opacity = '0.1';
@@ -2175,7 +2201,7 @@ const sessions = {
                     if (state.active && data.duration !== Infinity) {
                         if(state.session === 'hypnos') {
                             if(elapsed >= data.duration) { startHypnosRampDown(); }
-                        } else if (elapsed >= data.duration) { toggleSession('auto-complete'); return; }
+                        } else if (elapsed >= data.duration) { state.completed = true; toggleSession('auto-complete'); return; }
                     }
 
                     let currentPhase = data.phases[data.phases.length-1];
