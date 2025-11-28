@@ -455,6 +455,7 @@ const sessions = {
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
+                enterDemoBtn: document.getElementById('enterDemoBtn'),
                 appInterface: document.getElementById('appInterface'),
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
@@ -1992,6 +1993,11 @@ const sessions = {
 
             function loop() {
                 const now = performance.now();
+
+                const shouldDimControls = (state.active || state.preview) && (now - state.lastInteraction > 4000);
+                if (els.controlPanel) {
+                    els.controlPanel.classList.toggle('control-dock--dim', shouldDimControls);
+                }
 
                 if (state.active && state.session === 'hypnos') {
                     if (now - state.lastInteraction > 5000) {
