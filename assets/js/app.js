@@ -181,9 +181,9 @@ const sessions = {
                 audioOnly: false,
                 intensityLevel: 'medium',
                 reduceMotion: null,
-                masterVolume: 0.85,
-                beatVolume: 0.95,
-                noiseVolume: 0.75
+                masterVolume: 0.7,
+                beatVolume: 0.6,
+                noiseVolume: 0.5
             };
 
             const userPreferences = {
@@ -347,9 +347,9 @@ const sessions = {
             };
 
             const volumeDefaults = {
-                master: 0.85,
-                beat: 0.95,
-                noise: 0.75
+                master: 0.7,
+                beat: 0.6,
+                noise: 0.5
             };
 
             const audioBaseLevels = {
@@ -385,7 +385,7 @@ const sessions = {
                 audio: {
                     oscL: null,
                     oscR: null,
-                    gain: null,
+                    beatGain: null,
                     noise: null,
                     noiseGain: null,
                     masterGain: null
@@ -821,7 +821,7 @@ const sessions = {
                 els.noiseTypeDisplay.textContent = isPink ? "Pink Noise (Soft)" : "Brown Noise (Deep)";
             }
 
-            function clampVolume(val, min = 0.1, max = 1.2) {
+            function clampVolume(val, min = 0, max = 1) {
                 if(typeof val !== 'number' || Number.isNaN(val)) return min;
                 return Math.min(max, Math.max(min, val));
             }
@@ -835,34 +835,53 @@ const sessions = {
                 if(els.noiseVolumeValue) els.noiseVolumeValue.textContent = `${Math.round(state.noiseVolume * 100)}%`;
             }
 
+            let volumeUpdateFrame = null;
+            let pendingVolumeOptions = { ramp: true };
+
             function applyVolumeToAudio({ ramp = true } = {}) {
                 const time = ramp ? 0.35 : 0;
                 if(state.audio.masterGain) state.audio.masterGain.gain.rampTo(state.masterVolume, time);
                 if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, ramp ? 0.6 : 0);
-                const beatTarget = state.currentBeatBase ? state.currentBeatBase * state.beatVolume : state.audio.gain?.gain.value || 0;
+                const beatTarget = state.currentBeatBase ? state.currentBeatBase * state.beatVolume : state.audio.beatGain?.gain.value || 0;
                 state.currentBeatGain = beatTarget;
-                if(state.audio.gain) state.audio.gain.gain.rampTo(beatTarget, ramp ? 0.4 : 0);
+                if(state.audio.beatGain) state.audio.beatGain.gain.rampTo(beatTarget, ramp ? 0.4 : 0);
+            }
+
+            function queueVolumeUpdate(options = {}) {
+                pendingVolumeOptions = { ...pendingVolumeOptions, ...options };
+                if(volumeUpdateFrame) return;
+                volumeUpdateFrame = requestAnimationFrame(() => {
+                    applyVolumeToAudio(pendingVolumeOptions);
+                    pendingVolumeOptions = { ramp: true };
+                    volumeUpdateFrame = null;
+                });
+            }
+
+            function cancelQueuedVolumeUpdate() {
+                if(volumeUpdateFrame) cancelAnimationFrame(volumeUpdateFrame);
+                volumeUpdateFrame = null;
+                pendingVolumeOptions = { ramp: true };
             }
 
             function setMasterVolume(val) {
-                state.masterVolume = clampVolume(val / 100, 0.2, 1.1);
+                state.masterVolume = clampVolume(val / 100, 0, 1);
                 userPreferences.save({ masterVolume: state.masterVolume });
                 updateVolumeUI();
-                applyVolumeToAudio();
+                queueVolumeUpdate();
             }
 
             function setBeatVolume(val) {
-                state.beatVolume = clampVolume(val / 100, 0.2, 1.2);
+                state.beatVolume = clampVolume(val / 100, 0, 1);
                 userPreferences.save({ beatVolume: state.beatVolume });
                 updateVolumeUI();
-                applyVolumeToAudio();
+                queueVolumeUpdate();
             }
 
             function setNoiseVolume(val) {
-                state.noiseVolume = clampVolume(val / 100, 0.1, 1.2);
+                state.noiseVolume = clampVolume(val / 100, 0, 1);
                 userPreferences.save({ noiseVolume: state.noiseVolume });
                 updateVolumeUI();
-                applyVolumeToAudio();
+                queueVolumeUpdate();
             }
 
             function resetAudioSettings() {
@@ -875,6 +894,7 @@ const sessions = {
                     noiseVolume: state.noiseVolume
                 });
                 updateVolumeUI();
+                cancelQueuedVolumeUpdate();
                 applyVolumeToAudio({ ramp: false });
             }
 
@@ -1810,9 +1830,9 @@ const sessions = {
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 state.audio.masterGain = new Tone.Gain(state.masterVolume).toDestination();
-                state.audio.gain = new Tone.Gain(0).connect(state.audio.masterGain);
-                const pL = new Tone.Panner(-1).connect(state.audio.gain);
-                const pR = new Tone.Panner(1).connect(state.audio.gain);
+                state.audio.beatGain = new Tone.Gain(0).connect(state.audio.masterGain);
+                const pL = new Tone.Panner(-1).connect(state.audio.beatGain);
+                const pR = new Tone.Panner(1).connect(state.audio.beatGain);
 
                 state.audio.oscL = new Tone.Oscillator(startL, "sine").connect(pL).start();
                 state.audio.oscR = new Tone.Oscillator(startR, "sine").connect(pR).start();
@@ -1825,20 +1845,20 @@ const sessions = {
                 state.currentBeatGain = beatBase * state.beatVolume;
 
                 state.audio.noiseGain.gain.rampTo(audioBaseLevels.noise * state.noiseVolume, 2);
-                state.audio.gain.gain.rampTo(state.currentBeatGain, 1);
+                state.audio.beatGain.gain.rampTo(state.currentBeatGain, 1);
             }
 
             function stopAudio() {
                 if (state.audio.oscL) { state.audio.oscL.dispose(); state.audio.oscL = null; }
                 if (state.audio.oscR) { state.audio.oscR.dispose(); state.audio.oscR = null; }
-                if (state.audio.gain) { state.audio.gain.dispose(); state.audio.gain = null; }
+                if (state.audio.beatGain) { state.audio.beatGain.dispose(); state.audio.beatGain = null; }
                 if (state.audio.noise) { state.audio.noise.dispose(); state.audio.noise = null; }
                 if (state.audio.noiseGain) { state.audio.noiseGain.dispose(); state.audio.noiseGain = null; }
                 if (state.audio.masterGain) { state.audio.masterGain.dispose(); state.audio.masterGain = null; }
             }
 
             function updateAudio(phase, progress, t) {
-                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
+                if (!state.audio.beatGain || !state.audio.oscL || !state.audio.oscR) return;
                 const a = phase.audio || {};
                 if (a.l) state.audio.oscL.frequency.value = a.l;
                 if (a.r) state.audio.oscR.frequency.value = a.r;
@@ -1867,9 +1887,9 @@ const sessions = {
                 if (a.mod === 'iso') {
                     const rate = 2;
                     const mod = (Math.sin(t * Math.PI * 2 * rate) + 1) / 2;
-                    state.audio.gain.gain.value = beatGain * mod;
+                    state.audio.beatGain.gain.value = beatGain * mod;
                 } else {
-                    state.audio.gain.gain.value = beatGain;
+                    state.audio.beatGain.gain.value = beatGain;
                 }
 
                 const deltaFactor = intensity.delta || 1;
@@ -1886,12 +1906,12 @@ const sessions = {
             // Smooth Hypnos ramp-down before auto-stop
             function startHypnosRampDown() {
                 if(state.hypnosRampTimer || !state.active) return;
-                const startGain = state.audio.gain?.gain.value ?? 0;
+                const startGain = state.audio.beatGain?.gain.value ?? 0;
                 const startNoise = state.audio.noiseGain?.gain.value ?? 0;
                 state.hypnosRampProgress = 0;
                 state.hypnosRampTimer = setInterval(() => {
                     state.hypnosRampProgress = Math.min(1, state.hypnosRampProgress + 0.1);
-                    if(state.audio.gain) state.audio.gain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
+                    if(state.audio.beatGain) state.audio.beatGain.gain.rampTo(startGain * (1 - state.hypnosRampProgress), 0.3);
                     if(state.audio.noiseGain) state.audio.noiseGain.gain.rampTo(startNoise * (1 - state.hypnosRampProgress), 0.3);
                     if(state.hypnosRampProgress >= 1) {
                         clearInterval(state.hypnosRampTimer);
