@@ -376,6 +376,7 @@ const sessions = {
                 beatVolume: typeof userPreferences.data.beatVolume === 'number' ? userPreferences.data.beatVolume : volumeDefaults.beat,
                 noiseVolume: typeof userPreferences.data.noiseVolume === 'number' ? userPreferences.data.noiseVolume : volumeDefaults.noise,
                 sessionDataOverride: null,
+                completed: false,
                 program: { active: false, id: null, stepIndex: 0, awaitingNext: false },
                 pendingFeedback: null,
                 npsScore: null,
@@ -1916,6 +1917,7 @@ const sessions = {
                     if(state.hypnosRampProgress >= 1) {
                         clearInterval(state.hypnosRampTimer);
                         state.hypnosRampTimer = null;
+                        state.completed = true;
                         toggleSession('auto-complete');
                     }
                 }, 700);
@@ -2094,6 +2096,12 @@ const sessions = {
                     const endTs = Date.now();
                     const elapsed = Math.max(1, Math.round((endTs - (state.sessionStartTs || endTs)) / 1000));
                     const feedbackMeta = { sessionId: state.session, startedAt: state.sessionStartTs || endTs, endedAt: endTs, durationSeconds: elapsed };
+                    const data = getSessionData();
+                    const duration = data?.duration ?? Infinity;
+                    const completedByDuration = duration !== Infinity && elapsed >= duration;
+                    const program = state.program.active ? getProgramById(state.program.id) : null;
+                    const isLastProgramStep = !!program && state.program.stepIndex >= program.steps.length - 1;
+                    const completed = (state.completed || completedByDuration) && (completedByDuration || isLastProgramStep);
                     state.active = false;
                     if (els.visualizer) {
                         els.visualizer.classList.remove('is-playing');
@@ -2122,11 +2130,10 @@ const sessions = {
                     disableFocusLock();
                     state.sessionStartTs = null;
                     setSession(state.session);
-                    const programResult = handleProgramAfterStep();
-                    const completedSession = reason === 'auto-complete';
-                    const completedProgram = programResult?.programEnded && completedSession;
+                    const programResult = completed ? handleProgramAfterStep() : null;
+                    const completedProgram = programResult?.programEnded && completed;
                     const awaitingNextStep = programResult?.awaitingNext;
-                    if((completedSession || completedProgram) && !awaitingNextStep) {
+                    if(completed && !awaitingNextStep) {
                         promptSessionFeedback(feedbackMeta);
                     }
                     updateQuickActionsUI();
@@ -2134,6 +2141,7 @@ const sessions = {
                 } else {
                     await startAudio();
                     state.active = true;
+                    state.completed = false;
                     if (els.visualizer) {
                         els.visualizer.classList.add('is-playing');
                         els.visualizer.classList.add('show-controls');
@@ -2194,7 +2202,7 @@ const sessions = {
                     if (state.active && data.duration !== Infinity) {
                         if(state.session === 'hypnos') {
                             if(elapsed >= data.duration) { startHypnosRampDown(); }
-                        } else if (elapsed >= data.duration) { toggleSession('auto-complete'); return; }
+                        } else if (elapsed >= data.duration) { state.completed = true; toggleSession('auto-complete'); return; }
                     }
 
                     let currentPhase = data.phases[data.phases.length-1];
