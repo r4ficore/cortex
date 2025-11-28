@@ -396,6 +396,7 @@ const sessions = {
                 // Elements for Landing Page
                 landingPage: document.getElementById('landingPage'),
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
+                enterDemoBtn: document.getElementById('enterDemoBtn'),
                 appInterface: document.getElementById('appInterface'),
                 landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
@@ -403,7 +404,10 @@ const sessions = {
                 circadianTitle: document.getElementById('circadianTitle'),
                 leftPanel: document.getElementById('leftPanel'),
                 appFooter: document.getElementById('appFooter'),
-                appHeader: document.getElementById('appHeader')
+                appHeader: document.getElementById('appHeader'),
+                calibStepList: document.getElementById('calibStepList'),
+                calibEta: document.getElementById('calibEta'),
+                calibMode: document.getElementById('calibMode')
             };
 
             function init() {
@@ -449,29 +453,8 @@ const sessions = {
                 });
 
                 // Landing Page Logic
-                els.enterSystemBtn.addEventListener('click', () => {
-                    const content = els.landingPage.querySelector('.max-w-5xl');
-                    content.style.opacity = '0';
-                    content.style.transition = 'opacity 0.5s';
-
-                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
-
-                    setTimeout(() => {
-                        els.landingPage.style.display = 'none';
-                        const calib = document.getElementById('calibrationOverlay');
-                        calib.style.display = 'flex';
-                        simulateCalibration(() => {
-                            els.appInterface.style.display = 'block';
-                            requestAnimationFrame(() => {
-                                els.appInterface.style.opacity = '1';
-                                resizeCanvas();
-                                setTimeout(() => {
-                                    if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
-                                }, 300);
-                            });
-                        });
-                    }, 500);
-                });
+                if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => startEntry());
+                if (els.enterDemoBtn) els.enterDemoBtn.addEventListener('click', () => startEntry({ demo: true }));
 
                 els.mainBtn.addEventListener('click', toggleSession);
                 const previewBtn = document.getElementById('previewButton');
@@ -1020,20 +1003,92 @@ const sessions = {
                 });
             }
 
-            function simulateCalibration(callback) {
+            function startEntry({ demo = false } = {}) {
+                const content = els.landingPage.querySelector('.max-w-5xl');
+                content.style.opacity = '0';
+                content.style.transition = 'opacity 0.5s';
+
+                if(!demo) {
+                    els.silentAudio.play().catch(e => console.log("Silent play prevented"));
+                } else {
+                    state.audioOnly = true;
+                    userPreferences.save({ audioOnly: true });
+                    if (els.audioOnlyToggle) els.audioOnlyToggle.checked = true;
+                }
+
+                setCalibrationContext(demo);
+
+                setTimeout(() => {
+                    els.landingPage.style.display = 'none';
+                    const calib = document.getElementById('calibrationOverlay');
+                    calib.style.display = 'flex';
+                    simulateCalibration(() => {
+                        els.appInterface.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            els.appInterface.style.opacity = '1';
+                            resizeCanvas();
+                            setTimeout(() => {
+                                if(!userPreferences.data.onboardingCompleted) openOnboardingModal();
+                            }, 300);
+                        });
+                    }, { demo });
+                }, 500);
+            }
+
+            function simulateCalibration(callback, { demo = false } = {}) {
                 const overlay = document.getElementById('calibrationOverlay');
                 const bar = document.getElementById('calibBar');
                 const text = document.getElementById('calibText');
                 const perc = document.getElementById('calibPercent');
                 let p = 0;
-                const steps = [{p: 20, t: "Loading Audio Drivers..."}, {p: 45, t: "Calibrating Oscillators..."}, {p: 70, t: "Initializing Noise Engine..."}, {p: 100, t: "System Ready."}];
+                const steps = demo ? [
+                    { p: 20, t: "Sprawdzanie wizualizacji (demo)", s: 1 },
+                    { p: 50, t: "Redukcja migotania", s: 2 },
+                    { p: 80, t: "Strojenie płynności animacji", s: 3 },
+                    { p: 100, t: "Tryb demo gotowy." , s: 4}
+                ] : [
+                    { p: 18, t: "Sprawdzanie kanałów L/R", s: 1 },
+                    { p: 44, t: "Kalibracja balansu głośności", s: 2 },
+                    { p: 72, t: "Strojenie oscylatorów", s: 3 },
+                    { p: 100, t: "Audio + wizualizacje gotowe." , s: 4}
+                ];
                 let stepIdx = 0;
+                const targetDuration = demo ? 6500 : 12000;
                 const interval = setInterval(() => {
-                    p += Math.random() * 5;
-                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx++; }
-                    if(p >= 100) { p = 100; clearInterval(interval); setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 1000); }, 500); }
+                    const increment = 100 / (targetDuration / 120);
+                    p += increment + Math.random() * 1.5;
+                    if(p > steps[stepIdx].p) { text.textContent = steps[stepIdx].t; stepIdx = Math.min(stepIdx + 1, steps.length - 1); updateCalibrationSteps(steps[stepIdx].s); }
+                    if(p >= 100) {
+                        p = 100;
+                        clearInterval(interval);
+                        updateCalibrationSteps(steps[steps.length - 1].s + 1, true);
+                        setTimeout(() => { overlay.style.opacity = 0; setTimeout(() => { overlay.style.display = 'none'; if(callback) callback(); }, 800); }, 500);
+                    }
                     bar.style.width = p + "%"; perc.textContent = Math.floor(p) + "%";
-                }, 30);
+                }, 120);
+            }
+
+            function setCalibrationContext(demo) {
+                if (!els.calibEta || !els.calibMode) return;
+                els.calibMode.textContent = demo ? 'Podgląd wizualizacji' : 'Pełna kalibracja audio';
+                els.calibEta.textContent = demo ? '~6s' : '~12s';
+                updateCalibrationSteps(1);
+            }
+
+            function updateCalibrationSteps(activeStep, forceComplete = false) {
+                if(!els.calibStepList) return;
+                const steps = Array.from(els.calibStepList.querySelectorAll('[data-step]'));
+                steps.forEach(node => {
+                    const step = Number(node.dataset.step);
+                    const status = node.querySelector('.calib-step-status');
+                    const isComplete = forceComplete ? step <= activeStep : step < activeStep;
+                    const isActive = !forceComplete && step === activeStep;
+                    node.classList.toggle('is-active', isActive);
+                    node.classList.toggle('is-complete', isComplete);
+                    if(status) {
+                        status.textContent = isComplete ? 'OK' : isActive ? '...': '—';
+                    }
+                });
             }
 
             function openStatsModal() {
