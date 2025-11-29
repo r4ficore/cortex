@@ -303,7 +303,7 @@
 
             <main class="min-h-screen pt-20 pb-40 px-4 sm:px-6 relative z-10 flex flex-col items-center">
                 <div class="max-w-7xl mx-auto w-full app-grid flex-grow lg:min-h-[640px]">
-                    <div id="leftPanel" class="flex flex-col gap-4 order-2 lg:order-1 h-full transition-opacity duration-1000 lg:sticky lg:top-24 self-start">
+                    <div id="leftPanel" class="flex flex-col gap-4 order-2 h-full transition-opacity duration-1000 lg:sticky lg:top-24 self-start">
 
                         <section id="circadianWidget" class="glass-panel rounded-xl p-4 shrink-0 border-l-2 border-medical-400 flex items-center justify-between group cursor-pointer hover:bg-medical-900/20 transition-colors" role="button" tabindex="0" aria-label="Sugestia rytmu dobowego">
                             <div>
@@ -342,74 +342,30 @@
                         </section>
                     </div>
 
-                    <div class="main-panel order-1 lg:order-2 h-full">
-                        <section id="personalizationCard" class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Personalizacja startu">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                    <div class="main-panel order-1 h-full">
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                 <div class="space-y-1">
-                                    <span class="ui-section-label">Polecany start</span>
-                                    <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                                        <span id="personalizationSource" class="font-mono">Personalizacja aktywna</span>
-                                        <span class="h-1.5 w-1.5 rounded-full bg-medical-400"></span>
-                                    </div>
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
                                 </div>
-                                <button id="editPersonalization" class="ui-btn ui-btn--ghost ui-btn--sm">Edytuj preferencje</button>
-                            </div>
-
-                            <div class="recommend-card">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="space-y-1">
-                                        <p class="recommend-meta" id="recommendedLabel">Na podstawie celów</p>
-                                        <h3 id="recommendedTitle" class="text-xl text-white font-semibold">Prime</h3>
-                                        <p id="recommendedDesc" class="text-sm text-zinc-400 leading-relaxed">Rozgrzewka neuronalna przed sesją właściwą.</p>
-                                    </div>
-                                    <div class="px-3 py-1 rounded-full bg-medical-900/40 border border-medical-500/30 text-medical-400 text-[10px] font-mono uppercase tracking-[0.2em]">Polecane</div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
                                 </div>
-                                <p id="recommendedReason" class="text-xs text-zinc-500">Cel: Skupienie · Pora: Poranek</p>
-                                <div class="recommend-actions">
-                                    <button id="applyRecommended" class="ui-btn ui-btn--primary ui-btn--md">Ustaw i uruchom</button>
-                                    <button id="previewRecommended" class="ui-btn ui-btn--ghost ui-btn--md">Pokaż parametry</button>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
                                 </div>
                             </div>
-
-                            <div class="space-y-2">
-                                <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Twoje ustawienia</p>
-                                <div class="pref-grid">
-                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefGoal">Cel: —</span></span>
-                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefTime">Pora: —</span></span>
-                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefSensitivity">Wrażliwość: —</span></span>
-                                </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
                             </div>
-                        </section>
-
-                        <section class="ui-card p-4 sm:p-5" aria-label="Głośność i balans">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="ui-section-label">Głośność</span>
-                                <button id="resetAudioSettings" class="ui-btn ui-btn--ghost ui-btn--sm">Reset ustawień</button>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
-                                        <span>Ogólna</span>
-                                        <span id="masterVolumeValue" class="text-[10px] text-zinc-400 font-mono">80%</span>
-                                    </div>
-                                    <input id="masterVolume" type="range" min="20" max="110" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
-                                        <span>Dudnienie</span>
-                                        <span id="beatVolumeValue" class="text-[10px] text-zinc-400 font-mono">90%</span>
-                                    </div>
-                                    <input id="beatVolume" type="range" min="20" max="120" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
-                                        <span>Szum</span>
-                                        <span id="noiseVolumeValue" class="text-[10px] text-zinc-400 font-mono">70%</span>
-                                    </div>
-                                    <input id="noiseVolume" type="range" min="10" max="120" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-zinc-500 mt-3">Suwaki działają bezpośrednio na bieżącą sesję – master skaluje oba kanały, a suwaki dudnienia i szumu pozwalają na szybkie dostrojenie.</p>
                         </section>
 
                         <div id="visualizer" class="relative w-full flex-1 min-h-[560px] sm:min-h-[620px] lg:min-h-[680px] rounded-2xl bg-black overflow-hidden border border-zinc-800 shadow-2xl ring-1 ring-white/5 group">
@@ -457,31 +413,7 @@
                                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                 </button>
                             </div>
-                        </section>
-
-                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Czas</span>
-                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Aktualna faza</span>
-                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Dudnienie</span>
-                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Tło</span>
-                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
-                        </section>
+                        </div>
 
                         <section class="ui-card p-4 sm:p-5" aria-label="Głośność i balans">
                             <div class="flex items-center justify-between mb-2">
@@ -514,103 +446,45 @@
                             <p class="text-[10px] text-zinc-500 mt-3">Suwaki działają bezpośrednio na bieżącą sesję – master skaluje oba kanały, a suwaki dudnienia i szumu pozwalają na szybkie dostrojenie.</p>
                         </section>
 
-                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <section id="personalizationCard" class="ui-card p-4 sm:p-5 flex flex-col gap-4" aria-label="Personalizacja startu">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div class="space-y-1">
-                                    <span class="ui-section-label">Czas</span>
-                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                    <span class="ui-section-label">Polecany start</span>
+                                    <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                        <span id="personalizationSource" class="font-mono">Personalizacja aktywna</span>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-medical-400"></span>
+                                    </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Aktualna faza</span>
-                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                <button id="editPersonalization" class="ui-btn ui-btn--ghost ui-btn--sm">Edytuj preferencje</button>
+                            </div>
+
+                            <div class="recommend-card">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <p class="recommend-meta" id="recommendedLabel">Na podstawie celów</p>
+                                        <h3 id="recommendedTitle" class="text-xl text-white font-semibold">Prime</h3>
+                                        <p id="recommendedDesc" class="text-sm text-zinc-400 leading-relaxed">Rozgrzewka neuronalna przed sesją właściwą.</p>
+                                    </div>
+                                    <div class="px-3 py-1 rounded-full bg-medical-900/40 border border-medical-500/30 text-medical-400 text-[10px] font-mono uppercase tracking-[0.2em]">Polecane</div>
                                 </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Dudnienie</span>
-                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Tło</span>
-                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                <p id="recommendedReason" class="text-xs text-zinc-500">Cel: Skupienie · Pora: Poranek</p>
+                                <div class="recommend-actions">
+                                    <button id="applyRecommended" class="ui-btn ui-btn--primary ui-btn--md">Ustaw i uruchom</button>
+                                    <button id="previewRecommended" class="ui-btn ui-btn--ghost ui-btn--md">Pokaż parametry</button>
                                 </div>
                             </div>
-                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+
+                            <div class="space-y-2">
+                                <p class="text-[11px] text-zinc-500 uppercase tracking-[0.2em]">Twoje ustawienia</p>
+                                <div class="pref-grid">
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefGoal">Cel: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefTime">Pora: —</span></span>
+                                    <span class="pref-chip"><span class="pref-chip__bullet"></span><span id="prefSensitivity">Wrażliwość: —</span></span>
+                                </div>
                             </div>
                         </section>
-
-                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Czas</span>
-                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Aktualna faza</span>
-                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Dudnienie</span>
-                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Tło</span>
-                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
-                        </section>
-
-                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Czas</span>
-                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Aktualna faza</span>
-                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Dudnienie</span>
-                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Tło</span>
-                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
-                        </section>
-
-                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Czas</span>
-                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Aktualna faza</span>
-                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Dudnienie</span>
-                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="ui-section-label">Tło</span>
-                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
-                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
-                            </div>
-                        </section>
-
                     </div>
+
                 </div>
 
                 <footer id="appFooter" class="w-full px-4 relative z-0 mt-24 transition-opacity duration-1000">
