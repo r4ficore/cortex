@@ -498,6 +498,8 @@ const sessions = {
                 leftPanel: document.getElementById('leftPanel'),
                 appFooter: document.getElementById('appFooter'),
                 appHeader: document.getElementById('appHeader'),
+                sessionStatusCard: document.getElementById('sessionStatusCard'),
+                statusCardAnchor: document.getElementById('statusCardAnchor'),
                 calibStepList: document.getElementById('calibStepList'),
                 calibEta: document.getElementById('calibEta'),
                 calibMode: document.getElementById('calibMode'),
@@ -1873,7 +1875,8 @@ const sessions = {
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
-                const displayHz = (currentHz + (Math.random() * 0.05 - 0.025)).toFixed(2);
+                const jitter = Math.sin(t * 1.6) * 0.18 + (Math.random() * 0.06 - 0.03);
+                const displayHz = Math.max(0, currentHz + jitter).toFixed(2);
                 els.realtimeHz.textContent = `${displayHz} Hz`;
 
                 let vol = 0.2;
@@ -2265,5 +2268,20 @@ const sessions = {
                     else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
                 }
             }
-            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, () => { setTimeout(resizeCanvas, 100); }); });
+            function handleFullscreenChange() {
+                const isFs = document.fullscreenElement === els.visualizer || document.webkitFullscreenElement === els.visualizer;
+                document.body.classList.toggle('fullscreen-active', isFs);
+                if (els.sessionStatusCard && els.visualizer && els.statusCardAnchor) {
+                    if (isFs) {
+                        els.sessionStatusCard.classList.add('fullscreen-status-card');
+                        els.visualizer.appendChild(els.sessionStatusCard);
+                    } else {
+                        els.sessionStatusCard.classList.remove('fullscreen-status-card');
+                        els.statusCardAnchor.insertAdjacentElement('afterend', els.sessionStatusCard);
+                    }
+                }
+                setTimeout(resizeCanvas, 100);
+            }
+            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, handleFullscreenChange); });
             init();
+            handleFullscreenChange();
