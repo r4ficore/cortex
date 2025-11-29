@@ -1867,7 +1867,7 @@ const sessions = {
             }
 
             function updateAudio(phase, progress, t) {
-                if (!state.audio.beatGain || !state.audio.oscL || !state.audio.oscR) return;
+                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
                 const a = phase.audio || {};
                 if (a.l) state.audio.oscL.frequency.value = a.l;
                 if (a.r) state.audio.oscR.frequency.value = a.r;
@@ -1875,7 +1875,10 @@ const sessions = {
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
-                const jitter = (Math.sin(t * 2.1) * 0.45) + (Math.sin(t * 3.4) * 0.2) + (Math.random() * 0.16 - 0.08);
+                const jitter = (Math.sin(t * 2.35) * 0.6)
+                    + (Math.sin(t * 3.8) * 0.35)
+                    + (Math.sin(t * 5.1) * 0.18)
+                    + (Math.random() * 0.24 - 0.12);
                 const displayHz = Math.max(0, currentHz + jitter).toFixed(2);
                 els.realtimeHz.textContent = `${displayHz} Hz`;
 

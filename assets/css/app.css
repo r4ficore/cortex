@@ -83,8 +83,8 @@ body {
 }
 
 #modeContainer {
-    max-height: calc(100vh - 160px);
-    min-height: 640px;
+    max-height: calc(100vh - 120px);
+    min-height: 760px;
     overflow-y: auto;
 }
 
@@ -115,7 +115,8 @@ body {
         }
 
         #modeContainer {
-            max-height: calc(100vh - 130px);
+            max-height: calc(100vh - 90px);
+            min-height: 820px;
         }
     }
 
