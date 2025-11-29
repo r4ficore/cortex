@@ -457,7 +457,134 @@
                                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                 </button>
                             </div>
-                        </div>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Głośność i balans">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="ui-section-label">Głośność</span>
+                                <button id="resetAudioSettings" class="ui-btn ui-btn--ghost ui-btn--sm">Reset ustawień</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                        <span>Ogólna</span>
+                                        <span id="masterVolumeValue" class="text-[10px] text-zinc-400 font-mono">80%</span>
+                                    </div>
+                                    <input id="masterVolume" type="range" min="20" max="110" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                        <span>Dudnienie</span>
+                                        <span id="beatVolumeValue" class="text-[10px] text-zinc-400 font-mono">90%</span>
+                                    </div>
+                                    <input id="beatVolume" type="range" min="20" max="120" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-[10px] uppercase text-zinc-500 font-bold tracking-widest">
+                                        <span>Szum</span>
+                                        <span id="noiseVolumeValue" class="text-[10px] text-zinc-400 font-mono">70%</span>
+                                    </div>
+                                    <input id="noiseVolume" type="range" min="10" max="120" step="1" class="w-full accent-medical-400 bg-zinc-900/70 rounded-lg" />
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-zinc-500 mt-3">Suwaki działają bezpośrednio na bieżącą sesję – master skaluje oba kanały, a suwaki dudnienia i szumu pozwalają na szybkie dostrojenie.</p>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
+
+                        <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Czas</span>
+                                    <div id="timer" class="font-mono text-lg sm:text-2xl text-white tracking-tighter tabular-nums transition-all duration-300">00:00</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Aktualna faza</span>
+                                    <p id="currentPhaseName" class="text-sm text-zinc-300 truncate">Oczekiwanie na start</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Dudnienie</span>
+                                    <p id="realtimeHz" class="text-sm font-mono text-medical-400 transition-all duration-300">-- Hz</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="ui-section-label">Tło</span>
+                                    <p id="noiseTypeDisplay" class="text-xs font-mono text-zinc-400">Brown Noise</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 h-[6px] w-full bg-black/60 border border-zinc-800 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-medical-400 shadow-[0_0_15px_rgba(34,211,238,0.45)] w-0 transition-all duration-300 ease-linear"></div>
+                            </div>
+                        </section>
 
                         <section class="ui-card p-4 sm:p-5" aria-label="Stan sesji">
                             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -623,7 +750,7 @@
 
         <!-- GUIDE MODAL -->
         <div id="guideModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-5xl h-full max-h-[90vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+            <div class="modal-card modal-card--flush bg-zinc-950 border border-zinc-800 rounded-xl w-full h-full max-h-[90vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
                 <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
                     <div>
                         <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
@@ -703,7 +830,7 @@
 
         <!-- SAFETY MODAL -->
         <div id="safetyModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+            <div class="modal-card modal-card--flush bg-zinc-950 border border-zinc-800 rounded-xl w-full h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
                 <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
                     <div>
                         <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
@@ -749,7 +876,7 @@
 
         <!-- ONBOARDING MODAL -->
         <div id="onboardingModal" class="fixed inset-0 z-[75] bg-black/90 backdrop-blur hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-4xl shadow-2xl relative flex flex-col ring-1 ring-white/10 p-6 sm:p-8 gap-6">
+            <div class="modal-card bg-zinc-950 border border-zinc-800 rounded-xl w-full shadow-2xl relative flex flex-col ring-1 ring-white/10 gap-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-[10px] uppercase text-medical-400 font-bold tracking-[0.3em]">Onboarding</p>
@@ -759,7 +886,7 @@
                     <button id="skipOnboarding" class="text-[11px] uppercase tracking-wider px-3 py-2 border border-zinc-700 rounded text-zinc-400 hover:text-white hover:border-zinc-500 transition-all">Pomiń na teraz</button>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-4" id="onboardingOptions">
+                <div class="modal-grid" id="onboardingOptions">
                     <div class="space-y-2">
                         <p class="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">Główny cel</p>
                         <div class="space-y-2">
@@ -801,7 +928,7 @@
 
         <!-- PROGRAMS MODAL -->
         <div id="programModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-5xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+            <div class="modal-card modal-card--flush bg-zinc-950 border border-zinc-800 rounded-xl w-full h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
                 <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
                     <div>
                         <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
@@ -821,14 +948,14 @@
                     </div>
                 </div>
                 <div class="flex-1 overflow-y-auto p-8 doc-scroll">
-                    <div id="programList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    <div id="programList" class="modal-grid"></div>
                 </div>
             </div>
         </div>
 
         <!-- SESSION FEEDBACK MODAL -->
         <div id="feedbackModal" class="fixed inset-0 z-[80] bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl shadow-2xl relative flex flex-col ring-1 ring-white/10 p-6 sm:p-8 gap-6">
+            <div class="modal-card bg-zinc-950 border border-zinc-800 rounded-xl w-full shadow-2xl relative flex flex-col ring-1 ring-white/10 gap-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-[10px] uppercase text-medical-400 font-bold tracking-[0.3em]">Feedback</p>
@@ -871,7 +998,7 @@
 
         <!-- STATS MODAL -->
         <div id="statsModal" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-5xl h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
+            <div class="modal-card modal-card--flush bg-zinc-950 border border-zinc-800 rounded-xl w-full h-full max-h-[85vh] shadow-2xl relative flex flex-col ring-1 ring-white/10">
                 <div class="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
                     <div>
                         <h3 class="text-xl font-mono text-medical-400 tracking-tight flex items-center gap-3">
@@ -885,7 +1012,7 @@
                     </button>
                 </div>
                 <div class="flex-1 overflow-y-auto p-8 doc-scroll space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="modal-grid">
                         <div class="stat-card">
                             <p class="stat-label">Łączny czas (7 dni)</p>
                             <p id="statsTotalTime" class="stat-value">—</p>
