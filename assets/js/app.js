@@ -537,7 +537,6 @@ const sessions = {
                 if(els.releaseVersionLabel) els.releaseVersionLabel.textContent = `v${RELEASE_NOTES_VERSION}`;
                 updateReleaseNotesUI();
                 updateNpsUI();
-                enableIdlePreview();
 
                 window.addEventListener('resize', resizeCanvas);
                 setInterval(checkCircadianRhythm, 60000);
@@ -1017,7 +1016,6 @@ const sessions = {
                 const sessionId = els.applyRecommended?.dataset.sessionId;
                 if(!sessionId) return;
                 setSession(sessionId);
-                if(!state.active) toggleSession('recommended-start');
             }
 
             function handlePreviewRecommended() {
@@ -1793,11 +1791,16 @@ const sessions = {
 
             function enableIdlePreview() {
                 if(state.active) return;
-                state.preview = true;
-                state.startTime = performance.now();
+                state.preview = false;
+                state.startTime = 0;
                 state.lastInteraction = performance.now();
-                if(els.canvas) els.canvas.style.opacity = 1;
-                if(els.msgBox) els.msgBox.style.opacity = 0;
+                if(els.canvas) {
+                    els.canvas.style.opacity = 0;
+                }
+                if(els.msgBox) {
+                    els.msgBox.style.opacity = 1;
+                    els.msgBox.style.transform = "scale(1)";
+                }
             }
 
             function wakeControls() {

@@ -78,10 +78,33 @@ body {
     align-items: start;
 }
 
+#leftPanel {
+    width: 100%;
+}
+
+#modeContainer {
+    max-height: calc(100vh - 320px);
+    min-height: 420px;
+    overflow-y: auto;
+}
+
+.main-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
 @media (min-width: 1100px) {
     .app-grid {
         grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
         gap: 1.5rem;
+    }
+
+    #leftPanel {
+        position: sticky;
+        top: 96px;
+        align-self: flex-start;
+        max-width: 420px;
     }
 }
 
@@ -89,6 +112,10 @@ body {
     .app-grid {
         grid-template-columns: minmax(380px, 440px) minmax(0, 1fr);
         gap: 1.75rem;
+    }
+
+    #modeContainer {
+        max-height: calc(100vh - 280px);
     }
 }
 
@@ -328,18 +355,6 @@ body {
 .doc-scroll::-webkit-scrollbar-track { background: #09090b; }
 .doc-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
 .doc-scroll::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-
-#modeContainer {
-    max-height: calc(100vh - 240px);
-    min-height: 420px;
-    overflow-y: auto;
-}
-
-@media (min-width: 1280px) {
-    #modeContainer {
-        max-height: calc(100vh - 220px);
-    }
-}
 
 #visualizer .control-visible { transition: opacity 200ms ease, transform 200ms ease; }
 #visualizer .control-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
