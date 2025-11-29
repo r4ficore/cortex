@@ -83,8 +83,8 @@ body {
 }
 
 #modeContainer {
-    max-height: calc(100vh - 220px);
-    min-height: 520px;
+    max-height: calc(100vh - 160px);
+    min-height: 640px;
     overflow-y: auto;
 }
 
@@ -108,16 +108,16 @@ body {
     }
 }
 
-@media (min-width: 1440px) {
-    .app-grid {
-        grid-template-columns: minmax(0, 1.2fr) minmax(360px, 440px);
-        gap: 1.75rem;
-    }
+    @media (min-width: 1440px) {
+        .app-grid {
+            grid-template-columns: minmax(0, 1.2fr) minmax(360px, 440px);
+            gap: 1.75rem;
+        }
 
-    #modeContainer {
-        max-height: calc(100vh - 200px);
+        #modeContainer {
+            max-height: calc(100vh - 130px);
+        }
     }
-}
 
 .display-fluid {
     font-size: clamp(2.75rem, 2vw + 2.4rem, 5rem);

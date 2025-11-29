@@ -1875,7 +1875,7 @@ const sessions = {
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
-                const jitter = Math.sin(t * 1.6) * 0.18 + (Math.random() * 0.06 - 0.03);
+                const jitter = (Math.sin(t * 2.1) * 0.45) + (Math.sin(t * 3.4) * 0.2) + (Math.random() * 0.16 - 0.08);
                 const displayHz = Math.max(0, currentHz + jitter).toFixed(2);
                 els.realtimeHz.textContent = `${displayHz} Hz`;
 
