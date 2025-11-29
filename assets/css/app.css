@@ -74,20 +74,21 @@ body {
 .app-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
     align-items: start;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1100px) {
     .app-grid {
-        grid-template-columns: minmax(360px, 0.95fr) minmax(640px, 1.35fr);
-        gap: 1.75rem;
+        grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
+        gap: 1.5rem;
     }
 }
 
 @media (min-width: 1440px) {
     .app-grid {
-        grid-template-columns: minmax(380px, 1fr) minmax(760px, 1.45fr);
+        grid-template-columns: minmax(380px, 440px) minmax(0, 1fr);
+        gap: 1.75rem;
     }
 }
 
@@ -330,6 +331,8 @@ body {
 
 #modeContainer {
     max-height: calc(100vh - 240px);
+    min-height: 420px;
+    overflow-y: auto;
 }
 
 @media (min-width: 1280px) {
