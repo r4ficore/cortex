@@ -1866,21 +1866,45 @@ const sessions = {
                 if (state.audio.masterGain) { state.audio.masterGain.dispose(); state.audio.masterGain = null; }
             }
 
-            function updateAudio(phase, progress, t) {
-                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
-                const a = phase.audio || {};
-                if (a.l) state.audio.oscL.frequency.value = a.l;
-                if (a.r) state.audio.oscR.frequency.value = a.r;
+            function getBaseHz(phase) {
+                const a = phase?.audio || {};
+                if (typeof a.l === 'number' && typeof a.r === 'number') {
+                    return Math.abs(a.l - a.r);
+                }
+                if (typeof phase?.baseHz === 'number') {
+                    return Math.abs(phase.baseHz);
+                }
+                if (typeof phase?.baseHz === 'string') {
+                    const parsed = parseFloat(phase.baseHz);
+                    if (!isNaN(parsed) && isFinite(parsed)) return Math.abs(parsed);
+                }
+                return null;
+            }
 
-                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
+            function updateRealtimeHzDisplay(phase, t) {
+                const a = phase?.audio || {};
+                const baseHz = getBaseHz(phase) ?? 0;
+                const currentHz = (state.audio.oscL && state.audio.oscR)
+                    ? Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value)
+                    : (typeof a.l === 'number' && typeof a.r === 'number' ? Math.abs(a.l - a.r) : baseHz);
 
-                const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
                 const jitter = (Math.sin(t * 2.35) * 0.6)
                     + (Math.sin(t * 3.8) * 0.35)
                     + (Math.sin(t * 5.1) * 0.18)
                     + (Math.random() * 0.24 - 0.12);
                 const displayHz = Math.max(0, currentHz + jitter).toFixed(2);
                 els.realtimeHz.textContent = `${displayHz} Hz`;
+            }
+
+            function updateAudio(phase, progress, t) {
+                updateRealtimeHzDisplay(phase, t);
+
+                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
+                const a = phase.audio || {};
+                if (a.l) state.audio.oscL.frequency.value = a.l;
+                if (a.r) state.audio.oscR.frequency.value = a.r;
+
+                const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
 
                 let vol = 0.2;
                 if(a.vol !== undefined) vol = a.vol;
@@ -2222,8 +2246,11 @@ const sessions = {
                         }
                     }
 
-                    if (state.preview) { drawVisual(data.phases[1] || data.phases[0], 0.5, elapsed); }
-                    else {
+                    if (state.preview) {
+                        const previewPhase = data.phases[1] || data.phases[0];
+                        updateRealtimeHzDisplay(previewPhase, elapsed);
+                        drawVisual(previewPhase, 0.5, elapsed);
+                    } else {
                         const phaseDuration = currentPhase.end === Infinity ? 1 : (currentPhase.end - currentPhase.start);
                         const phaseProgress = currentPhase.end === Infinity ? 0 : (elapsed - currentPhase.start) / phaseDuration;
 
