@@ -362,7 +362,7 @@ const sessions = {
                 session: userPreferences.data.lastSessionId || 'prime',
                 startTime: 0,
                 sessionStartTs: null,
-                preview: true,
+                preview: false,
                 focusLock: false,
                 noiseType: userPreferences.data.preferredNoiseType || 'brown',
                 breathingPacer: !!userPreferences.data.breathEnabled,
@@ -1765,16 +1765,20 @@ const sessions = {
                 if (els.messageTitle) els.messageTitle.textContent = data.name;
                 if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
-                const firstPhase = data.phases?.[0];
-                let startHz = '-- Hz';
-                if(firstPhase?.audio?.l && firstPhase?.audio?.r) {
-                    startHz = `${Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2)} Hz`;
-                } else if(typeof data.baseHz === 'number') {
-                    startHz = `${data.baseHz.toFixed(2)} Hz`;
-                } else if(typeof data.baseHz === 'string') {
-                    startHz = data.baseHz;
+                if (state.active || state.preview) {
+                    const firstPhase = data.phases?.[0];
+                    let startHz = '-- Hz';
+                    if(firstPhase?.audio?.l && firstPhase?.audio?.r) {
+                        startHz = `${Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2)} Hz`;
+                    } else if(typeof data.baseHz === 'number') {
+                        startHz = `${data.baseHz.toFixed(2)} Hz`;
+                    } else if(typeof data.baseHz === 'string') {
+                        startHz = data.baseHz;
+                    }
+                    els.realtimeHz.textContent = startHz;
+                } else {
+                    els.realtimeHz.textContent = '0 Hz';
                 }
-                els.realtimeHz.textContent = startHz;
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
