@@ -362,7 +362,7 @@ const sessions = {
                 session: userPreferences.data.lastSessionId || 'prime',
                 startTime: 0,
                 sessionStartTs: null,
-                preview: false,
+                preview: true,
                 focusLock: false,
                 noiseType: userPreferences.data.preferredNoiseType || 'brown',
                 breathingPacer: !!userPreferences.data.breathEnabled,
@@ -498,8 +498,6 @@ const sessions = {
                 leftPanel: document.getElementById('leftPanel'),
                 appFooter: document.getElementById('appFooter'),
                 appHeader: document.getElementById('appHeader'),
-                sessionStatusCard: document.getElementById('sessionStatusCard'),
-                statusCardAnchor: document.getElementById('statusCardAnchor'),
                 calibStepList: document.getElementById('calibStepList'),
                 calibEta: document.getElementById('calibEta'),
                 calibMode: document.getElementById('calibMode'),
@@ -1765,20 +1763,16 @@ const sessions = {
                 if (els.messageTitle) els.messageTitle.textContent = data.name;
                 if (els.desc) els.desc.textContent = data.desc;
                 els.timer.textContent = formatTime(data.duration);
-                if (state.active || state.preview) {
-                    const firstPhase = data.phases?.[0];
-                    let startHz = '-- Hz';
-                    if(firstPhase?.audio?.l && firstPhase?.audio?.r) {
-                        startHz = `${Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2)} Hz`;
-                    } else if(typeof data.baseHz === 'number') {
-                        startHz = `${data.baseHz.toFixed(2)} Hz`;
-                    } else if(typeof data.baseHz === 'string') {
-                        startHz = data.baseHz;
-                    }
-                    els.realtimeHz.textContent = startHz;
-                } else {
-                    els.realtimeHz.textContent = '0 Hz';
+                const firstPhase = data.phases?.[0];
+                let startHz = '-- Hz';
+                if(firstPhase?.audio?.l && firstPhase?.audio?.r) {
+                    startHz = `${Math.abs(firstPhase.audio.l - firstPhase.audio.r).toFixed(2)} Hz`;
+                } else if(typeof data.baseHz === 'number') {
+                    startHz = `${data.baseHz.toFixed(2)} Hz`;
+                } else if(typeof data.baseHz === 'string') {
+                    startHz = data.baseHz;
                 }
+                els.realtimeHz.textContent = startHz;
                 els.phaseName.textContent = "Gotowy";
                 updateBreathPatternUI();
                 updateHypnosDurationUI();
@@ -1870,45 +1864,17 @@ const sessions = {
                 if (state.audio.masterGain) { state.audio.masterGain.dispose(); state.audio.masterGain = null; }
             }
 
-            function getBaseHz(phase) {
-                const a = phase?.audio || {};
-                if (typeof a.l === 'number' && typeof a.r === 'number') {
-                    return Math.abs(a.l - a.r);
-                }
-                if (typeof phase?.baseHz === 'number') {
-                    return Math.abs(phase.baseHz);
-                }
-                if (typeof phase?.baseHz === 'string') {
-                    const parsed = parseFloat(phase.baseHz);
-                    if (!isNaN(parsed) && isFinite(parsed)) return Math.abs(parsed);
-                }
-                return null;
-            }
-
-            function updateRealtimeHzDisplay(phase, t) {
-                const a = phase?.audio || {};
-                const baseHz = getBaseHz(phase) ?? 0;
-                const currentHz = (state.audio.oscL && state.audio.oscR)
-                    ? Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value)
-                    : (typeof a.l === 'number' && typeof a.r === 'number' ? Math.abs(a.l - a.r) : baseHz);
-
-                const jitter = (Math.sin(t * 2.35) * 0.6)
-                    + (Math.sin(t * 3.8) * 0.35)
-                    + (Math.sin(t * 5.1) * 0.18)
-                    + (Math.random() * 0.24 - 0.12);
-                const displayHz = Math.max(0, currentHz + jitter).toFixed(2);
-                els.realtimeHz.textContent = `${displayHz} Hz`;
-            }
-
             function updateAudio(phase, progress, t) {
-                updateRealtimeHzDisplay(phase, t);
-
-                if (!state.audio.gain || !state.audio.oscL || !state.audio.oscR) return;
+                if (!state.audio.beatGain || !state.audio.oscL || !state.audio.oscR) return;
                 const a = phase.audio || {};
                 if (a.l) state.audio.oscL.frequency.value = a.l;
                 if (a.r) state.audio.oscR.frequency.value = a.r;
 
                 const intensity = intensityProfiles[state.intensityLevel] || intensityProfiles.medium;
+
+                const currentHz = Math.abs(state.audio.oscL.frequency.value - state.audio.oscR.frequency.value);
+                const displayHz = (currentHz + (Math.random() * 0.05 - 0.025)).toFixed(2);
+                els.realtimeHz.textContent = `${displayHz} Hz`;
 
                 let vol = 0.2;
                 if(a.vol !== undefined) vol = a.vol;
@@ -2250,11 +2216,8 @@ const sessions = {
                         }
                     }
 
-                    if (state.preview) {
-                        const previewPhase = data.phases[1] || data.phases[0];
-                        updateRealtimeHzDisplay(previewPhase, elapsed);
-                        drawVisual(previewPhase, 0.5, elapsed);
-                    } else {
+                    if (state.preview) { drawVisual(data.phases[1] || data.phases[0], 0.5, elapsed); }
+                    else {
                         const phaseDuration = currentPhase.end === Infinity ? 1 : (currentPhase.end - currentPhase.start);
                         const phaseProgress = currentPhase.end === Infinity ? 0 : (elapsed - currentPhase.start) / phaseDuration;
 
@@ -2302,20 +2265,5 @@ const sessions = {
                     else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
                 }
             }
-            function handleFullscreenChange() {
-                const isFs = document.fullscreenElement === els.visualizer || document.webkitFullscreenElement === els.visualizer;
-                document.body.classList.toggle('fullscreen-active', isFs);
-                if (els.sessionStatusCard && els.visualizer && els.statusCardAnchor) {
-                    if (isFs) {
-                        els.sessionStatusCard.classList.add('fullscreen-status-card');
-                        els.visualizer.appendChild(els.sessionStatusCard);
-                    } else {
-                        els.sessionStatusCard.classList.remove('fullscreen-status-card');
-                        els.statusCardAnchor.insertAdjacentElement('afterend', els.sessionStatusCard);
-                    }
-                }
-                setTimeout(resizeCanvas, 100);
-            }
-            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, handleFullscreenChange); });
+            ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => { document.addEventListener(event, () => { setTimeout(resizeCanvas, 100); }); });
             init();
-            handleFullscreenChange();
