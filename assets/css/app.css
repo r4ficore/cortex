@@ -83,9 +83,16 @@ body {
 }
 
 #modeContainer {
-    max-height: 1360px;
-    min-height: 960px;
+    min-height: 680px;
+    max-height: calc(100vh - 220px);
     overflow-y: auto;
+}
+
+@media (min-width: 1440px) {
+    #modeContainer {
+        min-height: 820px;
+        max-height: calc(100vh - 200px);
+    }
 }
 
 .main-panel {
