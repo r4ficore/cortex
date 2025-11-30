@@ -111,6 +111,76 @@ const sessions = {
                         { name: "Flow", start: 0, end: 360, audio: { l: 240, r: 250, vol_s: 0.2, vol_e: 0.35 }, visual: { f: 10, mod: 'soft' } },
                         { name: "Spokój", start: 360, end: 420, audio: { l: 240, r: 250, vol_s: 0.35, vol_e: 0.1 }, visual: { f: 8, mod: 'soft' } }
                     ]
+                },
+                auroraReset: {
+                    id: "auroraReset",
+                    name: "Aurora Reset",
+                    category: "Reset",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path><polyline points="21 3 21 12 12 12"></polyline></svg>`,
+                    desc: "Reset dobowy po zmianie strefy – od delta/theta do łagodnego świtu.",
+                    duration: 1800,
+                    baseHz: "Delta-Theta 1.5-9Hz",
+                    phases: [
+                        { name: "Prime", start: 0, end: 300, audio: { l: 160, r: 164, vol_s: 0.12, vol_e: 0.18 }, visual: { f: 5, mod: 'soft', bri: 0.35 } },
+                        { name: "Anchor", start: 300, end: 1200, audio: { l: 180, r: 188, vol_s: 0.18, vol_e: 0.25, mod: 'pulse' }, visual: { f: 9, mod: 'breath', bri: 0.45 } },
+                        { name: "Stabilize", start: 1200, end: 1800, audio: { l: 170, r: 175, vol_s: 0.22, vol_e: 0.12 }, visual: { f: 6, mod: 'soft', bri: 0.4 } }
+                    ]
+                },
+                cortexForge: {
+                    id: "cortexForge",
+                    name: "Cortex Forge",
+                    category: "Work",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+                    desc: "Hiper-fokus kognitywny z mikropulsami Gamma i przerwami co 10 min.",
+                    duration: 2040,
+                    baseHz: "Beta/Gamma 12-40Hz",
+                    phases: [
+                        { name: "Ignite", start: 0, end: 240, audio: { l: 230, r: 244, vol_s: 0.18, vol_e: 0.32 }, visual: { f: 12, mod: 'soft', bri: 0.65 } },
+                        { name: "Drive", start: 240, end: 1800, audio: { l: 250, r: 268, vol_s: 0.3, vol_e: 0.42, mod: 'pulse' }, visual: { f: 18, mod: 'hard', bri: 0.85 } },
+                        { name: "Cool", start: 1800, end: 2040, audio: { l: 210, r: 222, vol_s: 0.32, vol_e: 0.15 }, visual: { f: 12, mod: 'breath', bri: 0.55 } }
+                    ]
+                },
+                parasymPathway: {
+                    id: "parasymPathway",
+                    name: "Parasym Pathway",
+                    category: "Calm",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0"></path><path d="M12 7v10"></path><path d="M9 10h6"></path></svg>`,
+                    desc: "Reset parasympatyczny z zejściem do 3-4Hz i powrotem do 8Hz.",
+                    duration: 1440,
+                    baseHz: "Theta-Delta 3-8Hz",
+                    phases: [
+                        { name: "Release", start: 0, end: 300, audio: { l: 170, r: 176, vol_s: 0.12, vol_e: 0.22 }, visual: { f: 7, mod: 'breath', bri: 0.4 } },
+                        { name: "Deep Sink", start: 300, end: 1020, audio: { l: 140, r: 143, vol_s: 0.22, vol_e: 0.2, mod: 'pulse' }, visual: { f: 4, mod: 'soft', bri: 0.25 } },
+                        { name: "Rebalance", start: 1020, end: 1440, audio: { l: 170, r: 178, vol_s: 0.2, vol_e: 0.14 }, visual: { f: 8, mod: 'soft', bri: 0.35 } }
+                    ]
+                },
+                remSculpt: {
+                    id: "remSculpt",
+                    name: "REM Sculpt",
+                    category: "Sleep",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"></path><path d="M14 14h7v7h-7z"></path><path d="M7 14h2v2H7z"></path><path d="M15 7h2v2h-2z"></path><path d="M10 3 21 14"></path></svg>`,
+                    desc: "Hipnagogia i REM Drift z markerami 10Hz i łagodnym wybudzeniem.",
+                    duration: 2100,
+                    baseHz: "Theta/Alpha 4-10Hz",
+                    phases: [
+                        { name: "Hypnagogic Gate", start: 0, end: 600, audio: { l: 170, r: 176, vol_s: 0.1, vol_e: 0.22 }, visual: { f: 7, mod: 'breath', bri: 0.45 } },
+                        { name: "REM Drift", start: 600, end: 1800, audio: { l: 160, r: 166, vol_s: 0.22, vol_e: 0.28, mod: 'pulse' }, visual: { f: 6, mod: 'soft', bri: 0.4 } },
+                        { name: "Wake Buffer", start: 1800, end: 2100, audio: { l: 180, r: 188, vol_s: 0.28, vol_e: 0.15 }, visual: { f: 9, mod: 'soft', bri: 0.5 } }
+                    ]
+                },
+                gammaLift: {
+                    id: "gammaLift",
+                    name: "Gamma Lift",
+                    category: "Activation",
+                    icon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20 20 5"></path><path d="m9 5 11 0 0 11"></path><path d="M5 9h4v4"></path></svg>`,
+                    desc: "Szybkie pobudzenie Gamma z kontrolowanym lądowaniem do 12Hz.",
+                    duration: 960,
+                    baseHz: "Gamma 35-40Hz",
+                    phases: [
+                        { name: "Ramp", start: 0, end: 180, audio: { l: 240, r: 258, vol_s: 0.22, vol_e: 0.36 }, visual: { f: 16, mod: 'pulse', bri: 0.75 } },
+                        { name: "Peak", start: 180, end: 660, audio: { l: 260, r: 300, vol_s: 0.36, vol_e: 0.4, mod: 'hard' }, visual: { f: 38, mod: 'hard', bri: 0.9 } },
+                        { name: "Landing", start: 660, end: 960, audio: { l: 230, r: 242, vol_s: 0.35, vol_e: 0.16 }, visual: { f: 12, mod: 'breath', bri: 0.55 } }
+                    ]
                 }
             };
 
