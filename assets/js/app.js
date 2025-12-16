@@ -367,19 +367,19 @@ const sessions = {
             const breathPatterns = {
                 auto: { label: 'Auto (wg trybu)' },
                 '4-6': { label: '4–6', sequence: [
-                    { label: 'IN', duration: 4 },
-                    { label: 'OUT', duration: 6 }
+                    { label: 'WDECH', duration: 4 },
+                    { label: 'WYDECH', duration: 6 }
                 ] },
                 '4-7-8': { label: '4–7–8', sequence: [
-                    { label: 'IN', duration: 4 },
-                    { label: 'HOLD', duration: 7 },
-                    { label: 'OUT', duration: 8 }
+                    { label: 'WDECH', duration: 4 },
+                    { label: 'WSTRZYMAJ', duration: 7 },
+                    { label: 'WYDECH', duration: 8 }
                 ] },
                 box: { label: 'Box 4–4–4–4', sequence: [
-                    { label: 'IN', duration: 4 },
-                    { label: 'HOLD', duration: 4 },
-                    { label: 'OUT', duration: 4 },
-                    { label: 'HOLD', duration: 4 }
+                    { label: 'WDECH', duration: 4 },
+                    { label: 'WSTRZYMAJ', duration: 4 },
+                    { label: 'WYDECH', duration: 4 },
+                    { label: 'WSTRZYMAJ', duration: 4 }
                 ] }
             };
 
@@ -2158,7 +2158,7 @@ const sessions = {
                         for (const step of sequence) {
                             const start = elapsed;
                             const end = elapsed + step.duration;
-                            const targetLevel = step.label === 'IN' ? 1 : step.label === 'OUT' ? 0 : currentLevel;
+                            const targetLevel = step.label === 'WDECH' ? 1 : step.label === 'WYDECH' ? 0 : currentLevel;
 
                             if (cycleT >= start && cycleT < end) {
                                 const localP = (cycleT - start) / step.duration;
