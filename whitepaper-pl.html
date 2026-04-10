@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whitepaper — Kora Cortex: Neurotechnologia i Modulacja Fal Mózgowych</title>
+    <meta name="description" content="Recenzowana neuronauka za Kora Cortex. Odpowiedź Podążania za Częstotliwością (FFR), tony izochroniczne vs binaural beats, neuroprotekcja Gamma 40 Hz, oczyszczanie glimfatyczne i protokoły bezpieczeństwa.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #050508;
+            --bg-card: rgba(255,255,255,0.02);
+            --border: rgba(255,255,255,0.06);
+            --border-light: rgba(255,255,255,0.1);
+            --text-primary: #f0f0f5;
+            --text-secondary: rgba(240,240,245,0.75);
+            --text-muted: rgba(240,240,245,0.5);
+            --text-dim: rgba(240,240,245,0.3);
+            --accent-cyan: #22d3ee;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-sans); background: var(--bg-primary); color: var(--text-secondary); line-height: 1.8; font-size: 0.9375rem; -webkit-font-smoothing: antialiased; }
+        ::selection { background: var(--accent-cyan); color: #000; }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+        .wp-nav { position: sticky; top: 0; z-index: 100; padding: 1rem 0; background: rgba(5,5,8,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        .wp-nav .container { display: flex; align-items: center; justify-content: space-between; max-width: 720px; }
+        .wp-nav-logo { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.15em; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+        .wp-nav-logo .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); }
+        .wp-nav-back { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent-cyan); text-decoration: none; letter-spacing: 0.04em; opacity: 0.7; transition: opacity 0.2s; }
+        .wp-nav-back:hover { opacity: 1; }
+        .wp-nav-lang { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-dim); text-decoration: none; border: 1px solid var(--border-light); padding: 0.25rem 0.5rem; border-radius: 4px; transition: color 0.2s, border-color 0.2s; }
+        .wp-nav-lang:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+        .wp-hero { padding: 6rem 0 4rem; border-bottom: 1px solid var(--border); }
+        .wp-hero .micro-label { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.2em; color: var(--accent-cyan); margin-bottom: 1.5rem; }
+        .wp-hero h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 1.5rem; }
+        .wp-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-dim); letter-spacing: 0.04em; margin-bottom: 2rem; }
+        .wp-abstract { font-size: 0.9375rem; color: var(--text-muted); line-height: 1.9; font-style: italic; border-left: 2px solid var(--accent-cyan); padding-left: 1.25rem; }
+        .wp-toc { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+        .wp-toc h2 { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.2em; color: var(--accent-cyan); margin-bottom: 1.5rem; }
+        .wp-toc ol { list-style: none; counter-reset: toc; }
+        .wp-toc li { counter-increment: toc; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+        .wp-toc li:last-child { border-bottom: none; }
+        .wp-toc a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; display: flex; align-items: center; gap: 0.75rem; }
+        .wp-toc a::before { content: counter(toc, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-dim); min-width: 1.5rem; }
+        .wp-toc a:hover { color: var(--accent-cyan); }
+        .wp-content { padding: 3rem 0; }
+        .wp-section { padding: 2rem 0; border-bottom: 1px solid var(--border); }
+        .wp-section:last-child { border-bottom: none; }
+        .wp-section h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+        .wp-section h2 .sec-num { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent-cyan); letter-spacing: 0.1em; }
+        .wp-section h3 { font-size: 1rem; font-weight: 500; color: var(--text-primary); margin: 2rem 0 0.75rem; }
+        .wp-section p { margin-bottom: 1rem; }
+        .wp-section p sup { font-family: var(--font-mono); font-size: 0.625rem; color: var(--accent-cyan); margin-left: 1px; }
+        .key-finding { background: var(--bg-card); border: 1px solid var(--border-light); border-left: 3px solid var(--accent-cyan); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; font-size: 0.875rem; line-height: 1.7; }
+        .key-finding strong { color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem; }
+        .wp-table-wrapper { overflow-x: auto; margin: 2rem 0; border: 1px solid var(--border-light); border-radius: 8px; }
+        .wp-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+        .wp-table thead { background: rgba(34, 211, 238, 0.05); }
+        .wp-table th { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.06em; color: var(--accent-cyan); text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+        .wp-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+        .wp-table tr:last-child td { border-bottom: none; }
+        .wp-table .band-name { font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+        .wp-references { padding: 3rem 0; border-top: 1px solid var(--border); }
+        .wp-references h2 { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.2em; color: var(--accent-cyan); margin-bottom: 1.5rem; }
+        .wp-references ol { list-style: none; counter-reset: refs; }
+        .wp-references li { counter-increment: refs; font-size: 0.75rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 0.5rem; padding-left: 2rem; position: relative; }
+        .wp-references li::before { content: counter(refs) "."; position: absolute; left: 0; font-family: var(--font-mono); font-size: 0.625rem; color: var(--text-dim); }
+        .wp-references li a { color: var(--accent-cyan); opacity: 0.5; text-decoration: none; }
+        .wp-references li a:hover { opacity: 1; }
+        .wp-cta { text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); }
+        .wp-cta p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .wp-cta a { display: inline-block; font-family: var(--font-mono); font-size: 0.8125rem; letter-spacing: 0.06em; color: #000; background: var(--accent-cyan); padding: 0.875rem 2rem; border-radius: 6px; text-decoration: none; font-weight: 500; transition: transform 0.2s, box-shadow 0.2s; }
+        .wp-cta a:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34, 211, 238, 0.2); }
+        .wp-footer { border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; }
+        .wp-footer p { font-size: 0.6875rem; color: var(--text-dim); }
+        .pdf-download { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-muted); text-decoration: none; border: 1px solid var(--border-light); padding: 0.5rem 1rem; border-radius: 6px; transition: border-color 0.2s, color 0.2s; margin-top: 1.5rem; }
+        .pdf-download:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        @media (max-width: 640px) { .wp-hero { padding: 4rem 0 3rem; } .wp-meta { gap: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="wp-nav">
+        <div class="container">
+            <a href="landing.html" class="wp-nav-logo"><span class="dot"></span><span>KORA CORTEX</span></a>
+            <div style="display:flex;gap:1rem;align-items:center;">
+                <a href="whitepaper.html" class="wp-nav-lang">EN</a>
+                <a href="landing.html" class="wp-nav-back">← Powrót do produktu</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="wp-hero">
+        <div class="container">
+            <p class="micro-label">WHITEPAPER</p>
+            <h1>Neurotechnologia Cyfrowa i Modulacja Fal Mózgowych: Raport Badań Podstawowych</h1>
+            <div class="wp-meta">
+                <span>KORA CORTEX RESEARCH</span>
+                <span>48 RECENZOWANYCH ŹRÓDEŁ</span>
+                <span>2025-2026</span>
+            </div>
+            <p class="wp-abstract">
+                Rygorystyczna analiza mechanizmów biofizycznych i neurofizjologicznych leżących u podstaw
+                technologii entrainmentu fal mózgowych (BWE). Raport obejmuje Odpowiedź Podążania za Częstotliwością (FFR),
+                porównanie tonów izochronicznych z dudnieniami różnicowymi, neuroprotekcję Gamma 40 Hz (protokół MIT GENUS),
+                oczyszczanie glimfatyczne podczas snu Delta oraz standardy bezpieczeństwa fotostymulacji
+                — tworząc naukowe fundamenty algorytmów neuromodulacji Kora Cortex.
+            </p>
+            <a href="Kora Cortex_ Whitepaper Neurotechnologii.pdf" class="pdf-download" download>↓ Pobierz pełny PDF (3 MB)</a>
+        </div>
+    </header>
+
+    <section class="wp-toc">
+        <div class="container">
+            <h2>SPIS TREŚCI</h2>
+            <ol>
+                <li><a href="#s1">Neurofizjologiczne Podstawy Entrainmentu (BWE)</a></li>
+                <li><a href="#s2">Architektura Audytywna: Analiza Porównawcza</a></li>
+                <li><a href="#s3">Spektrum Częstotliwości i Zastosowania Kliniczne</a></li>
+                <li><a href="#s4">Bezpieczeństwo i Standardy Fotostymulacji (Harding FPA)</a></li>
+                <li><a href="#s5">Synteza i Strategia Rozwoju</a></li>
+                <li><a href="#refs">Bibliografia (48 źródeł)</a></li>
+            </ol>
+        </div>
+    </section>
+
+    <main class="wp-content">
+        <div class="container">
+
+            <section class="wp-section" id="s1">
+                <h2><span class="sec-num">01</span> Neurofizjologiczne Podstawy Entrainmentu</h2>
+
+                <h3>1.1 Dynamika Odpowiedzi Podążania za Częstotliwością (FFR)</h3>
+                <p>Fundamentem działania aplikacji klasyfikowanych jako „Digital Drug" lub narzędzia bio-hackingowe jest zjawisko odpowiedzi podążania za częstotliwością (Frequency Following Response – FFR). Jest to wskaźnik wierności kodowania neuronalnego, odzwierciedlający zdolność układu nerwowego do synchronizacji wewnętrznych oscylacji z periodycznym bodźcem zewnętrznym.<sup>1</sup></p>
+
+                <p>Historycznie dominował pogląd, że FFR jest generowane niemal wyłącznie w strukturach pnia mózgu (wzgórki dolne – inferior colliculus). Współczesne badania z wykorzystaniem MEG i EEG zrewolucjonizowały to podejście, dowodząc znaczącego udziału kory słuchowej w generowaniu FFR. Coffey et al. (2021) wykazali silną korelację oscylacji neuronalnych w korze słuchowej — ze szczególnym uwzględnieniem prawej półkuli — z bodźcem zewnętrznym.<sup>1</sup></p>
+
+                <div class="key-finding">
+                    <strong>KLUCZOWA IMPLIKACJA DLA KORA CORTEX</strong>
+                    Entrainment nie jest jedynie biernym „dostrajaniem" pnia mózgu — lecz aktywnym procesem angażującym korę mózgową, co otwiera drogę do modulacji wyższych funkcji poznawczych: uwagi, pamięci roboczej i przetwarzania językowego.<sup>4</sup>
+                </div>
+
+                <h3>1.2 Ścieżki Przetwarzania Sygnału</h3>
+                <p>Dudnienia różnicowe (binaural beats) nie istnieją fizycznie w fali dźwiękowej. Są konstruktem percepcyjnym powstającym w oliwie górnej (superior olivary complex), gdzie mózg integruje sygnały z obu uszu. Proces ten wymaga nienaruszonej interakcji międzyusznej i jest silnie zależny od integralności pnia mózgu.<sup>5</sup></p>
+
+                <p>Tony izochroniczne i dudnienia monoauralne to fizyczne modulacje amplitudy, kodowane już na poziomie błony podstawnej ślimaka. Sygnał transmitowany jest przez ciało kolankowate przyśrodkowe we wzgórzu bezpośrednio do kory słuchowej.<sup>7</sup></p>
+
+                <div class="key-finding">
+                    <strong>KLUCZOWE ROZRÓŻNIENIE</strong>
+                    Tony izochroniczne, z ich ostrymi impulsami on/off, wywołują silniejszą odpowiedź wywołaną i skuteczniejszą synchronizację wzgórzowo-korową niż subtelniejsze dudnienia różnicowe.<sup>8</sup> Wzgórze pełni rolę „rozrusznika" wielu rytmów korowych — czyniąc stymulację izochroniczną priorytetem dla szybkich, głębokich zmian stanu (koncentracja, skupienie).
+                </div>
+            </section>
+
+            <section class="wp-section" id="s2">
+                <h2><span class="sec-num">02</span> Architektura Audytywna: Analiza Porównawcza</h2>
+
+                <p>Wybór odpowiedniej architektury audytywnej jest decyzją strategiczną, determinującą skuteczność kliniczną aplikacji. Różne modalności stymulacji aktywują odmienne ścieżki neuronalne.</p>
+
+                <div class="wp-table-wrapper">
+                    <table class="wp-table">
+                        <thead>
+                            <tr>
+                                <th>Metoda</th>
+                                <th>Mechanizm Neurologiczny</th>
+                                <th>Wymagania Sprzętowe</th>
+                                <th>Głębokość Modulacji</th>
+                                <th>Zastosowanie w Kora Cortex</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="band-name">Binaural Beats</td>
+                                <td>Integracja w oliwie górnej (pień mózgu). Iluzja trzeciego tonu</td>
+                                <td>Słuchawki stereo (bezwzględnie)</td>
+                                <td>Niska (~3 dB)</td>
+                                <td>Relaksacja, integracja międzypółkulowa, sen</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">Monaural Beats</td>
+                                <td>Fizyczna interferencja fal na błonie podstawnej ślimaka</td>
+                                <td>Głośniki lub słuchawki</td>
+                                <td>Średnia (~20 dB)</td>
+                                <td>Alternatywa dla użytkowników wrażliwych na ostre dźwięki</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">Tony Izochroniczne</td>
+                                <td>Bezpośrednia stymulacja wzgórza, brak habituacji</td>
+                                <td>Głośniki lub słuchawki</td>
+                                <td>Bardzo wysoka (~50 dB)</td>
+                                <td>Power Focus, energetyzacja, szybkie wejście w stan</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">Szum Różowy</td>
+                                <td>Hipoteza rezonansu stochastycznego, rozkład mocy 1/f</td>
+                                <td>Dowolne</td>
+                                <td>N/A (szerokopasmowy)</td>
+                                <td>Wsparcie snu (faza SWS), stabilizacja środowiska</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>Badania Reedijk et al. i innych zespołów wykazują, że tony izochroniczne wywołują mierzalne zmiany mocy EEG na częstotliwości docelowej bardziej niezawodnie niż dudnienia różnicowe, szczególnie powyżej 8 Hz.<sup>9,15</sup> Ścieżka wzgórzowa zapewnia bardziej bezpośrednią i silniejszą drogę do synchronizacji korowej.</p>
+            </section>
+
+            <section class="wp-section" id="s3">
+                <h2><span class="sec-num">03</span> Spektrum Częstotliwości i Zastosowania Kliniczne</h2>
+
+                <h3>3.1 Gamma (40 Hz): Neuroprotekcja</h3>
+                <p>Protokół MIT GENUS (Gamma Entrainment Using Sensory stimulation) wykazał, że stymulacja gamma 40 Hz aktywuje fagocytozę mikrogleju, promuje wazodylatację i ułatwia synchronizację międzyobszarową mózgu. Efekt jest wysoce specyficzny częstotliwościowo — tylko 40 Hz wywołuje tę kaskadę.<sup>20</sup></p>
+
+                <p>Układ glimfatyczny — mechanizm oczyszczania mózgu z odpadów metabolicznych — aktywuje się podczas głębokiego snu, zwiększając przestrzeń śródmiąższową o około 60%, umożliwiając konwekcyjny przepływ CSF wypłukujący złogi beta-amyloidu.<sup>19</sup> Stymulacja gamma wzmacnia ten proces.</p>
+
+                <div class="key-finding">
+                    <strong>ZNACZENIE KLINICZNE</strong>
+                    Dowody na neuroprotekcyjne działanie stymulacji 40 Hz stale się rozszerzają. Połączenie entrainmentu gamma z optymalizacją snu stanowi dwutorowe podejście do ochrony funkcji poznawczych.
+                </div>
+
+                <h3>3.2 Delta (0.5-4 Hz): Głęboka Regeneracja</h3>
+                <p>Entrainment Delta wspiera dwa krytyczne procesy: indukcję snu (skrócenie latencji poprzez protokoły ramp-down) oraz wzmocnienie fazy N3. Bodźce zsynchronizowane z oscylacjami wolnofalowymi mogą wydłużyć czas trwania snu głębokiego i zwiększyć amplitudę oscylacji, intensyfikując oczyszczanie glimfatyczne.<sup>13</sup></p>
+
+                <h3>3.3 Theta (4-8 Hz): Brama do Pamięci i Stanów Granicznych</h3>
+                <p>Frontal Midline Theta (FmTheta) jest silnym markerem wysiłku poznawczego i sukcesu w zadaniach pamięciowych. Jednakże nadmiar rozlanej aktywności Theta w stanie czuwania wskazuje na presję snu i może obniżać czujność.<sup>32</sup> Moduły Theta muszą być zatem precyzyjnie profilowane: „Deep Meditation" dla wsparcia mindfulness lub „Hypnagogic Nap" dla krótkich sesji regeneracyjnych.</p>
+
+                <h3>3.4 Alpha (8-12 Hz): Fizjologia Stanu Flow</h3>
+                <p>Neurologicznie, stan Flow wiąże się z koncepcją transient hypofrontality — przejściowym obniżeniem aktywności kory przedczołowej. W EEG objawia się to wzrostem mocy Alpha w płatach czołowych i ciemieniowych, funkcjonując jako mechanizm inhibicji top-down — mózg aktywnie wygasza dystraktory.<sup>34</sup></p>
+
+                <p>Badania Reedijk et al. (2013) wykazały, że wpływ dudnień różnicowych na kreatywność dywergencyjną zależy od bazowego poziomu dopaminy (mierzonego wskaźnikiem częstotliwości mrugania — Eye Blink Rate). Osoby z niskim EBR odnosiły korzyści ze stymulacji Alpha, podczas gdy u osób z wysokim EBR stymulacja nie przynosiła efektów lub pogarszała wyniki.<sup>17</sup> Sugeruje to konieczność kalibracji sesji pod kątem profilu neurochemicznego użytkownika.</p>
+
+                <h3>3.5 Beta/SMR (12-30 Hz): Uwaga i Jej Ograniczenia</h3>
+                <p>Wysoka Beta (&gt;20 Hz) może korelować ze stanami lękowymi. Kora Cortex celuje zatem w pasmo SMR (Sensory Motor Rhythm, 12-15 Hz), które wiąże się ze „spokojnym skupieniem" i stabilizacją uwagi bez ryzyka nadmiernego pobudzenia układu nerwowego.<sup>37</sup></p>
+
+                <div class="wp-table-wrapper">
+                    <table class="wp-table">
+                        <thead>
+                            <tr>
+                                <th>Pasmo</th>
+                                <th>Cel Bio-hackingu</th>
+                                <th>Mechanizm Neurofizjologiczny</th>
+                                <th>Kluczowe Parametry</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="band-name">40 Hz (Gamma)</td>
+                                <td>Neuroprotekcja, Pamięć</td>
+                                <td>Aktywacja fagocytozy mikrogleju, wazodylatacja, synchronizacja międzyobszarowa</td>
+                                <td>Protokół GENUS. Tylko 40 Hz. Efekt systemowy (kora, hipokamp)</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">0.5-4 Hz (Delta)</td>
+                                <td>Głęboka Regeneracja, Detox</td>
+                                <td>+60% ekspansja przestrzeni śródmiąższowej, konwekcyjny przepływ CSF</td>
+                                <td>Faza snu N3. Kluczowa dla usuwania amyloidu. Wsparcie Pink Noise</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">4-8 Hz (Theta)</td>
+                                <td>Medytacja, Kreatywność</td>
+                                <td>Frontal Midline Theta, hipnagogia, konsolidacja pamięci</td>
+                                <td>Ryzyko senności przy nadmiarze. Skuteczne w Power Naps</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">8-12 Hz (Alpha)</td>
+                                <td>Stan Flow, Relaks</td>
+                                <td>Inhibicja top-down, transient hypofrontality</td>
+                                <td>Zależne od dopaminy (kalibracja EBR)</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">12-15 Hz (SMR)</td>
+                                <td>Spokojne Skupienie</td>
+                                <td>Stabilizacja rytmu sensomotorycznego</td>
+                                <td>Bezpieczniejsze niż wysoka Beta. Brak ryzyka lęku</td>
+                            </tr>
+                            <tr>
+                                <td class="band-name">Tony Izochroniczne</td>
+                                <td>Silny Entrainment</td>
+                                <td>Bezpośrednia stymulacja wzgórza, brak habituacji</td>
+                                <td>Skuteczniejsze niż Binaural w EEG. Wymagają maskowania</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="wp-section" id="s4">
+                <h2><span class="sec-num">04</span> Bezpieczeństwo i Standardy Fotostymulacji</h2>
+
+                <h3>Epilepsja Fotogenna (PSE)</h3>
+                <p>Epilepsja fotogenna dotyka około 1 na 4000 osób w populacji ogólnej, ale odsetek ten jest wyższy w grupie wiekowej 7-19 lat. Szczytowa wrażliwość mózgu przypada na zakres 15-25 Hz, choć ryzyko istnieje w szerokim paśmie 3-60 Hz.<sup>42</sup></p>
+
+                <h3>Zgodność z Harding FPA</h3>
+                <p>Kora Cortex implementuje algorytmy zgodne z wytycznymi Harding FPA (Flash and Pattern Analyser), które są branżowym standardem dla nadawców treści (Ofcom UK, ITU-R).</p>
+
+                <div class="key-finding">
+                    <strong>KRYTYCZNE PARAMETRY BEZPIECZEŃSTWA</strong>
+                    • Częstotliwość migotania: bezwzględnie unikać intensywnego migotania w zakresie 3-60 Hz<br>
+                    • Próg luminancji: błyski niebezpieczne jeśli ΔL &gt; 20 cd/m²<br>
+                    • Czerwony Błysk: najbardziej epileptogenny — maks. 3 przejścia nasyconej czerwieni na sekundę<sup>44</sup><br>
+                    • Obszar ekranu: ryzyko drastycznie wzrasta gdy bodziec zajmuje &gt;25% centralnego pola widzenia
+                </div>
+
+                <h3>Długoterminowe Skutki Uboczne</h3>
+                <p>Długotrwałe stosowanie BWE (szczególnie binaural beats i tonów izochronicznych przy dużej głośności) może prowadzić do uszkodzenia słuchu (NIHL) oraz nasilenia szumów usznych (tinnitus).<sup>47</sup> Kora Cortex implementuje limity czasu trwania sesji i zabezpieczenia maksymalnej głośności, a także obowiązkowe ostrzeżenia o epilepsji.</p>
+            </section>
+
+            <section class="wp-section" id="s5">
+                <h2><span class="sec-num">05</span> Synteza i Strategia Rozwoju</h2>
+
+                <h3>Zmiana Paradygmatu: Od „Skupienia" do „Utrzymania"</h3>
+                <p>Technologia BWE ewoluowała z niszowych eksperymentów do poziomu nauki opartej na precyzyjnych mechanizmach molekularnych. Optymalna strategia dla Kora Cortex to nie pogoń za pierwszym „hitem" skupienia, lecz budowanie protokołów utrzymujących optymalne stany neuronalne przez dłuższe sesje pracy.</p>
+
+                <div class="key-finding">
+                    <strong>REKOMENDACJE STRATEGICZNE</strong>
+                    1. Priorytet dla tonów izochronicznych w szybkim entrainmencie (Focus, Neuroprotekcja)<br>
+                    2. Zarezerwować binaural beats dla relaksacji i integracji międzypółkulowej (Sen, Medytacja)<br>
+                    3. Wdrożyć protokół Phased Ramp-up eliminujący Acoustic Startle Response<br>
+                    4. Celować w SMR (12-15 Hz) zamiast wysokiej Beta, aby unikać indukowania lęku<br>
+                    5. Zbudować moduł Gamma 40 Hz zgodny z GENUS dla neuroprotekcji<br>
+                    6. Kalibrować sesje Alpha na podstawie profilu neurochemicznego użytkownika
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Bibliografia — identical references (they are academic, language-neutral) -->
+    <section class="wp-references" id="refs">
+        <div class="container">
+            <h2>BIBLIOGRAFIA</h2>
+            <ol>
+                <li>Coffey et al. "Oscillatory Entrainment of the Frequency-following Response." <em>PMC</em>, 2021. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8448709/">↗</a></li>
+                <li>"Cortical Correlates of the Auditory Frequency-Following and Onset Responses: EEG and fMRI Evidence." <em>PMC</em>.</li>
+                <li>"Frequency-Following Responses to Speech Sounds Are Highly Conserved across Species." <em>PMC</em>.</li>
+                <li>"Evolving perspectives on the sources of the frequency-following response." <em>PMC</em>.</li>
+                <li>"Binaural beats to entrain the brain? A systematic review." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10198548/">↗</a></li>
+                <li>"Binaural Beat: A Failure to Enhance EEG Power and Emotional Arousal." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5694826/">↗</a></li>
+                <li>"Entraining Tones and Binaural Beats." <em>Mind Alive Inc.</em> <a href="https://mindalive.com/pages/entraining-tones-and-binaural-beats">↗</a></li>
+                <li>"Isochronic Tones vs. Binaural Beats." <em>Brain.fm</em>. <a href="https://www.brain.fm/blog/isochronic_tones_vs_binaural_beats_which_is_better_for_your_mind">↗</a></li>
+                <li>"How Do Isochronic Tones Work?" <em>BetterSleep</em>. <a href="https://www.bettersleep.com/blog/how-do-isochronic-tones-work">↗</a></li>
+                <li>"The Effects of Binaural and Monoaural Beat Stimulation on Cognitive Functioning." <em>PMC</em>.</li>
+                <li>"Brain wave modulation and EEG power changes." <em>PubMed</em>. <a href="https://pubmed.ncbi.nlm.nih.gov/39004412/">↗</a></li>
+                <li>"The effect of white noise and coloured noise on cognition and sleep." <em>UQ eSpace</em>.</li>
+                <li>"Overnight exposure to pink noise could jeopardize sleep-dependent insight." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10722168/">↗</a></li>
+                <li>"Stochastic resonance is not required for pink noise to have beneficial effects on ADHD." <em>PMC</em>.</li>
+                <li>"Binaural beats to entrain the brain? A systematic review of the effects." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10198548/">↗</a></li>
+                <li>"Effects of binaural and monaural beat stimulation on attention and EEG." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8448709/">↗</a></li>
+                <li>Reedijk et al. "The impact of binaural beats on creativity." <em>Frontiers</em>, 2013. <a href="https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2013.00786/full">↗</a></li>
+                <li>"Stochastic resonance is not required for pink noise — ADHD." <em>Ghent University</em>.</li>
+                <li>"The Sleeping Brain: Harnessing the Power of the Glymphatic System." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7698404/">↗</a></li>
+                <li>"Gamma sensory entrainment for cognitive improvement." <em>PMC</em> (MIT GENUS). <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10149720/">↗</a></li>
+                <li>"Gamma Entrainment Binds Higher Order Brain Regions." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6697125/">↗</a></li>
+                <li>"The Glymphatic System: A Novel Component." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8603752/">↗</a></li>
+                <li>"The gamma rhythm as a guardian of brain health." <em>eLife</em>. <a href="https://elifesciences.org/articles/100238">↗</a></li>
+                <li>"Gamma Oscillations in Alzheimer's Disease." <em>Frontiers</em>.</li>
+                <li>"Evidence that 40Hz gamma stimulation promotes brain health." <em>MIT News</em>, 2025. <a href="https://news.mit.edu/2025/evidence-40hz-gamma-stimulation-promotes-brain-health-expanding-0314">↗</a></li>
+                <li>Xie et al. "Sleep drives metabolite clearance from the adult brain." <em>Science</em>, 2013. <a href="https://pubmed.ncbi.nlm.nih.gov/24136970/">↗</a></li>
+                <li>"Sleep Drives Metabolite Clearance." <em>UniRoma2 / Science</em>.</li>
+                <li>"Targeting Sleep Physiology to Modulate Glymphatic Brain Clearance." <em>Physiology Journals</em>. <a href="https://journals.physiology.org/doi/abs/10.1152/physiol.00019.2024">↗</a></li>
+                <li>"Applied Research Using Alpha/Theta Training." <em>ResearchGate</em>. <a href="https://www.researchgate.net/publication/232858086">↗</a></li>
+                <li>"Lucid dreaming brainwave entrainment." <em>roXiva</em>. <a href="https://roxiva.com/lucid-dreaming-brainwave-entrainment/">↗</a></li>
+                <li>"EEG Derived Neuronal Dynamics during Meditation." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4684838/">↗</a></li>
+                <li>"The Theta Paradox: 4-8 Hz EEG Oscillations." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9665934/">↗</a></li>
+                <li>"Review of the Neural Oscillations Underlying Meditation." <em>Frontiers</em>. <a href="https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2018.00178/full">↗</a></li>
+                <li>"A Review on the Role of the Neuroscience of Flow States." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7551835/">↗</a></li>
+                <li>"EEG alpha power and creative ideation." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4020761/">↗</a></li>
+                <li>"The impact of binaural beats on creativity." <em>Semantic Scholar</em>.</li>
+                <li>"The Effect of Binaural Beats on Visuospatial Working Memory." <em>PLOS One</em>. <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166630">↗</a></li>
+                <li>"Binaural Beats' Effect on Brain Activity and Psychiatric Disorders." <em>Open Public Health Journal</em>. <a href="https://openpublichealthjournal.com/VOLUME/17/ELOCATOR/e18749445332258/FULLTEXT/">↗</a></li>
+                <li>"Effect of Binaural Stimulation on Attention and EEG." <em>Polish Academy of Sciences</em>. <a href="https://journals.pan.pl/Content/101556?format_id=1">↗</a></li>
+                <li>"The Effect of Binaural Beat Stimulation on Sustained Attention." <em>Digital Commons</em>. <a href="https://digitalcommons.kansascity.edu/studentpub/220/">↗</a></li>
+                <li>"Effect of Binaural Beat Stimulation on Auditory and Visual Sustained Attentions." <em>PMC</em>.</li>
+                <li>"Photosensitive epilepsy." <em>Epilepsy.org.uk</em>. <a href="https://www.epilepsy.org.uk/info/seizure-triggers/photosensitive-epilepsy">↗</a></li>
+                <li>"Visually sensitive seizures: An updated review." <em>Epilepsy Foundation</em>.</li>
+                <li>"International Guidelines for Photosensitive Epilepsy." <em>PMC</em>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11872230/">↗</a></li>
+                <li>"Harding test." <em>Wikipedia</em>. <a href="https://en.wikipedia.org/wiki/Harding_test">↗</a></li>
+                <li>"How To Interpret HardingFPA Results." <em>Cambridge Research Systems</em>. <a href="https://www.hardingfpa.com/technical-support/how-to-interpret-hardingfpa-results">↗</a></li>
+                <li>"Can Binaural Beats Damage Your Brain?" <em>Brain.fm</em>. <a href="https://www.brain.fm/blog/can_binaural_beats_damage_your_brain_separating_facts_from_fears">↗</a></li>
+                <li>"A comprehensive review of the psychological effects of brainwave entrainment." <em>NCBI Bookshelf</em>. <a href="https://www.ncbi.nlm.nih.gov/books/NBK75019/">↗</a></li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="wp-cta">
+        <div class="container">
+            <p>Gotowy doświadczyć nauki? Wypróbuj Kora Cortex bezpłatnie przez 7 dni.</p>
+            <a href="landing.html#pricing">Rozpocznij Darmowy Trial →</a>
+        </div>
+    </section>
+
+    <footer class="wp-footer">
+        <div class="container">
+            <p>© 2026 Kora Cortex. Wszelkie prawa zastrzeżone. Niniejszy dokument ma charakter wyłącznie informacyjny i edukacyjny.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
