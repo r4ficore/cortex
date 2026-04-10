@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO -->
+    <title>Kora Cortex — Acoustic Neuromodulation for Deep Focus & Sleep</title>
+    <meta name="description" content="Clinically validated sound waves synchronize your neurons. Deep focus in 10 minutes, deep sleep in 15. Isochronic tones + binaural beats in one medical-grade interface." />
+    <meta name="keywords" content="neuromodulation, isochronic tones, binaural beats, focus, sleep, brain optimization, neurotechnology" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Kora Cortex — Acoustic Neuromodulation" />
+    <meta property="og:description" content="Deep focus in 10 minutes. Deep sleep in 15. Clinically validated acoustic neurotechnology." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://koracortex.com" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+
+    <!-- Grid Background -->
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 1: STICKY NAV
+         ═══════════════════════════════════════════════════ -->
+    <nav class="nav" id="mainNav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <span class="dot"></span>
+                <span>KORA</span>
+                <span>CORTEX</span>
+            </a>
+            <div class="nav-actions">
+                <div class="lang-switch" role="group" aria-label="Language selector">
+                    <button id="langEn" class="active" onclick="setLandingLang('en')">EN</button>
+                    <button id="langPl" onclick="setLandingLang('pl')">PL</button>
+                </div>
+                <a href="#pricing" class="btn btn-primary btn-sm" data-i18n="nav.cta">Start Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 2: HERO
+         ═══════════════════════════════════════════════════ -->
+    <section class="hero section" id="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-content">
+            <p class="micro-label fade-in" data-i18n="hero.label">ACOUSTIC NEUROMODULATION</p>
+            <h1 class="fade-in fade-in-delay-1">
+                <span data-i18n="hero.h1_line1">Deep focus in 10 minutes.</span>
+                <span data-i18n="hero.h1_line2">Deep sleep in 15.</span>
+            </h1>
+            <p class="hero-subtitle fade-in fade-in-delay-2" data-i18n="hero.subtitle">
+                Clinically validated sound waves synchronize your neurons — no pills, no meditation, no random music.
+            </p>
+            <div class="hero-ctas fade-in fade-in-delay-3">
+                <a href="#pricing" class="btn btn-primary" data-i18n="hero.cta_primary">Start Free — 7 Day Trial</a>
+                <a href="#how-it-works" class="btn btn-ghost" data-i18n="hero.cta_ghost">How it works ↓</a>
+            </div>
+        </div>
+
+        <!-- Sine wave decoration -->
+        <div class="hero-wave" aria-hidden="true">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none">
+                <path d="M0 60 Q180 0 360 60 T720 60 T1080 60 T1440 60 T1800 60 T2160 60 T2520 60 T2880 60" stroke="rgba(34,211,238,0.3)" stroke-width="1.5" fill="none"/>
+                <path d="M0 60 Q180 120 360 60 T720 60 T1080 60 T1440 60 T1800 60 T2160 60 T2520 60 T2880 60" stroke="rgba(34,211,238,0.15)" stroke-width="1" fill="none"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 3: PROBLEM STRIP
+         ═══════════════════════════════════════════════════ -->
+    <section class="section problem-strip" id="problem">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 3rem;" data-i18n="problem.label">YOUR BRAIN vs. 2026</p>
+
+            <div class="stats-grid">
+                <!-- Stat 1 -->
+                <div class="glass-card stat-card neon-cyan fade-in fade-in-delay-1">
+                    <div>
+                        <div class="stat-number" data-count="2.1" data-suffix="h" data-decimals="1">0</div>
+                        <div class="stat-unit" data-i18n="problem.stat1_unit">hours / day</div>
+                    </div>
+                    <p class="stat-desc" data-i18n="problem.stat1_desc">lost recovering focus after every distraction</p>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="glass-card stat-card neon-rose fade-in fade-in-delay-2">
+                    <div>
+                        <div class="stat-number" data-count="46" data-suffix="">0</div>
+                        <div class="stat-unit" data-i18n="problem.stat2_unit">days / year</div>
+                    </div>
+                    <p class="stat-desc" data-i18n="problem.stat2_desc">wasted fighting distraction — that's your vacation, burned</p>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="glass-card stat-card neon-cyan fade-in fade-in-delay-3">
+                    <div>
+                        <div class="stat-number" data-count="42" data-suffix=" min">0</div>
+                        <div class="stat-unit" data-i18n="problem.stat3_unit">avg. in 2026</div>
+                    </div>
+                    <p class="stat-desc" data-i18n="problem.stat3_desc">to fall asleep — while your mind replays the entire day</p>
+                </div>
+            </div>
+
+            <div class="problem-quote fade-in">
+                <span data-i18n="problem.quote">Your brain isn't broken. It's bombarded. It needs a metronome, not another Spotify playlist.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 4: AGITATION — The AI Gap (Red Queen)
+         ═══════════════════════════════════════════════════ -->
+    <section class="section agitation" id="agitation">
+        <div class="container">
+            <div class="agitation-layout">
+                <div class="agitation-copy">
+                    <p class="micro-label fade-in" data-i18n="agit.label">THE WIDENING GAP</p>
+                    <h2 class="fade-in fade-in-delay-1" data-i18n="agit.h2">While you fight distractions, your competitors optimize their brains.</h2>
+                    <p class="fade-in fade-in-delay-2" data-i18n="agit.p1">AI accelerates exponentially. In a year, the gap between an optimized and unoptimized mind will be like the gap between a computer and a typewriter.</p>
+                    <blockquote class="agitation-quote fade-in fade-in-delay-3">
+                        <p data-i18n="agit.quote1">The question isn't "should I optimize."</p>
+                        <p><strong data-i18n="agit.quote2">The question is "can I afford not to."</strong></p>
+                    </blockquote>
+                </div>
+                <div class="agitation-chart fade-in fade-in-delay-2">
+                    <div class="glass-card divergence-card">
+                        <div class="divergence-header">
+                            <span class="divergence-legend-item">
+                                <span class="legend-dot legend-dot-cyan"></span>
+                                <span data-i18n="agit.legend_optimized">Optimized (Cortex)</span>
+                            </span>
+                            <span class="divergence-legend-item">
+                                <span class="legend-dot legend-dot-dim"></span>
+                                <span data-i18n="agit.legend_baseline">Unoptimized Baseline</span>
+                            </span>
+                        </div>
+                        <div class="divergence-graph" aria-label="Divergence chart showing optimized vs baseline cognitive capacity over time">
+                            <!-- Y axis labels -->
+                            <div class="div-y-axis">
+                                <span>100%</span>
+                                <span>75%</span>
+                                <span>50%</span>
+                                <span>25%</span>
+                            </div>
+                            <!-- Chart area -->
+                            <div class="div-chart-area">
+                                <svg viewBox="0 0 400 200" preserveAspectRatio="none" class="div-svg">
+                                    <!-- Grid lines -->
+                                    <line x1="0" y1="50" x2="400" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                                    <line x1="0" y1="100" x2="400" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                                    <line x1="0" y1="150" x2="400" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                                    <!-- Baseline (dropping) -->
+                                    <path d="M0 100 C80 100, 120 108, 200 120 S360 155, 400 170" stroke="#52525b" stroke-width="2" fill="none" stroke-dasharray="6 4" class="div-line-baseline"/>
+                                    <!-- Optimized (rising) -->
+                                    <path d="M0 100 C80 95, 120 80, 200 60 S360 25, 400 10" stroke="#22d3ee" stroke-width="2.5" fill="none" class="div-line-optimized"/>
+                                    <!-- Glow -->
+                                    <path d="M0 100 C80 95, 120 80, 200 60 S360 25, 400 10" stroke="#22d3ee" stroke-width="8" fill="none" opacity="0.15" class="div-line-optimized"/>
+                                    <!-- Fill under optimized -->
+                                    <path d="M0 100 C80 95, 120 80, 200 60 S360 25, 400 10 L400 200 L0 200 Z" fill="url(#cyanGrad)" class="div-fill-optimized"/>
+                                    <defs>
+                                        <linearGradient id="cyanGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="rgba(34,211,238,0.12)"/>
+                                            <stop offset="100%" stop-color="rgba(34,211,238,0)"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <!-- X axis labels -->
+                                <div class="div-x-axis">
+                                    <span data-i18n="agit.x_now">Now</span>
+                                    <span data-i18n="agit.x_6mo">6 months</span>
+                                    <span data-i18n="agit.x_1yr">1 year</span>
+                                    <span data-i18n="agit.x_2yr">2 years</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="divergence-caption" data-i18n="agit.caption">Cognitive capacity trajectory under AI disruption pressure</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 5: SOLUTION — Kora Cortex
+         ═══════════════════════════════════════════════════ -->
+    <section class="section solution" id="solution">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="sol.label">THE SOLUTION</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 750px; margin: 0 auto 1rem;" data-i18n="sol.h2">The only app that combines both proven neuromodulation methods in one medical-grade cockpit.</h2>
+            <p class="fade-in fade-in-delay-2" style="text-align:center; max-width: 600px; margin: 0 auto 3.5rem; color: var(--text-muted);" data-i18n="sol.subtitle">Not AI music. Not white noise. Not a random playlist. Precision sound waves, calibrated to the Hertz.</p>
+
+            <div class="bento-grid">
+                <!-- Card 1: Focus -->
+                <div class="glass-card bento-card bento-card-large neon-cyan fade-in fade-in-delay-1">
+                    <div class="bento-icon">⚡</div>
+                    <h3 data-i18n="sol.card1_title">Titanic Focus</h3>
+                    <p data-i18n="sol.card1_desc">Isochronic Tones (50 dB modulation, 100,000:1 power ratio) activate the thalamocortical pathway. Flow State in 10 minutes.</p>
+                </div>
+
+                <!-- Card 2: Sleep -->
+                <div class="glass-card bento-card neon-cyan fade-in fade-in-delay-2">
+                    <div class="bento-icon">🌙</div>
+                    <h3 data-i18n="sol.card2_title">Deep Sleep</h3>
+                    <p data-i18n="sol.card2_desc">Binaural Beats gently synchronize Delta waves. Extended N3 phase = body and mind regeneration.</p>
+                </div>
+
+                <!-- Card 3: Neuroprotection -->
+                <div class="glass-card bento-card neon-cyan fade-in fade-in-delay-3">
+                    <div class="bento-icon">🧠</div>
+                    <h3 data-i18n="sol.card3_title">Neuroprotection 40 Hz</h3>
+                    <p data-i18n="sol.card3_desc">MIT GENUS Protocol. The glymphatic system literally flushes toxins from your brain.</p>
+                </div>
+
+                <!-- Card 4: Phased Ramp-up -->
+                <div class="glass-card bento-card bento-card-large neon-cyan fade-in fade-in-delay-1">
+                    <div class="bento-icon">🛡️</div>
+                    <h3 data-i18n="sol.card4_title">Phased Ramp-up</h3>
+                    <p data-i18n="sol.card4_desc">Proprietary protocol: gentle entry → gradual escalation. Zero panic, maximum tolerance. No competitor has this.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 6: COMPARISON TABLE
+         ═══════════════════════════════════════════════════ -->
+    <section class="section comparison" id="comparison">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="comp.label">HEAD TO HEAD</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 650px; margin: 0 auto 1rem;" data-i18n="comp.h2">We're not "another focus music app."</h2>
+            <p class="fade-in fade-in-delay-2" style="text-align:center; max-width: 550px; margin: 0 auto 3rem; color: var(--text-muted);" data-i18n="comp.subtitle">See how clinical neuromodulation compares to AI-generated music and playlists.</p>
+
+            <div class="table-wrapper fade-in fade-in-delay-3">
+                <table class="comp-table">
+                    <thead>
+                        <tr>
+                            <th class="comp-feature" data-i18n="comp.th_feature">Feature</th>
+                            <th class="comp-kora" data-i18n="comp.th_kora">Kora Cortex</th>
+                            <th data-i18n="comp.th_brainfm">Brain.fm</th>
+                            <th data-i18n="comp.th_endel">Endel</th>
+                            <th data-i18n="comp.th_spotify">Spotify</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-i18n="comp.row1">Isochronic Tones</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td>Binaural Beats</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="check-dim">✓¹</span></td>
+                            <td><span class="check-dim">✓²</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="comp.row3">Hz frequency control</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="comp.row7">Transparent mechanism</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="warn">⚠</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td>Phased Ramp-up</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="comp.row5">Offline mode</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="comp.row6">Gamma 40 Hz Protocol</td>
+                            <td class="comp-kora"><span class="check">✓</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                            <td><span class="cross">✗</span></td>
+                        </tr>
+                        <tr class="comp-price-row">
+                            <td data-i18n="comp.row8">Monthly price</td>
+                            <td class="comp-kora"><strong>$9</strong></td>
+                            <td>$14.99</td>
+                            <td>~$12.99</td>
+                            <td>$10.99</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="comp-footnotes fade-in" style="margin-top: 1.5rem;">
+                <p data-i18n="comp.fn1">¹ Brain.fm: "We took the concept of binaural beats and improved it" — but do NOT offer pure isochronic tones.</p>
+                <p data-i18n="comp.fn2">² Endel: One hidden Binaural Beats scenario. Everything else is generative AI — a black box.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 7: HOW IT WORKS
+         ═══════════════════════════════════════════════════ -->
+    <section class="section how-it-works" id="how-it-works">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="how.label">HOW IT WORKS</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 600px; margin: 0 auto 3.5rem;" data-i18n="how.h2">Three steps to a synchronized brain.</h2>
+
+            <div class="steps-grid">
+                <div class="step-card fade-in fade-in-delay-1">
+                    <div class="step-number">01</div>
+                    <h3 data-i18n="how.step1_title">Choose Your Goal</h3>
+                    <p data-i18n="how.step1_desc">Focus, Sleep, Neuroprotection, or Relaxation. Select a program calibrated to specific brainwave frequencies.</p>
+                    <div class="step-tags">
+                        <span class="step-tag">Focus</span>
+                        <span class="step-tag">Sleep</span>
+                        <span class="step-tag">Neuro</span>
+                        <span class="step-tag">Relax</span>
+                    </div>
+                </div>
+
+                <div class="step-connector" aria-hidden="true">
+                    <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="var(--accent-cyan)" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/></svg>
+                </div>
+
+                <div class="step-card fade-in fade-in-delay-2">
+                    <div class="step-number">02</div>
+                    <h3 data-i18n="how.step2_title">Press Play</h3>
+                    <p data-i18n="how.step2_desc">Kora Cortex generates precise sound waves in real time. No downloads, no buffering. Pure signal.</p>
+                    <div class="step-visual">
+                        <span class="pulse-ring"></span>
+                        <span class="pulse-ring pulse-ring-2"></span>
+                        <span class="pulse-center">▶</span>
+                    </div>
+                </div>
+
+                <div class="step-connector" aria-hidden="true">
+                    <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="var(--accent-cyan)" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/></svg>
+                </div>
+
+                <div class="step-card fade-in fade-in-delay-3">
+                    <div class="step-number">03</div>
+                    <h3 data-i18n="how.step3_title">Feel the Difference</h3>
+                    <p data-i18n="how.step3_desc">Entrainment begins at ~4 minutes. Full synchronization at 10–15. Flow state or deep sleep — on demand.</p>
+                    <div class="step-badge">
+                        <span class="step-badge-dot"></span>
+                        <span data-i18n="how.step3_badge">~10 min to flow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 8: SCIENCE
+         ═══════════════════════════════════════════════════ -->
+    <section class="section science" id="science">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="sci.label">THE SCIENCE</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 650px; margin: 0 auto 1rem;" data-i18n="sci.h2">Built on research, not hype.</h2>
+            <p class="fade-in fade-in-delay-2" style="text-align:center; max-width: 550px; margin: 0 auto 3.5rem; color: var(--text-muted);" data-i18n="sci.subtitle">Every feature is backed by peer-reviewed neuroscience. No marketing claims — only mechanisms.</p>
+
+            <div class="science-grid">
+                <div class="glass-card science-card neon-cyan fade-in fade-in-delay-1">
+                    <div class="sci-stat">100,000:1</div>
+                    <h3 data-i18n="sci.card1_title">FFR Response</h3>
+                    <p data-i18n="sci.card1_desc">Isochronic modulation depth — 100,000x more powerful than Binaural Beats at driving cortical entrainment.</p>
+                </div>
+                <div class="glass-card science-card neon-cyan fade-in fade-in-delay-2">
+                    <div class="sci-stat">Zero Panic</div>
+                    <h3 data-i18n="sci.card2_title">Phased Ramp-up</h3>
+                    <p data-i18n="sci.card2_desc">Proprietary protocol eliminating the Acoustic Startle Response. Gradual volume and frequency escalation.</p>
+                </div>
+                <div class="glass-card science-card neon-cyan fade-in fade-in-delay-3">
+                    <div class="sci-stat">β-amyloid ↓</div>
+                    <h3 data-i18n="sci.card3_title">MIT GENUS 40 Hz</h3>
+                    <p data-i18n="sci.card3_desc">Gamma stimulation activates the glymphatic system, flushing beta-amyloid plaques from the brain.</p>
+                </div>
+                <div class="glass-card science-card neon-cyan fade-in fade-in-delay-1">
+                    <div class="sci-stat">Flow ON</div>
+                    <h3 data-i18n="sci.card4_title">Transient Hypofrontality</h3>
+                    <p data-i18n="sci.card4_desc">Deactivating the prefrontal cortex unlocks auto-pilot productivity — the neurological basis of flow state.</p>
+                </div>
+            </div>
+
+            <div class="trust-line fade-in" style="margin-top: 2.5rem;">
+                <p data-i18n="sci.trust">Based on research from <strong>MIT</strong>, <strong>Nature</strong>, <strong>Frontiers in Neuroscience</strong>, and clinical data from <strong>13 peer-reviewed publications</strong>.</p>
+                <a href="index.html" class="btn btn-ghost" style="margin-top: 1rem;" data-i18n="sci.cta">Read Full Whitepaper →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 9: SESSION TIMELINE
+         ═══════════════════════════════════════════════════ -->
+    <section class="section timeline-section" id="timeline">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="tl.label">WHAT TO EXPECT</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 600px; margin: 0 auto 3.5rem;" data-i18n="tl.h2">Your first session, minute by minute.</h2>
+
+            <div class="timeline">
+                <div class="timeline-item fade-in fade-in-delay-1">
+                    <div class="tl-dot tl-dot-red"></div>
+                    <div class="tl-content">
+                        <div class="tl-time">0–3 min</div>
+                        <h3 data-i18n="tl.phase1_title">Calibration</h3>
+                        <p class="tl-feel" data-i18n="tl.phase1_feel">You hear the tones. Mind is still racing. This is normal.</p>
+                        <p class="tl-brain" data-i18n="tl.phase1_brain">Brain registers acoustic stimuli, begins frequency matching.</p>
+                    </div>
+                </div>
+                <div class="timeline-item fade-in fade-in-delay-2">
+                    <div class="tl-dot tl-dot-yellow"></div>
+                    <div class="tl-content">
+                        <div class="tl-time">4–7 min</div>
+                        <h3 data-i18n="tl.phase2_title">Entrainment</h3>
+                        <p class="tl-feel" data-i18n="tl.phase2_feel">Limbs feel heavy. Thoughts begin to dissolve. You stop noticing the sound.</p>
+                        <p class="tl-brain" data-i18n="tl.phase2_brain">Neurons lock onto the target frequency. Cortical synchronization begins.</p>
+                    </div>
+                </div>
+                <div class="timeline-item fade-in fade-in-delay-3">
+                    <div class="tl-dot tl-dot-green"></div>
+                    <div class="tl-content">
+                        <div class="tl-time">10–15 min</div>
+                        <h3 data-i18n="tl.phase3_title">Synchronization</h3>
+                        <p class="tl-feel" data-i18n="tl.phase3_feel">Time perception shifts. You lose track of minutes. Deep calm or laser focus.</p>
+                        <p class="tl-brain" data-i18n="tl.phase3_brain">Full brainwave stabilization at target frequency. Neural coherence achieved.</p>
+                    </div>
+                </div>
+                <div class="timeline-item fade-in fade-in-delay-1">
+                    <div class="tl-dot tl-dot-cyan"></div>
+                    <div class="tl-content">
+                        <div class="tl-time">20+ min</div>
+                        <h3 data-i18n="tl.phase4_title">Optimal State</h3>
+                        <p class="tl-feel" data-i18n="tl.phase4_feel">Flow state or deep sleep. Effortless. Sustained. Peak performance.</p>
+                        <p class="tl-brain" data-i18n="tl.phase4_brain">Sustained modulation. Brain operates at peak efficiency with minimal energy cost.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTIONS 10-12: Phase 4
+         ═══════════════════════════════════════════════════ -->
+    <!-- SECTION 10: PRICING -->
+    <section class="section pricing-section" id="pricing">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="price.label">SIMPLE PRICING</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 600px; margin: 0 auto 1rem;" data-i18n="price.h2">Less than your daily coffee. More than any supplement.</h2>
+            <p class="fade-in fade-in-delay-2" style="text-align:center; max-width: 500px; margin: 0 auto 2.5rem; color: var(--text-muted);" data-i18n="price.subtitle">Every feature. Every program. Every frequency. Unlimited.</p>
+
+            <div class="billing-toggle fade-in fade-in-delay-2">
+                <span class="billing-label" data-i18n="price.monthly">Monthly</span>
+                <button class="toggle-switch" id="billingToggle" onclick="toggleBilling()" aria-label="Toggle annual billing">
+                    <span class="toggle-knob"></span>
+                </button>
+                <span class="billing-label" data-i18n="price.annual">Annual</span>
+                <span class="billing-save" data-i18n="price.save">Save 17%</span>
+            </div>
+
+            <div class="pricing-card glass-card fade-in fade-in-delay-3">
+                <div class="price-anchor">
+                    <span class="price-anchor-label" data-i18n="price.anchor_label">Brain.fm charges</span>
+                    <span class="price-anchor-old">$14.99<span data-i18n="price.mo">/mo</span></span>
+                </div>
+                <div class="price-main">
+                    <span class="price-currency">$</span>
+                    <span class="price-amount" id="priceAmount">9</span>
+                    <span class="price-period" id="pricePeriod" data-i18n="price.per_month">/month</span>
+                </div>
+                <p class="price-annual-note" id="annualNote" style="display:none;">
+                    <span data-i18n="price.annual_total">$90/year billed annually</span>
+                </p>
+                <ul class="price-features">
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f1">Isochronic + Binaural in one cockpit</span></li>
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f2">All programs (Focus, Sleep, Neuro, Relax)</span></li>
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f3">Hz frequency control</span></li>
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f4">Phased Ramp-up protocol</span></li>
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f5">Offline sessions (no internet required)</span></li>
+                    <li><span class="check">&#10003;</span> <span data-i18n="price.f6">40 Hz Gamma neuroprotection</span></li>
+                </ul>
+                <a href="#" class="btn btn-primary btn-lg" id="stripeLink" data-i18n="price.cta">Start Free - 7 Day Trial</a>
+                <p class="price-disclaimer" data-i18n="price.disclaimer">Cancel anytime. No questions asked. $0 during trial.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 11: FAQ -->
+    <section class="section faq-section" id="faq">
+        <div class="container">
+            <p class="micro-label fade-in" style="text-align:center; margin-bottom: 1rem;" data-i18n="faq.label">FAQ</p>
+            <h2 class="fade-in fade-in-delay-1" style="text-align:center; max-width: 600px; margin: 0 auto 3rem;" data-i18n="faq.h2">Questions? Answered.</h2>
+            <div class="faq-list">
+                <details class="faq-item fade-in fade-in-delay-1">
+                    <summary data-i18n="faq.q1">Is this safe? Are there side effects?</summary>
+                    <p data-i18n="faq.a1">Yes. Isochronic tones and binaural beats are non-invasive acoustic stimulation. No drugs, no electricity. Avoid use while driving.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-1">
+                    <summary data-i18n="faq.q2">Do I need headphones?</summary>
+                    <p data-i18n="faq.a2">Binaural Beats require headphones. Isochronic Tones work with speakers too, but headphones give the best experience.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-2">
+                    <summary data-i18n="faq.q3">How is this different from Brain.fm or Endel?</summary>
+                    <p data-i18n="faq.a3">They use AI-generated music, a black box. Kora Cortex uses clinically validated tones with transparent Hz control. You see exactly what frequency your brain receives.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-2">
+                    <summary data-i18n="faq.q4">I already use lo-fi / nature sounds / white noise. Why switch?</summary>
+                    <p data-i18n="faq.a4">Lo-fi and white noise are pleasant, but they do NOT drive brainwave entrainment. Kora Cortex physically synchronizes your neurons. The difference is like comparing a warm bath to physical therapy.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-2">
+                    <summary data-i18n="faq.q5">How fast will I feel results?</summary>
+                    <p data-i18n="faq.a5">Most users report a noticeable shift within the first session (4-10 minutes). Full entrainment at 10-15 minutes. EEG studies confirm frequency-following response within minutes.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-3">
+                    <summary data-i18n="faq.q6">What happens after the 7-day trial?</summary>
+                    <p data-i18n="faq.a6">You will be charged $9/month (or $7.50/month on annual). Cancel anytime from your Stripe dashboard with one click.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-3">
+                    <summary data-i18n="faq.q7">Can I use it while working / studying / coding?</summary>
+                    <p data-i18n="faq.a7">That is exactly what it is designed for. Focus programs use Beta/Gamma frequencies (14-40 Hz). Many users code for 3-4 hours straight without breaking focus.</p>
+                </details>
+                <details class="faq-item fade-in fade-in-delay-1">
+                    <summary data-i18n="faq.q8">Does it work for ADHD?</summary>
+                    <p data-i18n="faq.a8">Isochronic tones in the Beta range (14-30 Hz) have shown promising results for attention regulation. A dedicated ADHD program with SMR (12-15 Hz) protocols is in development.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 12: FINAL CTA -->
+    <section class="section final-cta" id="final-cta">
+        <div class="container" style="text-align:center;">
+            <div class="final-cta-glow" aria-hidden="true"></div>
+            <p class="micro-label fade-in" data-i18n="final.label">ONE QUESTION</p>
+            <h2 class="fade-in fade-in-delay-1" style="max-width: 700px; margin: 1rem auto;" data-i18n="final.h2">What would you do with 2 extra hours of deep focus every day?</h2>
+            <p class="fade-in fade-in-delay-2" style="max-width: 500px; margin: 0 auto 2rem; color: var(--text-muted);" data-i18n="final.subtitle">Find out in 10 minutes. First 7 days free.</p>
+            <a href="#" class="btn btn-primary btn-lg fade-in fade-in-delay-3" id="finalStripeLink" data-i18n="final.cta">Start Free - 7 Day Trial</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <span class="nav-logo" style="font-size: 0.875rem;">
+                    <span class="dot"></span>
+                    <span>KORA</span>
+                    <span>CORTEX</span>
+                </span>
+                <p class="footer-copy">&#169; 2026 Kora Cortex. <span data-i18n="footer.rights">All rights reserved.</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="assets/js/landing.js"></script>
+</body>
+</html>
