@@ -68,9 +68,12 @@ test("every audio session schedules its complete timeline without animation call
     audio.ctx = context();
     const session = makeSession(s.id);
     audio.play(session, 0, { ...defaults, noiseType: "none" });
-    const oscillators = audio.ctx.nodes.filter((n) => n.kind === "oscillator");
+    const oscillators = audio.ctx.nodes.filter(
+      (n) =>
+        n.kind === "oscillator" && n.frequency.events.some((e) => e[1] >= 60),
+    );
     assert.equal(
-      oscillators[0].frequency.events.length,
+      oscillators[0].frequency.events.filter((e) => e[0] === "set").length,
       session.phases.length,
       s.id,
     );
@@ -93,7 +96,10 @@ test("resuming starts at the current phase and stops after only the remaining ti
   audio.ctx = context();
   const session = makeSession("prime");
   audio.play(session, 150, { ...defaults, noiseType: "none" });
-  const oscillators = audio.ctx.nodes.filter((n) => n.kind === "oscillator");
+  const oscillators = audio.ctx.nodes.filter(
+    (n) =>
+      n.kind === "oscillator" && n.frequency.events.some((e) => e[1] >= 60),
+  );
   assert.equal(
     oscillators[0].frequency.events[0][1],
     session.phases[1].audio.l,
@@ -117,7 +123,10 @@ test("infinite sleep schedules no infinite AudioParam events and system interrup
     ...defaults,
     noiseType: "none",
   });
-  const oscillators = ctx.nodes.filter((n) => n.kind === "oscillator");
+  const oscillators = ctx.nodes.filter(
+    (n) =>
+      n.kind === "oscillator" && n.frequency.events.some((e) => e[1] >= 60),
+  );
   assert.equal(oscillators[0].stops.length, 0);
   assert.ok(
     ctx.nodes.every((n) =>

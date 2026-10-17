@@ -5,5 +5,8 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "node-web-audio-api": "^2.2.0"
   }
 }

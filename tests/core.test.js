@@ -17,7 +17,7 @@ import {
   frequencies,
 } from "../assets/js/session.js";
 import { createStore, migratePreferences } from "../assets/js/store.js";
-import { visualFrequency, VISUAL_MAX_HZ } from "../assets/js/visual.js";
+
 import { wavHeader, pcm } from "../assets/js/wav.js";
 const normalise = (o) =>
   JSON.parse(JSON.stringify(o, (_, x) => (x === Infinity ? "Infinity" : x)));
@@ -170,11 +170,6 @@ test("unavailable or corrupt storage keeps the app functional", () => {
   assert.equal(p.masterVolume, 1.1);
   assert.equal(p.noiseType, "brown");
   assert.equal(p.breathDuration, 180);
-});
-test("advanced visuals never exceed two continuous cycles a second", () => {
-  assert.equal(VISUAL_MAX_HZ, 2);
-  for (const s of Object.values(protocols))
-    for (const p of s.phases) assert.ok(visualFrequency(p) <= 2);
 });
 test("WAV header is stereo 16-bit PCM with a correct frame size", () => {
   const header = new DataView(wavHeader(48000));

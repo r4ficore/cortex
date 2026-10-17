@@ -14,6 +14,7 @@ export const defaults = {
   breathDuration: 180,
   breathPattern: "4-6",
   breathCues: false,
+  breathHaptics: false,
   prelude: false,
   reduceMotion: null,
   audioOnly: false,
@@ -57,7 +58,7 @@ export function migratePreferences(raw = {}, legacyLang) {
   p.breathDuration = [60, 180, 300].includes(Number(raw.breathDuration))
     ? Number(raw.breathDuration)
     : 180;
-  for (const key of ["breathCues", "prelude", "audioOnly"])
+  for (const key of ["breathCues", "breathHaptics", "prelude", "audioOnly"])
     p[key] = raw[key] === true;
   p.reduceMotion =
     typeof raw.reduceMotion === "boolean" ? raw.reduceMotion : null;

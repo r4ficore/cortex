@@ -10,8 +10,8 @@ export function downloadBlob(blob, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
-export function exportPanel(selected) {
-  return `<div class="dialog-head"><h2 id="dialogTitle">${t("Eksport sesji", "Export a session")}</h2>${button("closeDialog", "", "close", "icon-btn", `aria-label="${t("Zamknij", "Close")}"`)}</div><div class="dialog-body"><p>${t("Zapisz dźwięk do słuchania poza przeglądarką. Plik WAV powstaje na Twoim urządzeniu.", "Save a sound session to listen outside your browser. The WAV file is created on your device.")}</p><label class="field"><span>${t("Sesja", "Session")}</span><select id="exportSession">${Object.values(
+export function exportPanel(selected, prefs = {}) {
+  return `<div class="dialog-head"><h2 id="dialogTitle">${t("Eksport sesji", "Export a session")}</h2>${button("closeDialog", "", "close", "icon-btn", `aria-label="${t("Zamknij", "Close")}"`)}</div><div class="dialog-body"><p>${t("Zapisz dźwięk do słuchania poza przeglądarką. Plik WAV powstaje na Twoim urządzeniu i uwzględnia bieżące poziomy głośności oraz intensywność.", "Save a sound session to listen outside your browser. The WAV file is created on your device using your current volume levels and intensity.")}</p><label class="field"><span>${t("Sesja", "Session")}</span><select id="exportSession">${Object.values(
     sessions,
   )
     .filter((s) => s.id !== "breath")
@@ -29,7 +29,10 @@ export function exportPanel(selected) {
     ["drone", t("Ambientowy ton", "Ambient drone")],
     ["none", t("Bez tła", "No background")],
   ]
-    .map(([v, n]) => `<option value="${v}">${n}</option>`)
+    .map(
+      ([v, n]) =>
+        `<option value="${v}" ${v === prefs.noiseType ? "selected" : ""}>${n}</option>`,
+    )
     .join(
       "",
     )}</select></label></div></details></div><div class="export-status" id="exportStatus" hidden role="status"><progress id="exportProgress" max="100" value="0"></progress><p id="exportMessage"></p></div><div id="exportError" class="error" role="alert" hidden></div>${button("renderExport", t("Utwórz i pobierz WAV", "Create and download WAV"), "download", "btn btn-primary")}${button("cancelExport", t("Anuluj renderowanie", "Cancel rendering"), "", "btn", 'hidden id="cancelExport"')}<details class="details"><summary>${t("Grafika i dane sesji", "Artwork and session data")}</summary><div class="button-row">${button("exportArt", t("Grafika SVG", "SVG artwork"), "download")}${button("exportMetadata", t("Dane JSON", "JSON data"), "download")}</div></details><p class="help">${t("Stereo · 48 kHz · 16 bit. Dłuższe pliki potrzebują więcej pamięci. Zmieniona długość skaluje etapy wyłącznie w eksportowanym pliku.", "Stereo · 48 kHz · 16 bit. Longer files need more memory. Changing the duration scales stages in the exported file only.")}</p></div>`;
@@ -47,12 +50,13 @@ export function cancelExport(root) {
     root.querySelectorAll("select").forEach((e) => (e.disabled = false));
   }
 }
-export function startExport(root) {
+export function startExport(root, prefs = {}) {
   if (job) return;
   const id = root.querySelector("#exportSession").value,
     minutes = Number(root.querySelector("#exportDuration").value);
   const session = makeSession(id, minutes * 60);
   const options = {
+    prefs,
     entrainment: root.querySelector("#exportEntrainment").value,
     carrier: root.querySelector("#exportCarrier").value,
     loop: root.querySelector("#exportLoop").value,

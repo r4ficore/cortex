@@ -1,3 +1,11 @@
+import {
+  modulationSpec,
+  fadeTimes,
+  noiseGenerator,
+  OUTPUT_HEADROOM,
+  NOISE_GAIN,
+  TRANSITION_SECONDS,
+} from "./signal.js";
 import { intensityProfiles, frequencies, phaseVolume } from "./session.js";
 export class AudioEngine {
   constructor() {
@@ -33,16 +41,27 @@ export class AudioEngine {
       envelope = node(c.createGain()),
       balance = node(c.createGain()),
       volume = node(c.createGain()),
-      pulse = node(c.createGain());
+      pulse = node(c.createGain()),
+      output = node(c.createGain()),
+      lfo = node(c.createOscillator()),
+      depth = node(c.createGain());
+    output.gain.value = OUTPUT_HEADROOM;
+    lfo.connect(depth);
+    depth.connect(pulse.gain);
+    lfo.start(now);
+    sources.push(lfo);
     master.gain.value = prefs.masterVolume;
     balance.gain.value = prefs.beatVolume;
     envelope.gain.setValueAtTime(0, now);
-    envelope.gain.linearRampToValueAtTime(1, now + 1);
+    const remaining = session.duration - offset;
+    const fade = fadeTimes(remaining);
+    envelope.gain.linearRampToValueAtTime(1, now + fade.in);
     volume.connect(balance);
     balance.connect(pulse);
     pulse.connect(envelope);
     envelope.connect(master);
-    master.connect(c.destination);
+    master.connect(output);
+    output.connect(c.destination);
     const l = node(c.createOscillator()),
       r = node(c.createOscillator()),
       pl = node(c.createStereoPanner()),
@@ -55,37 +74,51 @@ export class AudioEngine {
     pr.connect(volume);
     const intensity =
       intensityProfiles[prefs.intensity] || intensityProfiles.medium;
+    let previous = null;
     for (const phase of session.phases) {
       if (phase.end <= offset) continue;
       const start = now + Math.max(0, phase.start - offset),
         end = now + phase.end - offset;
       const [fl, fr] = frequencies(phase.audio, prefs.intensity);
-      l.frequency.setValueAtTime(fl, start);
-      r.frequency.setValueAtTime(fr, start);
-      volume.gain.setValueAtTime(
-        phaseVolume(phase, Math.max(offset, phase.start)) * intensity.gain,
-        start,
-      );
+      const rampEnd = Math.min(start + TRANSITION_SECONDS, end);
+      if (previous) {
+        l.frequency.setValueAtTime(previous.fl, start);
+        r.frequency.setValueAtTime(previous.fr, start);
+        l.frequency.linearRampToValueAtTime(fl, rampEnd);
+        r.frequency.linearRampToValueAtTime(fr, rampEnd);
+      } else {
+        l.frequency.setValueAtTime(fl, start);
+        r.frequency.setValueAtTime(fr, start);
+      }
+      const gain =
+        phaseVolume(phase, Math.max(offset, phase.start)) * intensity.gain;
+      volume.gain.setValueAtTime(previous ? previous.gain : gain, start);
+      if (previous) volume.gain.linearRampToValueAtTime(gain, rampEnd);
       if (Number.isFinite(end))
         volume.gain.linearRampToValueAtTime(
           phaseVolume(phase, phase.end) * intensity.gain,
           end,
         );
-      if (phase.audio.mod === "iso") {
-        pulse.gain.setValueAtTime(0.5, start);
-        const lfo = node(c.createOscillator()),
-          depth = node(c.createGain());
-        lfo.frequency.value = 2;
-        depth.gain.value = 0.5;
-        lfo.connect(depth);
-        depth.connect(pulse.gain);
-        lfo.start(start);
-        if (Number.isFinite(end)) lfo.stop(end);
-        sources.push(lfo);
-      } else pulse.gain.setValueAtTime(1, start);
+      const mod = modulationSpec(phase.audio, prefs.intensity);
+      lfo.frequency.setValueAtTime(mod.rate, start);
+      pulse.gain.setValueAtTime(previous ? previous.base : mod.base, start);
+      depth.gain.setValueAtTime(
+        previous ? previous.depth / 2 : mod.depth / 2,
+        start,
+      );
+      if (previous) {
+        pulse.gain.linearRampToValueAtTime(mod.base, rampEnd);
+        depth.gain.linearRampToValueAtTime(mod.depth / 2, rampEnd);
+      }
+      previous = {
+        fl,
+        fr,
+        gain: phaseVolume(phase, phase.end) * intensity.gain,
+        ...mod,
+      };
     }
     const noiseGain = node(c.createGain());
-    noiseGain.gain.value = prefs.noiseVolume * 0.04;
+    noiseGain.gain.value = prefs.noiseVolume * NOISE_GAIN;
     noiseGain.connect(envelope);
     let noise = null;
     if (prefs.noiseType !== "none") {
@@ -101,39 +134,37 @@ export class AudioEngine {
     sources.push(l, r);
     if (Number.isFinite(session.duration)) {
       const end = now + session.duration - offset;
-      if (end > now + 1) {
-        envelope.gain.setValueAtTime(1, Math.max(now + 1, end - 3));
+      if (end > now) {
+        envelope.gain.setValueAtTime(
+          1,
+          Math.max(now + fade.in, end - fade.out),
+        );
         envelope.gain.linearRampToValueAtTime(0, end);
       }
-      for (const s of [l, r, noise].filter(Boolean)) s.stop(end);
+      for (const s of [l, r, lfo, noise].filter(Boolean)) s.stop(end);
     }
-    this.graph = { nodes, sources, master, balance, noiseGain, envelope };
+    this.graph = {
+      nodes,
+      sources,
+      master,
+      balance,
+      noiseGain,
+      envelope,
+      startedAt: now,
+    };
   }
   noise(type) {
     const c = this.ctx,
-      b = c.createBuffer(1, c.sampleRate * 4, c.sampleRate),
+      b = c.createBuffer(1, c.sampleRate * 16, c.sampleRate),
       d = b.getChannelData(0);
-    let last = 0,
-      b0 = 0,
-      b1 = 0,
-      b2 = 0;
-    for (let i = 0; i < d.length; i++) {
-      const w = Math.random() * 2 - 1;
-      if (type === "brown") {
-        last = (last + 0.02 * w) / 1.02;
-        d[i] = last * 3.5;
-      } else if (type === "pink") {
-        b0 = 0.99765 * b0 + w * 0.099046;
-        b1 = 0.963 * b1 + w * 0.2965164;
-        b2 = 0.57 * b2 + w * 1.0526913;
-        d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.18;
-      } else d[i] = w;
-    }
+    const next = noiseGenerator(type);
+    for (let i = 0; i < d.length; i++) d[i] = next(i / c.sampleRate);
     const fade = Math.min(1024, d.length / 2);
     for (let i = 0; i < fade; i++) {
       d[i] *= i / fade;
       d[d.length - 1 - i] *= i / fade;
     }
+    if (b.copyToChannel) b.copyToChannel(d, 0);
     return b;
   }
   volumes(prefs) {
@@ -142,7 +173,7 @@ export class AudioEngine {
     for (const [p, v] of [
       [this.graph.master.gain, prefs.masterVolume],
       [this.graph.balance.gain, prefs.beatVolume],
-      [this.graph.noiseGain.gain, prefs.noiseVolume * 0.04],
+      [this.graph.noiseGain.gain, prefs.noiseVolume * NOISE_GAIN],
     ])
       p.setTargetAtTime(v, now, 0.06);
   }

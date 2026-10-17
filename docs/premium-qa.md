@@ -1,5 +1,7 @@
 # Porcelana — raport kontroli, 18 października 2026
 
+> Raport pierwszego odbioru (`78e2d73`). Kolejne zmiany światła, oddechu, audio i nocy opisują `light-audio-research.md` oraz `light-audio-qa.md`; zastępują m.in. ówczesny limit 2 Hz.
+
 ## Wynik
 
 Przebudowa przygotowana do odbioru w lokalnym podglądzie. Brak publikacji na GitHub Pages w tym etapie. Weryfikacja dotyczy lokalnej aplikacji uruchomionej przez HTTP oraz przeglądarki w Codex. Historia lokalnego podglądu zawiera sesje wykonane podczas testów.

@@ -10,6 +10,15 @@ import { createStore } from "./store.js";
 import { SessionController, phaseAt } from "./session.js";
 import { breathAt } from "./breath.js";
 import { AudioEngine } from "./audio.js";
+import { sessionId, breathHaptic, stopHaptics } from "./platform.js";
+import {
+  FrameMonitor,
+  supportsStimulation,
+  maxVisualFrequency,
+  visualFrequency,
+  visualCycles,
+  lightSample,
+} from "./stimulation.js";
 import { updateOrb } from "./visual.js";
 import { t, local, language, setLanguage, esc, icon, time } from "./i18n.js";
 import * as views from "./views.js";
@@ -26,6 +35,7 @@ try {
 } catch {}
 const store = createStore(storage),
   audio = new AudioEngine();
+const frameMonitor = new FrameMonitor();
 const mediaMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const state = {
   flow: null,
@@ -33,6 +43,7 @@ const state = {
   starting: false,
   token: 0,
   selected: "",
+  nightResult: false,
   visual: "calm",
   pendingProgram: null,
   route: "home",
@@ -40,6 +51,18 @@ const state = {
 };
 const main = document.getElementById("content"),
   dialog = document.getElementById("dialog");
+const blackScreen = document.createElement("dialog");
+blackScreen.id = "blackScreen";
+document.body.append(blackScreen);
+function openBlackScreen() {
+  blackScreen.innerHTML = `<button id="wakeScreen" aria-label="${t("Pokaż sterowanie sesją", "Show session controls")}"><span>${t("Dotknij ekranu, aby wrócić", "Tap to return")}</span></button>`;
+  if (!blackScreen.open) blackScreen.showModal();
+  blackScreen.querySelector("button").focus({ preventScroll: true });
+}
+blackScreen.addEventListener("click", () => blackScreen.close());
+blackScreen.addEventListener("close", () => {
+  (document.getElementById("playerVisual") || main).focus({ preventScroll: true });
+});
 let restoreFocus = null,
   refs = {},
   lastCue = "",
@@ -75,6 +98,16 @@ function render() {
   const playerPage =
     page === "session" && state.flow && state.flow.stage !== "between";
   document.body.classList.toggle("player-page", Boolean(playerPage));
+  const night =
+    (page === "session" &&
+      state.flow &&
+      state.flow.stage !== "prelude" &&
+      ["night", "black"].includes(state.flow.visual)) ||
+    (page === "complete" && state.nightResult);
+  document.body.classList.toggle("night-mode", Boolean(night));
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", night ? "#000000" : "#f7f8f5");
   document.getElementById("header").innerHTML = views.header(
     page === "path" || page === "prepare" || page === "program" ? "home" : page,
   );
@@ -89,7 +122,11 @@ function render() {
     const selected = sessions[id] ? id : "deepFocus";
     if (state.selected !== selected) {
       state.selected = selected;
-      state.visual = prefs().audioOnly ? "none" : "calm";
+      state.visual = prefs().audioOnly
+        ? "none"
+        : sessions[selected]?.goal === "sleep"
+          ? "night"
+          : "calm";
     }
     main.innerHTML = views.prepare(
       selected,
@@ -123,6 +160,8 @@ function render() {
     progress: document.getElementById("playerProgress"),
     pause: document.getElementById("pauseButton"),
     tip: document.getElementById("playerTip"),
+    light: document.getElementById("lightDisc"),
+    lightStatus: document.getElementById("lightStatus"),
   };
   lastSecond = "";
   updateMini();
@@ -147,10 +186,9 @@ function updatePlayer() {
     elapsed,
     breath: b,
     reduced: reduced(),
-    advanced: f.visual === "advanced" && !breath,
-    phase: phaseAt(f.session, elapsed),
     paused,
   });
+  if (refs.light) updateLight(f, elapsed, paused);
   const key = `${Math.ceil(elapsed)}-${paused}-${language}-${f.stage}`;
   if (key !== lastSecond) {
     lastSecond = key;
@@ -205,10 +243,83 @@ function updatePlayer() {
       mini.textContent =
         (paused ? t("Pauza · ", "Paused · ") : "") + time(remaining);
   }
-  if (b && !paused && prefs().breathCues && b.key !== lastCue) {
+  if (b && !paused && !document.hidden && b.key !== lastCue) {
     lastCue = b.key;
-    audio.cue(b.phase, prefs().masterVolume);
+    if (prefs().breathCues) audio.cue(b.phase, prefs().masterVolume);
+    if (prefs().breathHaptics) breathHaptic(b.phase);
   }
+}
+function updateLight(f, elapsed, paused) {
+  const assessment = frameMonitor.assess(maxVisualFrequency(f.session));
+  const reason = paused
+    ? "paused"
+    : reduced()
+      ? "reduced"
+      : document.hidden || state.route !== "session" || dialog.open
+        ? "hidden"
+        : f.lightStopped
+          ? "stopped"
+          : assessment.reason;
+  const ready = reason === "ready";
+  if (
+    f.lightStarted &&
+    !ready &&
+    ["unstable", "slow", "hidden"].includes(reason)
+  )
+    f.lightStopped = true;
+  if (ready) {
+    if (f.lightStartedAt == null) f.lightStartedAt = elapsed;
+    f.lightStarted = true;
+  }
+  const sample = lightSample(
+    visualCycles(f.session, elapsed),
+    f.lightContrast,
+    ready ? Math.min(1, (elapsed - f.lightStartedAt) / 2) : 0,
+  );
+  refs.light.style.backgroundColor = `rgb(${sample.channel},${sample.channel},${sample.channel})`;
+  const message = {
+    measuring: t(
+      "Sprawdzanie tempa klatek… światło jest statyczne.",
+      "Checking frame cadence… light is static.",
+    ),
+    ready: `${visualFrequency(phaseAt(f.session, elapsed), elapsed).toFixed(1)} Hz · ${t("tempo klatek", "frame cadence")} ≈ ${Math.round(assessment.fps)}/s`,
+    slow: t(
+      "Za wolne odświeżanie dla tego protokołu. Światło pozostaje statyczne.",
+      "Frame cadence is too low for this protocol. Light stays static.",
+    ),
+    unstable: t(
+      "Nierówne tempo klatek. Pulsacja wyłączona.",
+      "Uneven frame cadence. Pulsation is off.",
+    ),
+    stopped: t(
+      "Pulsacja zatrzymana. Pauza i Wznów, aby sprawdzić ponownie.",
+      "Pulsation stopped. Pause and Resume to recheck.",
+    ),
+    reduced: t(
+      "Ograniczenie ruchu wyłącza pulsację.",
+      "Reduced motion disables pulsation.",
+    ),
+    paused: t("Pauza · światło jest statyczne.", "Paused · light is static."),
+    hidden: t("Pulsacja wstrzymana.", "Pulsation suspended."),
+  }[reason];
+  if (
+    refs.lightStatus &&
+    (f.lastLightReason !== reason || elapsed - (f.lastLightReport ?? -1) >= 1)
+  ) {
+    if (refs.lightStatus.textContent !== message)
+      refs.lightStatus.textContent = message;
+    f.lastLightReason = reason;
+    f.lastLightReport = elapsed;
+  }
+}
+function setPlayerVisual(value) {
+  const f = state.flow;
+  if (!f) return;
+  f.visual = value === "black" ? "night" : value;
+  f.lightStopped = true;
+  render();
+  if (value === "black") openBlackScreen();
+  else document.getElementById("playerVisual")?.focus({ preventScroll: true });
 }
 function setMedia() {
   if (!("mediaSession" in navigator) || !state.flow) return;
@@ -230,7 +341,10 @@ function setMedia() {
 }
 async function start(id) {
   if (state.starting || state.flow) return;
-  const advanced = state.visual === "advanced" && id !== "breath";
+  const advanced =
+    state.visual === "advanced" && supportsStimulation(sessionFor(id));
+  const lightContrast =
+    Number(document.getElementById("lightContrast")?.value) || 0.04;
   if (advanced && !document.getElementById("advancedConsent")?.checked) {
     showStartError(
       t(
@@ -272,6 +386,8 @@ async function start(id) {
     const clock = new SessionController(
       usesAudio ? () => audio.now() : () => performance.now() / 1000,
     );
+    state.nightResult = false;
+    frameMonitor.reset();
     state.flow = {
       session,
       stage: prelude ? "prelude" : "session",
@@ -283,15 +399,25 @@ async function start(id) {
       total: 0,
       logged: false,
       startedAt: Date.now(),
-      dim: false,
+      lightContrast,
+      lightStarted: false,
+      lightStopped: false,
+      lightStartedAt: null,
     };
     clock.start(prelude ? 60 : session.duration);
-    if (!prelude && !standalone) audio.play(session, 0, prefs());
+    if (!prelude && !standalone) {
+      audio.play(session, 0, prefs());
+      clock.anchor = audio.graph.startedAt;
+    }
     store.save({ lastSessionId: id, goal: session.goal });
     state.pendingProgram = null;
     lastCue = "";
     setMedia();
     go("session");
+    if (!prelude && state.visual === "black") {
+      state.flow.visual = "night";
+      openBlackScreen();
+    }
   } catch (error) {
     audio.stop();
     state.flow = null;
@@ -322,6 +448,7 @@ function pause() {
   const f = state.flow;
   if (!f || f.stage === "between" || f.clock.status !== "running") return;
   f.clock.pause();
+  stopHaptics();
   audio.stop();
   if ("mediaSession" in navigator)
     navigator.mediaSession.playbackState = "paused";
@@ -339,7 +466,13 @@ async function resume() {
     if (state.flow !== f || token !== state.token) return;
     if (f.stage === "session" && f.session.id !== "breath")
       audio.play(f.session, f.clock.position(), prefs());
+    frameMonitor.reset();
+    f.lightStopped = false;
+    f.lightStarted = false;
+    f.lightStartedAt = null;
     f.clock.resume();
+    if (audio.graph && f.stage === "session")
+      f.clock.anchor = audio.graph.startedAt;
     lastCue = "";
     if ("mediaSession" in navigator)
       navigator.mediaSession.playbackState = "playing";
@@ -375,7 +508,13 @@ function enterSound() {
   f.total += opening?.durationSeconds || 0;
   f.logged = false;
   f.stage = "session";
+  frameMonitor.reset();
+  if (f.visual === "black") {
+    f.visual = "night";
+    openBlackScreen();
+  }
   f.clock.start(f.session.duration);
+  if (audio.graph) f.clock.anchor = audio.graph.startedAt;
   f.startedAt = Date.now();
   lastCue = "";
   render();
@@ -385,7 +524,7 @@ function saveLog(f, complete) {
   f.logged = true;
   const prelude = f.stage === "prelude";
   const entry = {
-    id: crypto.randomUUID(),
+    id: sessionId(),
     sessionId: prelude ? "breath" : f.session.id,
     goal: prelude ? "breath" : f.session.goal,
     startedAt: f.startedAt,
@@ -423,8 +562,11 @@ function finish(complete) {
         : f.program?.name || f.session.title,
     durationSeconds: f.total,
   };
+  state.nightResult = ["night", "black"].includes(f.visual);
+  stopHaptics();
   state.flow = null;
   state.visual = prefs().audioOnly ? "none" : "calm";
+  state.selected = "";
   state.token++;
   if ("mediaSession" in navigator)
     navigator.mediaSession.playbackState = "none";
@@ -447,8 +589,13 @@ async function nextStep() {
     f.stage = "session";
     f.logged = false;
     f.startedAt = Date.now();
-    f.visual = prefs().audioOnly ? "none" : "calm";
+    f.visual = prefs().audioOnly
+      ? "none"
+      : session.goal === "sleep"
+        ? "night"
+        : "calm";
     f.clock.start(f.session.duration);
+    if (audio.graph) f.clock.anchor = audio.graph.startedAt;
     setMedia();
     render();
   } catch {
@@ -471,6 +618,8 @@ function finishProgram() {
     name: f.program.name,
     durationSeconds: f.total,
   };
+  state.nightResult = ["night", "black"].includes(state.flow?.visual);
+  stopHaptics();
   state.flow = null;
   state.token++;
   if ("mediaSession" in navigator)
@@ -489,8 +638,11 @@ function tick() {
   }
   updatePlayer();
 }
-function frame() {
-  if (!document.hidden) tick();
+function frame(timestamp) {
+  if (!document.hidden) {
+    frameMonitor.add(timestamp);
+    tick();
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -509,6 +661,9 @@ audio.onInterrupted = () => {
   }
 };
 document.addEventListener("visibilitychange", () => {
+  stopHaptics();
+  frameMonitor.reset();
+  if (state.flow?.visual === "advanced") state.flow.lightStopped = true;
   if (
     document.hidden &&
     (state.flow?.session.id === "breath" || state.flow?.stage === "prelude")
@@ -523,7 +678,7 @@ function openDialog(type) {
   dialog.innerHTML =
     type === "settings"
       ? views.settings(prefs(), store.available, active())
-      : exportPanel(state.selected);
+      : exportPanel(state.selected, prefs());
   if (!dialog.open) dialog.showModal();
   else dialog.querySelector("button")?.focus();
 }
@@ -608,6 +763,10 @@ document.addEventListener("change", (e) => {
       el.type !== "range",
     );
   }
+  if (el.id === "playerVisual") {
+    setPlayerVisual(el.value);
+    return;
+  }
   if (el.id === "visualMode") {
     state.visual = el.value;
     render();
@@ -675,12 +834,8 @@ document.addEventListener("click", async (e) => {
     go("prepare/" + p.steps[0].sessionId);
   } else if (a === "nextStep") await nextStep();
   else if (a === "endProgram") finishProgram();
-  else if (a === "dim") {
-    if (state.flow) {
-      state.flow.dim = !state.flow.dim;
-      render();
-    }
-  } else if (a === "fullscreen") {
+  else if (a === "disableLight") setPlayerVisual("calm");
+  else if (a === "fullscreen") {
     const player = document.getElementById("player");
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -743,7 +898,7 @@ document.addEventListener("click", async (e) => {
       ),
       "cortex-history.json",
     );
-  else if (a === "renderExport") startExport(dialog);
+  else if (a === "renderExport") startExport(dialog, prefs());
   else if (a === "cancelExport") cancelExport(dialog);
   else if (a === "exportMetadata") {
     const id = dialog.querySelector("#exportSession").value;
@@ -779,7 +934,7 @@ document.addEventListener("click", async (e) => {
   }
   if (
     !el.isConnected &&
-    ["language", "filterGoal", "clearFilters", "rate", "dim"].includes(a)
+    ["language", "filterGoal", "clearFilters", "rate"].includes(a)
   ) {
     const selector =
       `[data-action="${a}"]` +
@@ -788,6 +943,8 @@ document.addEventListener("click", async (e) => {
   }
 });
 window.addEventListener("hashchange", () => {
+  if (state.flow?.visual === "advanced" && location.hash !== "#session")
+    state.flow.lightStopped = true;
   if (
     state.pendingProgram &&
     location.hash !==

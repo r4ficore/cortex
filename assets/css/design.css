@@ -959,6 +959,8 @@ body.player-page .page {
   border-color: var(--line);
 }
 .player-stage {
+  container-type: size;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2071,4 +2073,242 @@ dialog::backdrop {
 }
 .history-row h3 {
   overflow-wrap: anywhere;
+}
+
+/* A fixed boundary makes the breathing excursion readable at a glance. */
+.player-stage > .breath-orb {
+  transform: none;
+  aspect-ratio: 1;
+  height: auto;
+  width: min(45svh, 400px);
+}
+.breath-boundary {
+  position: absolute;
+  inset: 3%;
+  border: 1px solid #9bb19f;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+.breath-orb .breath-lung {
+  transform: scale(var(--breath-scale, 0.46));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.breath-direction {
+  position: absolute;
+  top: 3%;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  color: #3e6348;
+  background: var(--canvas);
+  border-radius: 50%;
+}
+.breath-direction svg {
+  width: 24px;
+  height: 24px;
+}
+.breath-orb[data-phase="exhale"] .breath-direction svg {
+  transform: rotate(180deg);
+}
+.breath-orb[data-phase="hold"] .breath-direction,
+.breath-orb[data-phase="paused"] .breath-direction {
+  visibility: hidden;
+}
+.player-stage.breathing .breath-caption {
+  background: #f7f8f5ed;
+  padding: 9px 16px;
+  border-radius: 24px;
+  min-width: 90px;
+}
+.breath-caption strong {
+  font-size: 15px;
+  font-weight: 450;
+  letter-spacing: 0.025em;
+}
+.breath-caption .breath-count {
+  margin-top: 1px;
+  font-size: 12px;
+  color: #4b6053;
+}
+.player-visual {
+  width: min(100%, 300px);
+}
+.player-visual select {
+  min-height: 44px;
+  font-size: 13px;
+  padding-block: 8px;
+}
+.light-stage > .orb {
+  opacity: 0.18 !important;
+  transform: none;
+}
+.light-disc {
+  width: min(148px, 30vw, 28svh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(118, 118, 118);
+  position: relative;
+  contain: paint;
+}
+.light-stage .breath-caption {
+  position: absolute;
+  bottom: 0;
+}
+.light-status {
+  font-size: 12px;
+  text-align: center;
+  color: var(--muted);
+  max-width: 430px;
+  line-height: 1.35;
+}
+body.night-mode {
+  --canvas: #080e0d;
+  --paper: #111b18;
+  --ink: #d9e5de;
+  --muted: #a9bcb0;
+  --accent: #aac9b6;
+  --soft: #192b22;
+  --line: #35463d;
+  --shadow: none;
+  background: var(--canvas);
+  color: var(--ink);
+}
+.night-mode .site-header {
+  background: var(--canvas);
+}
+.night-mode .player {
+  color: var(--ink);
+}
+.night-mode .player-stage > .orb {
+  color: #a6bbac;
+  opacity: 0.35 !important;
+}
+.night-mode .btn-primary {
+  background: #c2d8c9;
+  color: #13271d;
+}
+.night-mode .btn:not(.btn-primary),
+.night-mode select {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.night-mode .completion .orb {
+  opacity: 0.25;
+}
+#blackScreen {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100dvh;
+  background: #000;
+  color: #b0b9b3;
+  border-radius: 0;
+}
+#blackScreen::backdrop {
+  background: #000;
+}
+#wakeScreen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 32px;
+  background: #000;
+  color: #b0b9b3;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+#wakeScreen span {
+  font-size: 14px;
+  animation: black-hint 4s forwards;
+}
+@keyframes black-hint {
+  0%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (max-height: 700px) {
+  .player-bottom {
+    gap: 8px;
+  }
+  .player-tip {
+    margin: 0;
+  }
+  .player-stage > .breath-orb {
+    width: min(38svh, 300px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #wakeScreen span {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.player-stage.breathing > .breath-orb {
+  width: min(100cqw, 100cqh, 400px);
+  height: auto;
+  max-height: none;
+}
+
+.reduce-motion #wakeScreen span {
+  opacity: 0;
+}
+
+.light-stage {
+  flex-direction: column;
+  gap: 8px;
+}
+.light-disc {
+  flex-shrink: 0;
+}
+.light-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+.light-stage .breath-caption {
+  display: none;
+}
+@media (max-height: 480px) and (min-width: 500px) {
+  .player-bottom {
+    gap: 4px;
+  }
+  .player-clock {
+    font-size: 23px;
+    line-height: 1.2;
+  }
+  .player-controls .btn {
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+  .player-visual select {
+    font-size: 12px;
+  }
+  .light-stage {
+    gap: 4px;
+  }
+  .light-info {
+    gap: 0;
+  }
+  .light-status {
+    font-size: 12px;
+  }
 }
