@@ -1,0 +1,160 @@
+import { orb } from "./visual.js";
+import { icon } from "./i18n.js";
+const sources = {
+  beats:
+    "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0286023",
+  breath: "https://www.nature.com/articles/s41598-022-27247-y",
+  control: "https://www.nature.com/articles/s41598-023-49279-8",
+  nhs: "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/",
+  flashes:
+    "https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html",
+};
+const cite = (key, text) =>
+  `<a href="${sources[key]}" target="_blank" rel="noopener">${text}</a>`;
+export function documentBody(lang = "pl", type = "science") {
+  const l = (pl, en) => (lang === "pl" ? pl : en),
+    science = type === "science";
+  const other = science
+    ? lang === "pl"
+      ? "whitepaper.html"
+      : "whitepaper-pl.html"
+    : lang === "pl"
+      ? "guide.html"
+      : "guide-pl.html";
+  const title = science
+    ? l(
+        "Dźwięk, oddech<br>i to, co wiemy.",
+        "Sound, breath<br>and what we know.",
+      )
+    : l(
+        "Twoja pierwsza chwila<br>z Cortex.",
+        "Your first moment<br>with Cortex.",
+      );
+  const intro = science
+    ? l(
+        "Przejrzysty opis działania Cortex, kontekstu badań i granic obecnej wiedzy.",
+        "A clear account of how Cortex works, the research context and the limits of current knowledge.",
+      )
+    : l(
+        "Wybierz potrzebę, przygotuj się i daj sobie chwilę. Ten przewodnik przeprowadzi Cię przez najważniejsze kroki.",
+        "Choose an intention, settle in and take a moment. This guide walks you through the essentials.",
+      );
+  const sections = science
+    ? [
+        [
+          "overview",
+          l("Najważniejsze w skrócie", "The essentials"),
+          `<p>${l("Cortex łączy sesje dźwiękowe, prowadzenie oddechu i spokojną oprawę wizualną. Pięć ścieżek — Oddech, Skupienie, Wyciszenie, Sen i Energia — porządkuje wybór według intencji użytkownika. Nazwy te opisują przeznaczenie sesji, a nie gwarantowany efekt biologiczny.", "Cortex brings together sound sessions, guided breathing and quiet visuals. Five paths — Breathe, Focus, Unwind, Sleep and Energy — organise the experience around your intention. These names describe the purpose of a session, not a guaranteed biological outcome.")}</p><div class="notice"><strong>${l("Badania nad techniką a badania nad produktem", "Research on a technique and research on a product")}</strong><p>${l("Przywołane publikacje nie badały tej wersji Cortex. Nie przedstawiamy aplikacji jako klinicznie zweryfikowanego leczenia, metody neuroprotekcji ani urządzenia mierzącego aktywność mózgu.", "The publications cited here did not study this version of Cortex. We do not present the app as a clinically validated treatment, a neuroprotective intervention or a device that measures brain activity.")}</p></div>`,
+        ],
+        [
+          "sound",
+          l("Co słyszysz", "What you hear"),
+          `<p>${l("Sesje wykorzystują tony sinusoidalne rozdzielone między lewy i prawy kanał oraz opcjonalny szum. Częstotliwości i poziomy tonów zmieniają się według etapów wybranego protokołu. Ustawienia pozwalają regulować głośność tonów i tła niezależnie.", "Sessions use sine tones separated between the left and right channels, plus optional noise. Tone frequencies and levels follow the stages of the selected protocol. You can adjust tones and background volume separately.")}</p><p>${l("Dudnienie binauralne jest zjawiskiem percepcyjnym związanym z podaniem różnych tonów do obu uszu. Nie jest tym samym co dowód „przestawienia” aktywności całego mózgu na wybraną częstotliwość. Przegląd Ingendoh i współautorów wykazał niespójne wyniki badań nad taką synchronizacją.", "A binaural beat is a perceptual phenomenon associated with presenting different tones to the two ears. This is distinct from evidence that the whole brain has shifted to a chosen frequency. Ingendoh and colleagues found inconsistent results in research on this kind of entrainment.")} ${cite("beats", "[1]")}</p><h3>${l("Parametry nie są pomiarem", "Parameters are not measurements")}</h3><p>${l("Liczby w szczegółach sesji opisują generowany dźwięk. Cortex nie wykonuje EEG, nie rozpoznaje faz snu i nie mierzy koncentracji. Ocena po sesji jest wyłącznie Twoim subiektywnym zapisem.", "The numbers in session details describe the generated sound. Cortex does not perform EEG, identify sleep stages or measure focus. Your post-session rating is a subjective record only.")}</p><div class="table-scroll"><table class="tech-table"><thead><tr><th>${l("Element", "Element")}</th><th>${l("Co oznacza", "What it means")}</th></tr></thead><tbody><tr><td>${l("Tony stereo", "Stereo tones")}</td><td>${l("Osobny sygnał dla każdego ucha; używaj słuchawek stereo.", "A separate signal for each ear; use stereo headphones.")}</td></tr><tr><td>${l("Szum", "Noise")}</td><td>${l("Opcjonalne tło. Jego kolor opisuje charakter widma, nie jakość zdrowotną.", "An optional background. Its colour describes its spectrum, not a health benefit.")}</td></tr><tr><td>${l("Modulacja", "Modulation")}</td><td>${l("Zmiana poziomu sygnału w czasie. W eksportowanym audio dostępne są także ustawienia mono i izochroniczne.", "A change in signal level over time. Exported audio also offers mono and isochronic arrangements.")}</td></tr></tbody></table></div>`,
+        ],
+        [
+          "breathing",
+          l("Co wiemy o oddechu", "What we know about breathing"),
+          `<p>${l("Metaanaliza Finchama i współautorów wskazała obiecujące wyniki ćwiczeń oddechowych dla samooceny stresu. Autorzy podkreślali jednak ograniczenia jakości i zróżnicowanie badań.", "Fincham and colleagues’ meta-analysis reported promising findings for breathwork and self-reported stress, while noting limitations in study quality and variation between studies.")} ${cite("breath", "[2]")}</p><p>${l("Późniejsze badanie z aktywną grupą kontrolną nie wykazało przewagi wolnego „coherent breathing” nad porównywaną praktyką oddechową. To ważny powód, by nie przypisywać jednej proporcji oddechu wyjątkowych, pewnych efektów.", "A later trial with an active control did not find coherent breathing superior to the comparison breathing practice. This is a reason not to attribute unique, certain effects to one breathing ratio.")} ${cite("control", "[3]")}</p><p>${l("W Cortex rytm 4–6 jest prostą wskazówką: 4 sekundy wdechu i 6 wydechu. Nie jest diagnozą ani indywidualnym zaleceniem. Wzorce z zatrzymaniem oddechu są opcjonalne. Jeśli rytm jest niewygodny, wróć do naturalnego oddechu.", "In Cortex, 4–6 is a simple guide: 4 seconds in and 6 seconds out. It is not a diagnosis or an individual prescription. Patterns with breath holds are optional. If a rhythm feels uncomfortable, return to natural breathing.")}</p><p>${l("NHS zaleca oddychanie łagodne, regularne i bez wymuszania głębokości. To zasada, na której opieramy instrukcje ćwiczeń.", "The NHS recommends gentle, regular breathing without forcing its depth. That principle informs our exercise instructions.")} ${cite("nhs", "[4]")}</p>`,
+        ],
+        [
+          "visuals",
+          l("Obraz i bodźce", "Visuals and stimulation"),
+          `<p>${l("Domyślna animacja jest spokojną dekoracją. W ćwiczeniu oddechowym zmiana jej wielkości wskazuje fazę wdechu i wydechu. Ruch nie przedstawia sygnału z mózgu ani nie śledzi rzeczywistego oddechu.", "The default animation is a quiet decoration. During breathing practice, its changing size guides inhalation and exhalation. The movement does not represent a brain signal or track your actual breathing.")}</p><p>${l("Zaawansowana pulsacja wymaga osobnego wyboru przed sesją. Ograniczamy ją do maksymalnie dwóch cykli na sekundę, niewielkiej zmiany przezroczystości formy i bez pełnoekranowego migotania. Nie stosujemy czerwonych błysków. Ograniczenie ruchu wyłącza pulsację.", "Advanced pulsation requires a separate choice before a session. It is limited to at most two cycles per second, a small change in the form’s opacity and no full-screen flashing. We do not use red flashes. Reduced motion disables pulsation.")}</p><p>${l("W3C opisuje kryterium ograniczania błysków jako wymóg dostępności. Spełnienie kryterium interfejsu nie jest certyfikatem medycznym ani gwarancją komfortu każdej osoby.", "W3C describes limits on flashing as an accessibility requirement. Meeting an interface criterion is not medical certification or a guarantee of comfort for every person.")} ${cite("flashes", "[5]")}</p>`,
+        ],
+        [
+          "limits",
+          l("Granice i odpowiedzialne użycie", "Limits and considered use"),
+          `<p>${l("Efekt sesji może zależeć od preferencji, otoczenia i sytuacji. Nie obiecujemy określonego czasu zasypiania, poprawy fazy N3, leczenia lęku, zmiany metabolizmu mózgu ani gwarantowanego wzrostu energii. Nie wyciągamy takich wniosków z samej nazwy pasma częstotliwości.", "Your experience can depend on preference, surroundings and circumstances. We do not promise a specific time to fall asleep, improved N3 sleep, anxiety treatment, altered brain metabolism or a guaranteed rise in energy. A frequency-band label alone does not establish these outcomes.")}</p><p>${l("Zacznij od komfortowej, niskiej głośności. Przerwij, jeśli pojawi się dyskomfort. Korzystaj w miejscu, w którym możesz bezpiecznie poświęcić uwagę sesji. Szczegółowe wskazówki znajdziesz w przewodniku.", "Start at a comfortable, low volume. Stop if you feel uncomfortable. Use Cortex somewhere you can safely give the session your attention. See the guide for practical instructions.")}</p><p><a href="${lang === "pl" ? "guide-pl.html" : "guide.html"}#safety">${l("Przejdź do instrukcji komfortowego korzystania", "Read the comfortable-use guide")}</a></p>`,
+        ],
+        [
+          "sources",
+          l("Źródła", "Sources"),
+          `<ol class="references"><li>${cite("beats", "Ingendoh, Posny & Heine (2023). Binaural beats to entrain the brain?")} PLOS ONE, 18(5), e0286023.</li><li>${cite("breath", "Fincham et al. (2023). Breathwork: meta-analysis.")} Scientific Reports, 13, 432.</li><li>${cite("control", "Fincham, Strauss & Cavanagh (2023). Coherent breathing: placebo-controlled trial.")} Scientific Reports, 13, 22141.</li><li>${cite("nhs", "NHS — Breathing exercises for stress.")}</li><li>${cite("flashes", "W3C — WCAG 2.2: Three Flashes or Below Threshold.")}</li></ol><p class="small">${l("To wybrany kontekst naukowy i dokumentacja produktu, nie pełny przegląd systematyczny. Aktualizacja: 18 października 2026.", "This is selected scientific context and product documentation, not a comprehensive systematic review. Updated 18 October 2026.")}</p>`,
+        ],
+      ]
+    : [
+        [
+          "choose",
+          l("1. Wybierz swoją chwilę", "1. Choose your moment"),
+          `<p>${l("Na starcie znajdziesz pięć ścieżek. Oddech prowadzi prosto do ćwiczenia. Skupienie, Wyciszenie, Sen i Energia pokazują sesje pasujące do wybranej intencji.", "Home offers five paths. Breathe takes you straight to a breathing practice. Focus, Unwind, Sleep and Energy show sessions for your chosen intention.")}</p><p>${l("Energia obejmuje Prime, Overdrive i Gamma Lift. Prime jest łagodniejszym początkiem; pozostałe sesje mają wyraźniejszy charakter dźwięku. Skupienie jest przeznaczone do towarzyszenia pracy nad zadaniem.", "Energy includes Prime, Overdrive and Gamma Lift. Prime offers a gentler beginning; the other sessions have a more pronounced sound character. Focus is designed to accompany work on a task.")}</p><p>${l("Biblioteka zawiera wszystkie 14 sesji dźwiękowych, oddech i pięć programów. Filtry celu, czasu i wyszukiwanie pomogą znaleźć właściwą sesję.", "The library includes all 14 sound sessions, breathing and five programmes. Filter by intention or time, or search to find a session.")}</p>`,
+        ],
+        [
+          "prepare",
+          l("2. Przygotuj sesję", "2. Make it yours"),
+          `<ol><li>${l("Usiądź lub połóż się wygodnie. Do sesji dźwiękowej przygotuj słuchawki stereo.", "Sit or lie comfortably. For sound sessions, have stereo headphones ready.")}</li><li>${l("Ustaw niską głośność. W „Dopasuj więcej” możesz osobno sprawdzić lewy i prawy kanał.", "Set a low volume. Under “More options”, you can check the left and right channels separately.")}</li><li>${l("Wybierz tło: szum brązowy, różowy, biały lub brak tła.", "Choose brown, pink or white noise, or no background.")}</li><li>${l("Jeśli chcesz, dodaj minutę oddechu przed sesją. Można ją pominąć przyciskiem w odtwarzaczu.", "If you like, add one minute of breathing first. You can skip it using the player button.")}</li><li>${l("Naciśnij „Rozpocznij”. Dźwięk uruchamia się dopiero po Twoim działaniu.", "Press “Begin”. Sound starts only after your action.")}</li></ol><p>${l("Hypnos pozwala wybrać 30, 45, 90 minut lub czas bez limitu. W pozostałych sesjach długość wynika z protokołu.", "Hypnos offers 30, 45 or 90 minutes, or no time limit. Other sessions follow the duration of their protocol.")}</p>`,
+        ],
+        [
+          "breath",
+          l("3. Podążaj za oddechem", "3. Follow your breath"),
+          `<p>${l("Wybierz 1, 3 lub 5 minut. Gdy forma rośnie, wykonaj wdech. Gdy maleje, wykonaj wydech. Nazwa fazy i odliczanie są widoczne także bez animacji.", "Choose 1, 3 or 5 minutes. Inhale as the form expands and exhale as it contracts. Phase names and a countdown remain available without animation.")}</p><p>${l("Podstawowy rytm 4–6 nie zawiera zatrzymania oddechu. Box i 4–7–8 zawierają pauzy i są opcjonalne. Nie próbuj na siłę dotrzymać odliczania. Oddychaj łagodnie i wróć do naturalnego rytmu, jeśli ćwiczenie jest niewygodne.", "The basic 4–6 rhythm has no breath holds. Box and 4–7–8 include optional holds. Do not force yourself to keep up with the count. Breathe gently and return to your natural rhythm if the exercise feels uncomfortable.")} ${cite("nhs", l("Wskazówki NHS", "NHS guidance"))}</p><p>${l("Ćwiczenie działa bez dźwięku. Sygnały zmiany faz możesz włączyć w przygotowaniu. Schowanie karty wstrzymuje prowadzenie oddechu; wznów je, gdy wrócisz.", "The practice works silently. Enable phase-change sounds in preparation if you like. Hiding the tab pauses guided breathing; resume when you return.")}</p>`,
+        ],
+        [
+          "controls",
+          l("4. Korzystaj w swoim tempie", "4. Stay in control"),
+          `<p>${l("Pauza zatrzymuje przebieg. „Wznów” kontynuuje od tego samego miejsca. „Zakończ” zamyka sesję i zapisuje rzeczywisty czas. Możesz przeglądać bibliotekę podczas słuchania — pasek na dole prowadzi z powrotem do odtwarzacza.", "Pause freezes the session. Resume continues from the same point. Finish ends the session and records the time spent. You can browse while listening; the bottom bar takes you back to the player.")}</p><p>${l("W programach kolejny etap uruchamiasz samodzielnie. Po sesji możesz opcjonalnie ocenić samopoczucie. Historia nie jest oceną zdrowia ani raportem medycznym.", "In programmes, you start each next step yourself. After a session, you can optionally rate how you feel. History is not a health assessment or medical report.")}</p><p>${l("System telefonu może przerwać dźwięk w tle lub po zablokowaniu ekranu. Jeśli przeglądarka zgłosi przerwanie, Cortex wstrzyma sesję. Po powrocie sprawdź stan odtwarzacza.", "Your phone may interrupt background audio or playback while locked. If the browser reports an interruption, Cortex pauses the session. Check the player state when you return.")}</p>`,
+        ],
+        [
+          "safety",
+          l("Komfort i bezpieczeństwo", "Comfort and safety"),
+          `<div class="notice"><strong>${l("Przerwij, jeśli czujesz dyskomfort", "Stop if you feel uncomfortable")}</strong><p>${l("Nie używaj Cortex podczas prowadzenia pojazdu lub czynności wymagających uwagi. Zacznij od niskiej głośności. Jeśli pojawią się zawroty głowy, ból, nudności lub niepokój, zakończ sesję.", "Do not use Cortex while driving or doing tasks that need your attention. Start at a low volume. If you experience dizziness, pain, nausea or distress, end the session.")}</p></div><p>${l("Domyślnie obraz porusza się spokojnie. Przy wrażliwości na bodźce wybierz brak animacji lub ograniczenie ruchu. Ustawienie ograniczonego ruchu w systemie jest respektowane.", "Visuals move gently by default. If you are sensitive to stimulation, choose no animation or reduced motion. Your system’s reduced-motion preference is respected.")}</p><p>${l("Zaawansowana pulsacja jest opcjonalnym bodźcem wizualnym. Nie włączaj jej przy nadwrażliwości na migające światło lub padaczce fotogennej. W razie wątpliwości dotyczących swojego zdrowia omów korzystanie z lekarzem.", "Advanced pulsation is optional visual stimulation. Do not enable it if you have sensitivity to flashing light or photosensitive epilepsy. If you are unsure about your health circumstances, discuss use with a clinician.")} ${cite("flashes", l("Informacja o błyskach — W3C", "Information on flashing — W3C"))}</p><p>${l("Cortex służy osobistym rytuałom i nie zastępuje diagnozy ani leczenia. Nie musisz kończyć ćwiczenia ani wybierać intensywnej sesji.", "Cortex supports personal rituals and does not replace diagnosis or treatment. You do not need to finish an exercise or choose an intense session.")}</p>`,
+        ],
+        [
+          "data",
+          l("Dane i eksport", "Data and export"),
+          `<p>${l("Preferencje, historia i oceny są zapisywane lokalnie w przeglądarce. Usunięcie danych witryny może je skasować. W ustawieniach możesz pobrać ich kopię w formacie JSON.", "Preferences, history and ratings are stored locally in your browser. Clearing site data can remove them. Download a JSON copy from Settings.")}</p><p>${l("Eksport audio tworzy plik WAV na urządzeniu. Dostępne są różne długości, układy dźwięku, tła, grafika SVG i dane protokołu JSON. Renderowanie można anulować. Dłuższe pliki zużywają więcej pamięci.", "Audio export creates a WAV file on your device. Choose a duration, sound arrangement and background, or download SVG artwork and protocol data as JSON. Rendering can be cancelled. Longer files use more memory.")}</p>`,
+        ],
+      ];
+  return `<a class="skip-link" href="#article">${l("Przejdź do treści", "Skip to content")}</a><header class="site-header"><a class="brand" href="index.html"><img src="assets/images/cortex-mark.svg" alt="">cortex</a><div class="header-actions"><a class="icon-btn language-btn" href="${other}" hreflang="${lang === "pl" ? "en" : "pl"}" aria-label="${l("Read in English", "Czytaj po polsku")}">${lang === "pl" ? "EN" : "PL"}</a><a class="btn btn-quiet" href="index.html#knowledge">${l("Wróć do aplikacji", "Back to app")} ${icon("arrow", 18)}</a></div></header><main class="page"><header class="reading-intro"><div class="eyebrow">${science ? "Whitepaper" : l("Przewodnik", "The guide")}</div><h1>${title}</h1><p>${intro}</p><p class="doc-meta"><span>Cortex · Porcelana</span><span>${l("18 października 2026", "18 October 2026")}</span><button class="text-link print-hide" data-print>${l("Drukuj / zapisz PDF", "Print / save PDF")}</button></p></header><div class="reading-layout"><nav class="toc" aria-label="${l("Spis treści", "Contents")}">${sections.map(([id, title]) => `<a href="#${id}">${title}</a>`).join("")}</nav><article class="article" id="article">${sections.map(([id, title, body]) => `<section id="${id}"><h2>${title}</h2>${body}</section>`).join("")}</article></div><footer class="footer"><span>${l("Twój czas. Twoje tempo.", "Your time. Your pace.")}</span><a href="index.html">${l("Znajdź swoją chwilę", "Find your moment")} ${icon("arrow", 18)}</a></footer></main>`;
+}
+export function documentHTML(lang, type) {
+  const title =
+    type === "science"
+      ? lang === "pl"
+        ? "Podstawy naukowe"
+        : "The science"
+      : lang === "pl"
+        ? "Jak korzystać"
+        : "The guide";
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f8f5"><title>${title} — Cortex</title><meta name="description" content="${lang === "pl" ? "Działanie Cortex, instrukcje, źródła i granice wiedzy." : "How Cortex works, guidance, sources and the limits of current knowledge."}"><link rel="icon" href="assets/images/cortex-mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/design.css"><script type="module" src="assets/js/reading.js"></script></head><body>${documentBody(lang, type)}</body></html>`;
+}
+export function marketingBody(lang) {
+  const l = (pl, en) => (lang === "pl" ? pl : en);
+  const routeCards = [
+    [
+      "breath",
+      "Oddech",
+      "Breathe",
+      "Zatrzymaj się i znajdź swój rytm.",
+      "Pause and find your rhythm.",
+    ],
+    [
+      "focus",
+      "Skupienie",
+      "Focus",
+      "Zrób przestrzeń na jedno zadanie.",
+      "Make room for one thing.",
+    ],
+    [
+      "calm",
+      "Wyciszenie",
+      "Unwind",
+      "Zwolnij i odetchnij.",
+      "Let the day slow down.",
+    ],
+    [
+      "sleep",
+      "Sen",
+      "Sleep",
+      "Przygotuj się do odpoczynku.",
+      "Ease into your evening.",
+    ],
+    [
+      "energy",
+      "Energia",
+      "Energy",
+      "Złap energię do działania.",
+      "Find your momentum.",
+    ],
+  ];
+  return `<header class="site-header"><a class="brand" href="index.html"><img src="assets/images/cortex-mark.svg" alt="">cortex</a><div class="header-actions"><button class="icon-btn language-btn" data-language aria-label="${l("Switch to English", "Zmień na polski")}">${lang.toUpperCase()}</button><a class="btn btn-primary" href="index.html">${l("Otwórz Cortex", "Open Cortex")}</a></div></header><main class="page"><section class="marketing-hero"><div class="home-hero"><div><div class="eyebrow">${l("Dźwięk i oddech. W Twoim rytmie.", "Sound and breath. At your pace.")}</div><h1>${l("Trochę przestrzeni.<br>Dla Ciebie.", "A little space.<br>Just for you.")}</h1><p class="intro">${l("Pięć sposobów na chwilę dla siebie — od pierwszego spokojnego oddechu po wejście w działanie.", "Five ways to make time for yourself — from a quiet breath to finding your momentum.")}</p><a class="btn btn-primary" href="index.html">${l("Znajdź swoją chwilę", "Find your moment")} ${icon("arrow", 19)}</a></div><div class="hero-art">${orb("breath")}</div></div></section><section class="marketing-section"><h2>${l("Czego dziś potrzebujesz?", "What do you need today?")}</h2><p>${l("Wybierz swoją intencję. Cortex pomoże znaleźć odpowiednią sesję i przeprowadzi Cię przez jej kolejne kroki.", "Choose your intention. Cortex helps you find a session and guides you through each step.")}</p><div class="paths">${routeCards.map(([id, pl, en, pld, end]) => `<a href="index.html#${id === "breath" ? "prepare/breath" : "path/" + id}" class="path-card" data-goal="${id}"><span class="path-symbol">${icon(id)}</span><h3>${l(pl, en)}</h3><p>${l(pld, end)}</p><span class="path-arrow">${icon("arrow", 17)}</span></a>`).join("")}</div></section><section class="marketing-section"><div class="eyebrow">${l("Prosty rytuał", "A simple ritual")}</div><h2>${l("Mniej ustawiania.<br>Więcej bycia tu.", "Less setting up.<br>More being here.")}</h2><div class="steps-grid"><article><h3>01 · ${l("Wybierz", "Choose")}</h3><p>${l("Krótki oddech, skupienie, wyciszenie, sen lub energia.", "A short breath, focus, unwinding, sleep or energy.")}</p></article><article><h3>02 · ${l("Dopasuj", "Settle in")}</h3><p>${l("Wygodne miejsce, komfortowa głośność i wybrane tło.", "A comfortable place, a gentle volume and your choice of background.")}</p></article><article><h3>03 · ${l("Zostań na chwilę", "Take a moment")}</h3><p>${l("Podążaj za oddechem lub słuchaj. Pauza jest zawsze pod ręką.", "Follow your breath or simply listen. Pause is always within reach.")}</p></article></div></section><section class="marketing-section"><div class="knowledge-grid"><article class="knowledge-card"><h2>${l("Spokój także w interfejsie.", "A quieter interface, too.")}</h2><p>${l("Czytelne sterowanie, delikatny ruch i możliwość korzystania bez animacji. Twoja historia zostaje na Twoim urządzeniu.", "Clear controls, gentle movement and an option to use Cortex without animation. Your history stays on your device.")}</p><a class="text-link" href="${lang === "pl" ? "guide-pl.html" : "guide.html"}">${l("Poznaj sposób działania", "Read the guide")}</a></article><article class="knowledge-card"><h2>${l("Ciekawość. Bez obietnic na wyrost.", "Curiosity. With perspective.")}</h2><p>${l("Przeczytaj, co wiemy o dźwięku i oddechu, jakie są ograniczenia badań i co robi sama aplikacja.", "Read what we know about sound and breathing, where research has limits and what the app itself does.")}</p><a class="text-link" href="${lang === "pl" ? "whitepaper-pl.html" : "whitepaper.html"}">${l("Podstawy naukowe", "The science")}</a></article></div></section><footer class="footer"><span>${l("Twój czas. Twoje tempo.", "Your time. Your pace.")}</span><a href="index.html">${l("Otwórz Cortex", "Open Cortex")} ${icon("arrow", 18)}</a></footer></main>`;
+}

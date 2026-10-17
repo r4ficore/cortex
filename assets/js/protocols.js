@@ -1,0 +1,819 @@
+// Preserved audio/phase definitions from ecddf71. Product copy lives in catalog.js.
+export const protocols = {
+  hypnos: {
+    id: "hypnos",
+    name: "Hypnos",
+    duration: Infinity,
+    baseHz: "Delta 0.5-2Hz",
+    phases: [
+      {
+        name: "Indukcja Snu",
+        start: 0,
+        end: 900,
+        audio: {
+          l: 100,
+          r: 108,
+          vol_s: 0.2,
+          vol_e: 0.15,
+        },
+        visual: {
+          f: 6,
+          mod: "soft",
+          bri: 0.3,
+        },
+      },
+      {
+        name: "Głęboki Sen",
+        start: 900,
+        end: Infinity,
+        audio: {
+          l: 60,
+          r: 61,
+          vol: 0.15,
+        },
+        visual: {
+          f: 0.5,
+          mod: "breath",
+          bri: 0.05,
+        },
+      },
+    ],
+  },
+  prime: {
+    id: "prime",
+    name: "Prime",
+    duration: 300,
+    baseHz: "Alpha -> Beta",
+    phases: [
+      {
+        name: "Inicjacja Alpha",
+        start: 0,
+        end: 120,
+        audio: {
+          l: 220,
+          r: 228,
+          vol_s: 0.1,
+          vol_e: 0.3,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+          bri: 0.6,
+        },
+      },
+      {
+        name: "Aktywacja Beta",
+        start: 120,
+        end: 300,
+        audio: {
+          l: 220,
+          r: 234,
+          vol: 0.35,
+        },
+        visual: {
+          f: 14,
+          mod: "soft",
+          bri: 0.8,
+        },
+      },
+    ],
+  },
+  overdrive: {
+    id: "overdrive",
+    name: "Overdrive",
+    duration: 300,
+    baseHz: "Gamma 40Hz",
+    phases: [
+      {
+        name: "Ramp Up",
+        start: 0,
+        end: 60,
+        audio: {
+          l: 440,
+          r: 470,
+          vol_s: 0.3,
+          vol_e: 0.5,
+        },
+        visual: {
+          f_s: 20,
+          f_e: 35,
+          mod: "hard",
+        },
+      },
+      {
+        name: "Gamma Peak",
+        start: 60,
+        end: 240,
+        audio: {
+          l: 440,
+          r: 480,
+          mod: "pulse",
+        },
+        visual: {
+          f: 40,
+          mod: "hard",
+          bri: 1,
+        },
+      },
+      {
+        name: "Cool Down",
+        start: 240,
+        end: 300,
+        audio: {
+          l: 440,
+          r: 460,
+          vol_s: 0.5,
+          vol_e: 0.2,
+        },
+        visual: {
+          f_s: 30,
+          f_e: 10,
+          mod: "soft",
+        },
+      },
+    ],
+  },
+  deepFocus: {
+    id: "deepFocus",
+    name: "Deep Focus",
+    duration: 900,
+    baseHz: "Beta 14-18Hz",
+    phases: [
+      {
+        name: "Indukcja",
+        start: 0,
+        end: 120,
+        audio: {
+          l: 210,
+          r: 224,
+          vol_s: 0.1,
+          vol_e: 0.3,
+        },
+        visual: {
+          f: 10,
+          mod: "soft",
+          bri: 0.7,
+        },
+      },
+      {
+        name: "Tunel",
+        start: 120,
+        end: 780,
+        audio: {
+          l: 230,
+          r: 248,
+          vol: 0.4,
+        },
+        visual: {
+          f: 14,
+          mod: "soft",
+          bri: 0.85,
+        },
+      },
+      {
+        name: "Wyjście",
+        start: 780,
+        end: 900,
+        audio: {
+          l: 210,
+          r: 224,
+          vol_s: 0.3,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 10,
+          mod: "soft",
+          bri: 0.6,
+        },
+      },
+    ],
+  },
+  clarity: {
+    id: "clarity",
+    name: "Clarity",
+    duration: 720,
+    baseHz: "Isochronic 12Hz",
+    phases: [
+      {
+        name: "Centrowanie",
+        start: 0,
+        end: 180,
+        audio: {
+          l: 220,
+          r: 232,
+          vol_s: 0.2,
+          vol_e: 0.35,
+        },
+        visual: {
+          f: 10,
+          mod: "soft",
+        },
+      },
+      {
+        name: "Analiza",
+        start: 180,
+        end: 600,
+        audio: {
+          l: 220,
+          r: 236,
+          mod: "iso",
+        },
+        visual: {
+          f: 12,
+          mod: "soft",
+        },
+      },
+      {
+        name: "Synteza",
+        start: 600,
+        end: 720,
+        audio: {
+          l: 220,
+          r: 232,
+          vol_s: 0.35,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+        },
+      },
+    ],
+  },
+  genesis: {
+    id: "genesis",
+    name: "Genesis",
+    duration: 600,
+    baseHz: "Theta 6Hz",
+    phases: [
+      {
+        name: "Zejście",
+        start: 0,
+        end: 120,
+        audio: {
+          l: 180,
+          r: 190,
+          vol_s: 0.2,
+          vol_e: 0.3,
+        },
+        visual: {
+          f: 10,
+          mod: "soft",
+          bri: 0.6,
+        },
+      },
+      {
+        name: "Theta Flow",
+        start: 120,
+        end: 500,
+        audio: {
+          l: 150,
+          r: 156,
+          vol: 0.35,
+        },
+        visual: {
+          f: 6,
+          mod: "soft",
+          bri: 0.5,
+        },
+      },
+      {
+        name: "Powrót",
+        start: 500,
+        end: 600,
+        audio: {
+          l: 180,
+          r: 190,
+          vol_s: 0.3,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+          bri: 0.4,
+        },
+      },
+    ],
+  },
+  equilibrium: {
+    id: "equilibrium",
+    name: "Equilibrium",
+    duration: 420,
+    baseHz: "Solid Alpha 10Hz",
+    phases: [
+      {
+        name: "Uziemienie",
+        start: 0,
+        end: 60,
+        audio: {
+          l: 200,
+          r: 212,
+          vol_s: 0.15,
+          vol_e: 0.25,
+        },
+        visual: {
+          f: 12,
+          mod: "soft",
+          bri: 0.6,
+        },
+      },
+      {
+        name: "Stabilizacja",
+        start: 60,
+        end: 360,
+        audio: {
+          l: 200,
+          r: 210,
+          vol: 0.3,
+        },
+        visual: {
+          f: 10,
+          mod: "breath",
+          bri: 0.7,
+        },
+      },
+      {
+        name: "Wyciszenie",
+        start: 360,
+        end: 420,
+        audio: {
+          l: 200,
+          r: 208,
+          vol_s: 0.25,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 8,
+          mod: "breath",
+          bri: 0.5,
+        },
+      },
+    ],
+  },
+  restoration: {
+    id: "restoration",
+    name: "Restoration",
+    duration: 900,
+    baseHz: "Delta 3Hz",
+    phases: [
+      {
+        name: "Zwolnienie",
+        start: 0,
+        end: 180,
+        audio: {
+          l: 100,
+          r: 108,
+          vol_s: 0.15,
+          vol_e: 0.25,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+          bri: 0.5,
+        },
+      },
+      {
+        name: "Delta Immersion",
+        start: 180,
+        end: 800,
+        audio: {
+          l: 100,
+          r: 103,
+          vol: 0.3,
+        },
+        visual: {
+          f: 3,
+          mod: "breath",
+          bri: 0.3,
+        },
+      },
+      {
+        name: "Przebudzenie",
+        start: 800,
+        end: 900,
+        audio: {
+          l: 100,
+          r: 108,
+          vol_s: 0.25,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 6,
+          mod: "soft",
+          bri: 0.4,
+        },
+      },
+    ],
+  },
+  presence: {
+    id: "presence",
+    name: "Presence",
+    duration: 420,
+    baseHz: "Alpha 10Hz",
+    phases: [
+      {
+        name: "Flow",
+        start: 0,
+        end: 360,
+        audio: {
+          l: 240,
+          r: 250,
+          vol_s: 0.2,
+          vol_e: 0.35,
+        },
+        visual: {
+          f: 10,
+          mod: "soft",
+        },
+      },
+      {
+        name: "Spokój",
+        start: 360,
+        end: 420,
+        audio: {
+          l: 240,
+          r: 250,
+          vol_s: 0.35,
+          vol_e: 0.1,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+        },
+      },
+    ],
+  },
+  auroraReset: {
+    id: "auroraReset",
+    name: "Aurora Reset",
+    duration: 1800,
+    baseHz: "Delta-Theta 1.5-9Hz",
+    phases: [
+      {
+        name: "Prime",
+        start: 0,
+        end: 300,
+        audio: {
+          l: 160,
+          r: 164,
+          vol_s: 0.12,
+          vol_e: 0.18,
+        },
+        visual: {
+          f: 5,
+          mod: "soft",
+          bri: 0.35,
+        },
+      },
+      {
+        name: "Anchor",
+        start: 300,
+        end: 1200,
+        audio: {
+          l: 180,
+          r: 188,
+          vol_s: 0.18,
+          vol_e: 0.25,
+          mod: "pulse",
+        },
+        visual: {
+          f: 9,
+          mod: "breath",
+          bri: 0.45,
+        },
+      },
+      {
+        name: "Stabilize",
+        start: 1200,
+        end: 1800,
+        audio: {
+          l: 170,
+          r: 175,
+          vol_s: 0.22,
+          vol_e: 0.12,
+        },
+        visual: {
+          f: 6,
+          mod: "soft",
+          bri: 0.4,
+        },
+      },
+    ],
+  },
+  cortexForge: {
+    id: "cortexForge",
+    name: "Cortex Forge",
+    duration: 2040,
+    baseHz: "Beta/Gamma 12-40Hz",
+    phases: [
+      {
+        name: "Ignite",
+        start: 0,
+        end: 240,
+        audio: {
+          l: 230,
+          r: 244,
+          vol_s: 0.18,
+          vol_e: 0.32,
+        },
+        visual: {
+          f: 12,
+          mod: "soft",
+          bri: 0.65,
+        },
+      },
+      {
+        name: "Drive",
+        start: 240,
+        end: 1800,
+        audio: {
+          l: 250,
+          r: 268,
+          vol_s: 0.3,
+          vol_e: 0.42,
+          mod: "pulse",
+        },
+        visual: {
+          f: 18,
+          mod: "hard",
+          bri: 0.85,
+        },
+      },
+      {
+        name: "Cool",
+        start: 1800,
+        end: 2040,
+        audio: {
+          l: 210,
+          r: 222,
+          vol_s: 0.32,
+          vol_e: 0.15,
+        },
+        visual: {
+          f: 12,
+          mod: "breath",
+          bri: 0.55,
+        },
+      },
+    ],
+  },
+  parasymPathway: {
+    id: "parasymPathway",
+    name: "Parasym Pathway",
+    duration: 1440,
+    baseHz: "Theta-Delta 3-8Hz",
+    phases: [
+      {
+        name: "Release",
+        start: 0,
+        end: 300,
+        audio: {
+          l: 170,
+          r: 176,
+          vol_s: 0.12,
+          vol_e: 0.22,
+        },
+        visual: {
+          f: 7,
+          mod: "breath",
+          bri: 0.4,
+        },
+      },
+      {
+        name: "Deep Sink",
+        start: 300,
+        end: 1020,
+        audio: {
+          l: 140,
+          r: 143,
+          vol_s: 0.22,
+          vol_e: 0.2,
+          mod: "pulse",
+        },
+        visual: {
+          f: 4,
+          mod: "soft",
+          bri: 0.25,
+        },
+      },
+      {
+        name: "Rebalance",
+        start: 1020,
+        end: 1440,
+        audio: {
+          l: 170,
+          r: 178,
+          vol_s: 0.2,
+          vol_e: 0.14,
+        },
+        visual: {
+          f: 8,
+          mod: "soft",
+          bri: 0.35,
+        },
+      },
+    ],
+  },
+  remSculpt: {
+    id: "remSculpt",
+    name: "REM Sculpt",
+    duration: 2100,
+    baseHz: "Theta/Alpha 4-10Hz",
+    phases: [
+      {
+        name: "Hypnagogic Gate",
+        start: 0,
+        end: 600,
+        audio: {
+          l: 170,
+          r: 176,
+          vol_s: 0.1,
+          vol_e: 0.22,
+        },
+        visual: {
+          f: 7,
+          mod: "breath",
+          bri: 0.45,
+        },
+      },
+      {
+        name: "REM Drift",
+        start: 600,
+        end: 1800,
+        audio: {
+          l: 160,
+          r: 166,
+          vol_s: 0.22,
+          vol_e: 0.28,
+          mod: "pulse",
+        },
+        visual: {
+          f: 6,
+          mod: "soft",
+          bri: 0.4,
+        },
+      },
+      {
+        name: "Wake Buffer",
+        start: 1800,
+        end: 2100,
+        audio: {
+          l: 180,
+          r: 188,
+          vol_s: 0.28,
+          vol_e: 0.15,
+        },
+        visual: {
+          f: 9,
+          mod: "soft",
+          bri: 0.5,
+        },
+      },
+    ],
+  },
+  gammaLift: {
+    id: "gammaLift",
+    name: "Gamma Lift",
+    duration: 960,
+    baseHz: "Gamma 35-40Hz",
+    phases: [
+      {
+        name: "Ramp",
+        start: 0,
+        end: 180,
+        audio: {
+          l: 240,
+          r: 258,
+          vol_s: 0.22,
+          vol_e: 0.36,
+        },
+        visual: {
+          f: 16,
+          mod: "pulse",
+          bri: 0.75,
+        },
+      },
+      {
+        name: "Peak",
+        start: 180,
+        end: 660,
+        audio: {
+          l: 260,
+          r: 300,
+          vol_s: 0.36,
+          vol_e: 0.4,
+          mod: "hard",
+        },
+        visual: {
+          f: 38,
+          mod: "hard",
+          bri: 0.9,
+        },
+      },
+      {
+        name: "Landing",
+        start: 660,
+        end: 960,
+        audio: {
+          l: 230,
+          r: 242,
+          vol_s: 0.35,
+          vol_e: 0.16,
+        },
+        visual: {
+          f: 12,
+          mod: "breath",
+          bri: 0.55,
+        },
+      },
+    ],
+  },
+};
+export const programs = [
+  {
+    id: "flow90",
+    name: "Flow 90",
+    steps: [
+      {
+        sessionId: "deepFocus",
+        durationMinutes: 5,
+      },
+      {
+        sessionId: "prime",
+        durationMinutes: 10,
+      },
+      {
+        sessionId: "clarity",
+        durationMinutes: 55,
+      },
+      {
+        sessionId: "equilibrium",
+        durationMinutes: 20,
+      },
+    ],
+  },
+  {
+    id: "socialUpgrade",
+    name: "Social Upgrade",
+    steps: [
+      {
+        sessionId: "presence",
+        durationMinutes: 7,
+      },
+      {
+        sessionId: "equilibrium",
+        durationMinutes: 10,
+      },
+    ],
+  },
+  {
+    id: "sleepReset",
+    name: "Sleep Reset",
+    steps: [
+      {
+        sessionId: "restoration",
+        durationMinutes: 20,
+      },
+      {
+        sessionId: "hypnos",
+        durationMinutes: 90,
+      },
+    ],
+  },
+  {
+    id: "powerNap45",
+    name: "Power Nap 45",
+    steps: [
+      {
+        sessionId: "equilibrium",
+        durationMinutes: 10,
+      },
+      {
+        sessionId: "hypnos",
+        durationMinutes: 30,
+      },
+      {
+        sessionId: "genesis",
+        durationMinutes: 5,
+      },
+    ],
+  },
+  {
+    id: "creativeBloom",
+    name: "Creative Bloom",
+    steps: [
+      {
+        sessionId: "presence",
+        durationMinutes: 8,
+      },
+      {
+        sessionId: "deepFocus",
+        durationMinutes: 45,
+      },
+      {
+        sessionId: "equilibrium",
+        durationMinutes: 10,
+      },
+    ],
+  },
+];
