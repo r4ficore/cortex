@@ -642,7 +642,6 @@ const sessions = {
                 enterSystemBtn: document.getElementById('enterSystemBtn'),
                 enterDemoBtn: document.getElementById('enterDemoBtn'),
                 appInterface: document.getElementById('appInterface'),
-                landingGlow: document.getElementById('landingGlow'),
                 silentAudio: document.getElementById('silentAudioLoop'),
                 releaseNotesCard: document.getElementById('releaseNotesCard'),
                 releaseVersionLabel: document.getElementById('releaseVersionLabel'),
@@ -722,18 +721,19 @@ const sessions = {
                     els.mainBtn.addEventListener('blur', () => { if(state.active) wakeControls(); });
                 }
 
-                // Interactive Glow on Landing
-                document.addEventListener('mousemove', (e) => {
-                    if(els.landingPage.style.display !== 'none') {
-                        const x = e.clientX;
-                        const y = e.clientY;
-                        els.landingGlow.style.left = x + 'px';
-                        els.landingGlow.style.top = y + 'px';
-                    }
+                // The welcome screen selects an existing session; audio starts in the player.
+                document.querySelectorAll('[data-entry-session]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        document.querySelectorAll('[data-entry-session]').forEach(item => {
+                            item.setAttribute('aria-pressed', String(item === button));
+                        });
+                    });
                 });
-
-                // Landing Page Logic
-                if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => startEntry());
+                if (els.enterSystemBtn) els.enterSystemBtn.addEventListener('click', () => {
+                    const selected = document.querySelector('[data-entry-session][aria-pressed="true"]');
+                    if (selected) setSession(selected.dataset.entrySession);
+                    startEntry();
+                });
 
                 // Release notes prompt
                 if (els.releaseAckBtn) els.releaseAckBtn.addEventListener('click', acknowledgeReleaseNotes);
@@ -968,9 +968,10 @@ const sessions = {
             }
 
             function updateNoiseUI() {
-                const active = ['bg-medical-900', 'border-medical-400', 'text-white', 'shadow-[0_0_12px_rgba(34,211,238,0.35)]'];
-                const inactive = ['bg-zinc-800', 'border-zinc-700', 'text-zinc-300', 'shadow-none'];
+                const active = ['bg-medical-900', 'border-medical-400'];
+                const inactive = ['bg-soft', 'border-line'];
                 const setState = (btn, isActive) => {
+                    btn.classList.add('text-ink', 'shadow-none');
                     active.forEach(c => btn.classList.toggle(c, isActive));
                     inactive.forEach(c => btn.classList.toggle(c, !isActive));
                 };
@@ -1070,8 +1071,8 @@ const sessions = {
                     const active = btn.dataset.intensity === state.intensityLevel;
                     btn.classList.toggle('bg-medical-900/40', active);
                     btn.classList.toggle('border-medical-400/60', active);
-                    btn.classList.toggle('text-white', active);
-                    btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
+                    btn.classList.add('text-ink');
+                    btn.classList.toggle('shadow-none', active);
                 });
             }
 
@@ -1226,11 +1227,10 @@ const sessions = {
                     const active = btn.dataset.pattern === state.breathPattern;
                     btn.classList.toggle('bg-medical-900/40', active);
                     btn.classList.toggle('border-medical-400/60', active);
-                    btn.classList.toggle('text-white', active);
-                    btn.classList.toggle('shadow-[0_0_12px_rgba(34,211,238,0.3)]', active);
-                    btn.classList.toggle('bg-zinc-800', !active);
-                    btn.classList.toggle('border-zinc-700', !active);
-                    btn.classList.toggle('text-zinc-300', !active);
+                    btn.classList.add('text-ink');
+                    btn.classList.toggle('shadow-none', active);
+                    btn.classList.toggle('bg-soft', !active);
+                    btn.classList.toggle('border-line', !active);
                 });
 
                 const resolvedLabel = breathPatterns[resolved]?.label || '4–6';
@@ -1303,25 +1303,25 @@ const sessions = {
                 if(!els.programList) return;
                 els.programList.innerHTML = '';
                 if(!programs.length) {
-                    els.programList.innerHTML = `<p class="text-sm text-zinc-400">${t('programs.no_programs')}</p>`;
+                    els.programList.innerHTML = `<p class="text-sm text-muted">${t('programs.no_programs')}</p>`;
                     return;
                 }
                 programs.forEach(program => {
                     const wrapper = document.createElement('div');
-                    wrapper.className = 'border border-white/5 rounded-xl p-4 bg-zinc-950/40 h-full flex flex-col gap-3';
-                    const stepsInline = program.steps.map(step => sessions[step.sessionId]?.name || step.sessionId).join(' <span class="text-zinc-600">→</span> ');
+                    wrapper.className = 'border border-line rounded-xl p-4 bg-canvas/40 h-full flex flex-col gap-3';
+                    const stepsInline = program.steps.map(step => sessions[step.sessionId]?.name || step.sessionId).join(' <span class="text-muted">→</span> ');
                     wrapper.innerHTML = `
                         <div class="flex items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-bold uppercase tracking-widest text-medical-400">${program.name}</span>
-                                    <span class="text-[10px] text-zinc-500">${program.steps.length} ${t('programs.steps')}</span>
+                                    <span class="text-xs font-bold normal-case tracking-normal text-medical-400">${program.name}</span>
+                                    <span class="text-xs text-muted">${program.steps.length} ${t('programs.steps')}</span>
                                 </div>
-                                <p class="text-xs text-zinc-300 leading-relaxed">${getLocalizedProgramDesc(program)}</p>
+                                <p class="text-xs text-ink leading-relaxed">${getLocalizedProgramDesc(program)}</p>
                             </div>
-                            <button data-program="${program.id}" class="program-start px-3 py-2 text-[10px] uppercase tracking-wider bg-medical-400 text-black rounded hover:shadow-[0_0_14px_rgba(34,211,238,0.4)] transition-all">${t('programs.start')}</button>
+                            <button data-program="${program.id}" class="program-start px-3 py-2 text-xs normal-case tracking-normal bg-medical-400 text-white rounded shadow-none transition-all">${t('programs.start')}</button>
                         </div>
-                        <div class="mt-1 text-[11px] text-zinc-400 font-mono flex flex-wrap gap-1 items-center bg-zinc-900/50 p-2 rounded">${stepsInline}</div>
+                        <div class="mt-1 text-[11px] text-muted font-mono flex flex-wrap gap-1 items-center bg-paper/50 p-2 rounded">${stepsInline}</div>
                     `;
                     els.programList.appendChild(wrapper);
                 });
@@ -1479,18 +1479,19 @@ const sessions = {
                 els.hypnosDurationButtons.forEach(btn => {
                     const selected = btn.dataset.duration === state.hypnosDuration;
                     btn.classList.toggle('border-medical-400', selected);
-                    btn.classList.toggle('text-white', selected);
+                    btn.classList.add('text-ink');
                     btn.classList.toggle('bg-medical-900/60', selected);
                 });
             }
 
             let entryInProgress = false;
             let controlFadeTimer = null;
+            let sessionStarting = false;
 
             function startEntry({ demo = false } = {}) {
                 if (!els.landingPage || !els.appInterface || entryInProgress) return;
 
-                const content = els.landingPage.querySelector('.max-w-5xl');
+                const content = els.landingPage.querySelector('.welcome-content');
                 if(content) {
                     content.style.opacity = '0';
                     content.style.transition = 'opacity 0.5s';
@@ -1642,7 +1643,7 @@ const sessions = {
                         const avg = (data.sum / data.count).toFixed(2);
                         const name = sessions[id]?.name || id;
                         const row = document.createElement('div');
-                        row.className = 'flex items-center justify-between text-sm text-zinc-200 bg-zinc-900/40 border border-white/5 rounded px-3 py-2';
+                        row.className = 'flex items-center justify-between text-sm text-ink bg-paper/40 border border-line rounded px-3 py-2';
                         row.innerHTML = `<span class="font-medium">${name}</span><span class="font-mono text-medical-400">${avg}</span>`;
                         els.statsAverageList.appendChild(row);
                     });
@@ -1718,13 +1719,13 @@ const sessions = {
                     <svg viewBox="0 0 ${width} ${height}" role="presentation" aria-hidden="true">
                         <defs>
                             <linearGradient id="sparkline-stroke" x1="0%" x2="100%" y1="0%" y2="0%">
-                                <stop offset="0%" stop-color="rgba(34, 211, 238, 0.95)" />
-                                <stop offset="50%" stop-color="rgba(244, 114, 182, 0.85)" />
-                                <stop offset="100%" stop-color="rgba(14, 165, 233, 0.9)" />
+                                <stop offset="0%" stop-color="rgba(56, 109, 91, 0.95)" />
+                                <stop offset="50%" stop-color="rgba(56, 109, 91, 0.85)" />
+                                <stop offset="100%" stop-color="rgba(56, 109, 91, 0.9)" />
                             </linearGradient>
                             <linearGradient id="sparkline-fill" x1="0%" x2="0%" y1="0%" y2="100%">
-                                <stop offset="0%" stop-color="rgba(34, 211, 238, 0.25)" />
-                                <stop offset="100%" stop-color="rgba(6, 182, 212, 0.02)" />
+                                <stop offset="0%" stop-color="rgba(140, 184, 159, 0.25)" />
+                                <stop offset="100%" stop-color="rgba(56, 109, 91, 0.02)" />
                             </linearGradient>
                         </defs>
                         <path d="${area}" fill="url(#sparkline-fill)" stroke="none" />
@@ -1874,15 +1875,16 @@ const sessions = {
 
             function renderModes() {
                 els.modeContainer.innerHTML = '';
-                
+                document.getElementById('protocolCount').textContent = `${Object.keys(sessions).length} ${t('porcelain.sessions')}`;
+
                 const groups = [
-                    { id: 'isochronic', name: 'Isochronic (Focus & Energy)', sessions: ['prime', 'overdrive', 'clarity', 'genesis', 'presence', 'cortexForge', 'gammaLift'] },
-                    { id: 'binaural', name: 'Binaural (Sleep & Recovery)', sessions: ['hypnos', 'deepFocus', 'equilibrium', 'restoration', 'auroraReset', 'parasymPathway', 'remSculpt'] }
+                    { id: 'isochronic', name: t('porcelain.group_energy'), sessions: ['prime', 'overdrive', 'clarity', 'genesis', 'presence', 'cortexForge', 'gammaLift'] },
+                    { id: 'binaural', name: t('porcelain.group_rest'), sessions: ['hypnos', 'deepFocus', 'equilibrium', 'restoration', 'auroraReset', 'parasymPathway', 'remSculpt'] }
                 ];
 
                 groups.forEach(group => {
                     const groupTitle = document.createElement('div');
-                    groupTitle.className = 'px-3 pt-3 pb-1 mt-1 text-[10px] uppercase tracking-[0.15em] text-white font-bold border-b border-zinc-800/50 mb-2';
+                    groupTitle.className = 'px-3 pt-3 pb-1 mt-1 text-xs normal-case tracking-normal text-ink font-bold border-b border-line mb-2';
                     groupTitle.innerHTML = group.name;
                     els.modeContainer.appendChild(groupTitle);
 
@@ -1895,10 +1897,10 @@ const sessions = {
                         btn.innerHTML = `
                             <div class="flex items-center justify-between w-full relative z-10">
                                 <div class="flex items-center gap-3">
-                                    <div class="text-zinc-500 group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div>
-                                    <span class="font-bold text-[11px] uppercase tracking-wider">${s.name}</span>
+                                    <div class="text-muted group-hover:text-medical-400 transition-colors icon-container">${s.icon}</div>
+                                    <span class="font-bold text-[11px] normal-case tracking-normal">${s.name}</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-zinc-500">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span>
+                                <span class="text-xs font-mono text-muted">${s.duration === Infinity ? "∞" : Math.floor(s.duration/60) + " MIN"}</span>
                             </div>
                             <p class="mode-desc">${getLocalizedDesc(s)}</p>
                             <p class="mode-meta">${s.baseHz || (t('hz_na') || 'Hz N/A')}</p>
@@ -1927,21 +1929,23 @@ const sessions = {
                 document.querySelectorAll('.mode-btn').forEach(b => {
                     const isActive = b.dataset.id === id;
                     const icon = b.querySelector('.icon-container');
+                    b.setAttribute('aria-pressed', String(isActive));
                     if(isActive) {
-                        b.classList.remove('border-transparent', 'text-zinc-500');
-                        b.classList.add('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
-                        icon.classList.remove('text-zinc-500');
+                        b.classList.remove('border-transparent', 'text-muted');
+                        b.classList.add('bg-medical-900/30', 'border-medical-500/50', 'text-ink', 'glow-box-cyan');
+                        icon.classList.remove('text-muted');
                         icon.classList.add('text-medical-400');
                     } else {
-                        b.classList.add('border-transparent', 'text-zinc-500');
-                        b.classList.remove('bg-medical-900/30', 'border-medical-500/50', 'text-white', 'glow-box-cyan');
-                        icon.classList.add('text-zinc-500');
+                        b.classList.add('border-transparent', 'text-muted');
+                        b.classList.remove('bg-medical-900/30', 'border-medical-500/50', 'text-ink', 'glow-box-cyan');
+                        icon.classList.add('text-muted');
                         icon.classList.remove('text-medical-400');
                     }
                 });
                 if (els.messageTitle) els.messageTitle.textContent = data.name;
                 if (els.desc) els.desc.textContent = getLocalizedDesc(data);
                 els.timer.textContent = formatTime(data.duration);
+                els.progressBar.style.width = '0%';
                 if (state.active || state.preview) {
                     const firstPhase = data.phases?.[0];
                     let startHz = '-- Hz';
@@ -1965,10 +1969,14 @@ const sessions = {
             function updateQuickActionsUI() {
                 if(els.mainBtn) {
                     els.mainBtn.innerHTML = state.active
-                        ? '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg><span class="sr-only">Stop</span>'
+                        ? '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span class="sr-only">Stop</span>'
                         : '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span class="sr-only">Start</span>';
                     els.mainBtn.setAttribute('aria-pressed', state.active ? 'true' : 'false');
-                    els.mainBtn.setAttribute('title', state.active ? 'Stop' : 'Start');
+                    const label = t(state.active ? 'porcelain.stop' : 'porcelain.start');
+                    els.mainBtn.querySelector('span').classList.remove('sr-only');
+                    els.mainBtn.querySelector('span').textContent = label;
+                    els.mainBtn.setAttribute('title', label);
+                    els.mainBtn.setAttribute('aria-label', label);
                 }
             }
 
@@ -1992,7 +2000,7 @@ const sessions = {
                 els.mainBtn.classList.remove('control-hidden');
                 els.mainBtn.classList.add('control-visible');
                 els.mainBtn.setAttribute('aria-hidden', 'false');
-                if(state.active) {
+                if(state.active && document.fullscreenElement === els.visualizer) {
                     controlFadeTimer = setTimeout(() => {
                         els.mainBtn.classList.add('control-hidden');
                         els.mainBtn.setAttribute('aria-hidden', 'true');
@@ -2169,7 +2177,7 @@ const sessions = {
                 if(state.reduceMotion) {
                     ctx.fillStyle = '#050505';
                     ctx.fillRect(0, 0, w, h);
-                    ctx.strokeStyle = 'rgba(34, 211, 238, 0.35)';
+                    ctx.strokeStyle = 'rgba(140, 184, 159, 0.35)';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.arc(w / 2, h / 2, Math.min(w, h) * 0.28, 0, Math.PI * 2);
@@ -2236,9 +2244,9 @@ const sessions = {
                 if (!isHypnos) {
                     ctx.beginPath();
                     ctx.lineWidth = state.safeVisuals ? 1.2 : 2;
-                    ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 + bri*0.5})`;
+                    ctx.strokeStyle = `rgba(140, 184, 159, ${0.5 + bri*0.5})`;
                     ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#22d3ee';
+                    ctx.shadowColor = '#8cb89f';
                     const amplitude = h * 0.15 * (state.safeVisuals ? 0.6 : 1);
                     const centerY = h / 2;
                     for(let x=0; x<w; x+=2) {
@@ -2295,12 +2303,12 @@ const sessions = {
                         ctx.beginPath();
                         ctx.arc(w/2, h/2, currentR, 0, Math.PI * 2);
                         ctx.lineWidth = 3;
-                        ctx.strokeStyle = `rgba(34, 211, 238, 0.5)`;
+                        ctx.strokeStyle = `rgba(140, 184, 159, 0.5)`;
                         ctx.stroke();
-                        ctx.fillStyle = `rgba(34, 211, 238, ${0.05 + 0.1 * breathProgress})`;
+                        ctx.fillStyle = `rgba(140, 184, 159, ${0.05 + 0.1 * breathProgress})`;
                         ctx.fill();
                         ctx.font = "12px JetBrains Mono";
-                        ctx.fillStyle = `rgba(34, 211, 238, 0.9)`;
+                        ctx.fillStyle = `rgba(140, 184, 159, 0.9)`;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
                         ctx.fillText(breathLabel, w/2, h/2);
@@ -2309,6 +2317,7 @@ const sessions = {
             }
 
             async function toggleSession(reason = 'manual') {
+                if (sessionStarting) return;
                 if (state.active) {
                     const endTs = Date.now();
                     const elapsed = Math.max(1, Math.round((endTs - (state.sessionStartTs || endTs)) / 1000));
@@ -2332,7 +2341,7 @@ const sessions = {
                     els.timer.classList.remove('glow-text-cyan');
                     if (els.statusText) els.statusText.textContent = t('status.standby');
                     if (els.statusDot) {
-                        els.statusDot.className = "w-2 h-2 rounded-full bg-zinc-600 shadow-none";
+                        els.statusDot.className = "w-2 h-2 rounded-full bg-muted shadow-none";
                         els.statusDot.style.boxShadow = 'none';
                     }
 
@@ -2353,7 +2362,23 @@ const sessions = {
                     updateQuickActionsUI();
                     wakeControls();
                 } else {
-                    await startAudio();
+                    sessionStarting = true;
+                    els.mainBtn.disabled = true;
+                    els.mainBtn.setAttribute('aria-busy', 'true');
+                    els.mainBtn.querySelector('span').textContent = t('porcelain.preparing');
+                    try {
+                        await startAudio();
+                    } catch (error) {
+                        stopAudio();
+                        els.phaseName.textContent = t('porcelain.audio_error');
+                        updateQuickActionsUI();
+                        console.error('Could not start audio', error);
+                        return;
+                    } finally {
+                        sessionStarting = false;
+                        els.mainBtn.disabled = false;
+                        els.mainBtn.removeAttribute('aria-busy');
+                    }
                     state.preview = false;
                     state.active = true;
                     state.completed = false;
@@ -2373,7 +2398,7 @@ const sessions = {
                     if (els.statusText) els.statusText.textContent = t('status.active');
                     if (els.statusDot) {
                         els.statusDot.className = "w-2 h-2 rounded-full bg-medical-400 animate-pulse";
-                        els.statusDot.style.boxShadow = '0 0 8px #22d3ee';
+                        els.statusDot.style.boxShadow = 'none';
                     }
                     if(state.focusLock) enableFocusLock();
                     updateQuickActionsUI();
@@ -2662,10 +2687,9 @@ const sessions = {
                     btn.classList.toggle('active-export-noise', isActive);
                     btn.classList.toggle('border-medical-400', isActive);
                     btn.classList.toggle('bg-medical-900/40', isActive);
-                    btn.classList.toggle('text-white', isActive);
-                    btn.classList.toggle('border-zinc-700', !isActive);
-                    btn.classList.toggle('bg-zinc-800', !isActive);
-                    btn.classList.toggle('text-zinc-300', !isActive);
+                    btn.classList.add('text-ink');
+                    btn.classList.toggle('border-line', !isActive);
+                    btn.classList.toggle('bg-soft', !isActive);
                 });
             }
 
@@ -2676,10 +2700,9 @@ const sessions = {
                     btn.classList.toggle('active-export-ent', isActive);
                     btn.classList.toggle('border-medical-400', isActive);
                     btn.classList.toggle('bg-medical-900/40', isActive);
-                    btn.classList.toggle('text-white', isActive);
-                    btn.classList.toggle('border-zinc-700', !isActive);
-                    btn.classList.toggle('bg-zinc-800', !isActive);
-                    btn.classList.toggle('text-zinc-300', !isActive);
+                    btn.classList.add('text-ink');
+                    btn.classList.toggle('border-line', !isActive);
+                    btn.classList.toggle('bg-soft', !isActive);
                 });
             }
 
@@ -2690,10 +2713,9 @@ const sessions = {
                     btn.classList.toggle('active-export-loop', isActive);
                     btn.classList.toggle('border-medical-400', isActive);
                     btn.classList.toggle('bg-medical-900/40', isActive);
-                    btn.classList.toggle('text-white', isActive);
-                    btn.classList.toggle('border-zinc-700', !isActive);
-                    btn.classList.toggle('bg-zinc-800', !isActive);
-                    btn.classList.toggle('text-zinc-300', !isActive);
+                    btn.classList.add('text-ink');
+                    btn.classList.toggle('border-line', !isActive);
+                    btn.classList.toggle('bg-soft', !isActive);
                 });
             }
 
@@ -2856,9 +2878,9 @@ const sessions = {
                     let hp = 0;
                     for (let i = 0; i < numSamples; i++) {
                         const white = Math.random() * 2 - 1;
-                        lp += 0.05 * (white - lp); 
-                        hp += 0.01 * (lp - hp);    
-                        data[i] = (lp - hp) * 6.0; 
+                        lp += 0.05 * (white - lp);
+                        hp += 0.01 * (lp - hp);
+                        data[i] = (lp - hp) * 6.0;
                     }
                 } else if (type === 'drone') {
                     for (let i = 0; i < numSamples; i++) {
@@ -2911,7 +2933,7 @@ const sessions = {
                         const sampleRate = 48000;
                         const totalSamples = sampleRate * durationSec;
 
-                        const estimatedRAM = totalSamples * 2 * 4; 
+                        const estimatedRAM = totalSamples * 2 * 4;
                         if (estimatedRAM > 1.2e9) throw new Error(`Segment za długi (${exportState.durationMinutes} min = ~${(estimatedRAM / 1e9).toFixed(1)} GB RAM). Max 60 min.`);
 
                         exportEls.progressContainer.classList.remove('hidden');
@@ -2951,19 +2973,19 @@ const sessions = {
                         } else if (exportState.entrainment === 'isochronic') {
                             panL.pan.value = 0;
                             panR.pan.value = 0;
-                            
+
                             isoGain = ctx.createGain();
                             isoGain.gain.value = 0.5; // Base gain offset
 
                             isoLfo = ctx.createOscillator();
                             isoLfo.type = 'sine';
-                            
+
                             const lfoDepth = ctx.createGain();
                             lfoDepth.gain.value = 0.5; // Depth
-                            
+
                             isoLfo.connect(lfoDepth);
                             lfoDepth.connect(isoGain.gain);
-                            
+
                             isoLfo.start(0);
                             isoLfo.stop(durationSec);
                         }
@@ -3090,7 +3112,7 @@ const sessions = {
                         noiseSource.loop = true;
 
                         const noiseGain = ctx.createGain();
-                        noiseGain.gain.value = exportState.noiseType === 'drone' ? 0.35 : 0.09; 
+                        noiseGain.gain.value = exportState.noiseType === 'drone' ? 0.35 : 0.09;
                         noiseSource.connect(noiseGain);
                         noiseGain.connect(masterGain);
 
@@ -3202,9 +3224,9 @@ const sessions = {
                 // Oscilloscope waveform
                 ctx.beginPath();
                 ctx.lineWidth = 3;
-                ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 + bri * 0.5})`;
+                ctx.strokeStyle = `rgba(140, 184, 159, ${0.5 + bri * 0.5})`;
                 ctx.shadowBlur = 20;
-                ctx.shadowColor = '#22d3ee';
+                ctx.shadowColor = '#8cb89f';
                 const amplitude = h * 0.15;
                 const centerY = h / 2;
                 for (let x = 0; x < w; x += 2) {
@@ -3216,7 +3238,7 @@ const sessions = {
 
                 // Second glow layer (more atmospheric)
                 const glowGrad = ctx.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, w * 0.5);
-                glowGrad.addColorStop(0, 'rgba(34, 211, 238, 0.08)');
+                glowGrad.addColorStop(0, 'rgba(140, 184, 159, 0.08)');
                 glowGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.04)');
                 glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
                 ctx.fillStyle = glowGrad;
@@ -3233,14 +3255,14 @@ const sessions = {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.shadowBlur = 30;
-                ctx.shadowColor = 'rgba(34, 211, 238, 0.6)';
+                ctx.shadowColor = 'rgba(140, 184, 159, 0.6)';
                 ctx.fillText(`${band} WAVES`, w / 2, h * 0.35);
 
                 // Hz display
                 ctx.font = '120px JetBrains Mono, monospace';
                 ctx.fillStyle = '#22d3ee';
                 ctx.shadowBlur = 40;
-                ctx.shadowColor = '#22d3ee';
+                ctx.shadowColor = '#8cb89f';
                 ctx.fillText(`${hz}Hz`, w / 2, h * 0.55);
 
                 // Subtitle
@@ -3251,7 +3273,7 @@ const sessions = {
 
                 // Brand watermark
                 ctx.font = 'bold 18px JetBrains Mono, monospace';
-                ctx.fillStyle = 'rgba(34, 211, 238, 0.5)';
+                ctx.fillStyle = 'rgba(140, 184, 159, 0.5)';
                 ctx.textAlign = 'right';
                 ctx.fillText('KΩ CORTEX', w - 40, h - 30);
                 ctx.textAlign = 'center';
@@ -3469,7 +3491,7 @@ ${phase2Name ? `${Math.floor((session.phases[1]?.start || 900) / 60)}:00 — ${p
                 try {
                     if (els.modeContainer) renderModes();
                     renderPrograms();
-                    updateCircadianSync();
+                    checkCircadianRhythm();
                     // Refresh visualizer description for current session
                     const data = getSessionData();
                     if (els.desc) els.desc.textContent = getLocalizedDesc(data);

@@ -1,4 +1,12 @@
-# System design — Kora Cortex
+# System design — Kora Cortex · Porcelana
+
+## Kierunek wizualny
+- Porcelanowe tło `#f7f8f7`, białe powierzchnie, grafitowy tekst `#202b28` i zielony akcent `#386d5b`.
+- Tokeny `canvas`, `paper`, `soft`, `line`, `ink`, `muted` są dostępne zarówno w CSS, jak i konfiguracji Tailwind w `index.html`.
+- Nowy ekran wejścia oferuje trzy istniejące sesje: Deep Focus, Equilibrium i Hypnos. Przycisk przygotowuje wybraną sesję; odtwarzanie uruchamia się osobno w panelu.
+- Lokalne pliki `assets/images/cortex-mark.svg` i `cortex-contours.svg` tworzą motyw mózgu. Elementy dekoracyjne nie animują się.
+- Jasny panel pozostaje czytelny podczas konfiguracji. Uruchomiona wizualizacja zachowuje ciemne tło i dotychczasowe reguły bezpieczeństwa.
+- Ekran wejścia, nowe etykiety i przyciski sesji mają wersje PL i EN. Przyciski start/koniec pozostają widoczne poza pełnym ekranem.
 
 ## Tokeny (CSS variables)
 - **Paleta bazowa:** `--bg-dark`, `--surface-900/800/700` dla tła i paneli; akcent `--accent-300/400/500/900` oraz semafory `--success-500`, `--warning-500`, `--danger-500`.
@@ -8,17 +16,17 @@
 - **Efekty:** `--cyan-glow`, `--focus-ring` zapewniają subtelne highlighty i focus state w jednym miejscu.
 
 ## Primitives / komponenty bazowe
-- `.ui-card` — szklany panel z blur i cieniem, przejścia hover spójne z akcentem.
+- `.ui-card` — biała powierzchnia z delikatnym obramowaniem i cieniem.
 - `.ui-btn` + modyfikatory `.ui-btn--primary`, `.ui-btn--ghost`, `.ui-btn--sm`, `.ui-btn--lg` — standaryzowane CTA z jednolitymi stanami hover/focus.
 - `.ui-badge` — kapsułka statusowa z wariantami semaforowymi (`data-variant="success|warning|danger"`).
-- `.ui-section-label` — podpisy sekcji w monospaced uppercase.
+- `.ui-section-label` — czytelne etykiety sans-serif bez wersalików.
 
 ## Adopcja w interfejsie
-- Hero CTA korzysta z `.ui-btn--primary` z jednolitym focusem i mikro-shinem zamiast ad-hoc styli.
+- Główne przyciski korzystają z `.ui-btn--primary`, jednolitej zieleni i widocznego obrysu fokusu.
 - Przyciski nawigacji (Raport/Programy/Statystyki/Bezpieczeństwo) używają `.ui-btn--ghost` dla spójnych stanów hover/focus.
 - Statusy w nagłówku mają ujednolicony `.ui-badge`, co zapewnia spójny padding, krój pisma i kolory.
 
 ## Następne kroki
 - Iteracyjne podmienianie kolejnych przycisków i kart na `.ui-btn` oraz `.ui-card`.
-- Dodanie light theme override na tych samych tokenach (`:root[data-theme="light"]`).
+- Osobne strony `landing.html` i whitepaper pozostają niezależne od motywu aplikacji.
 - Uzupełnienie wariantów komponentów: pola formularzy, toggle, listy presetów.

@@ -6,16 +6,46 @@
 
 const LANG = {
     en: {
+        'porcelain.preparing': 'Preparing audio…',
+        'porcelain.audio_error': 'Audio could not start. Please try again.',
+        // Porcelain welcome and player
+        "porcelain.eyebrow": "A little time for you",
+        "porcelain.title": "A moment<br>for your mind.",
+        "porcelain.description": "Sound for focus, rest and sleep. At your own pace.",
+        "porcelain.art_caption": "Sound. Attention. Balance.",
+        "porcelain.choose": "What do you need today?",
+        "porcelain.choose_hint": "Start with how you feel.",
+        "porcelain.focus": "Focus",
+        "porcelain.focus_desc": "Space for what matters.",
+        "porcelain.calm": "Unwind",
+        "porcelain.calm_desc": "A little room to breathe.",
+        "porcelain.sleep": "Sleep",
+        "porcelain.sleep_desc": "Your evening ritual.",
+        "porcelain.sleep_meta": "Hypnos · choose your duration",
+        "porcelain.headphones": "Find your headphones. Take your time.",
+        "porcelain.continue": "Prepare my session",
+        "porcelain.footer": "A small ritual. A little space for yourself.",
+        "porcelain.learn": "Explore how it works",
+        "porcelain.science": "The science",
+        "porcelain.workspace": "Your space to unwind.",
+        "porcelain.workspace_hint": "Choose a session. Settle in. Make it your own.",
+        "porcelain.selected": "Your selected session",
+        "porcelain.group_energy": "Focus & energy · isochronic",
+        "porcelain.group_rest": "Rest & balance · binaural",
+        "porcelain.sessions": "sessions",
+        "porcelain.start": "Start session",
+        "porcelain.stop": "End session",
+        "nav.settings": "Settings",
         // ── Navigation ──
         'nav.report': 'Report',
         'nav.programs': 'Programs',
         'nav.stats': 'Statistics',
         'nav.safety': 'Safety',
-        'nav.standby': 'Standby',
+        'nav.standby': 'Ready',
         'nav.close': 'Close',
 
         // ── Settings Modal Header ──
-        'settings.title': 'Configuration',
+        'settings.title': 'Settings',
 
         // ── Landing Page ──
         'landing.hero': 'Advanced bio-hacking platform. Harness <span class="text-zinc-200">Binaural Beats</span>, <span class="text-zinc-200">Isochronic Tones</span> and <span class="text-zinc-200">Stochastic Resonance</span> for precision consciousness modulation.',
@@ -122,7 +152,7 @@ const LANG = {
         'circadian.melatonin': 'Window: Melatonin',
 
         // ── Cockpit: Protocol List ──
-        'protocols.title': 'Choose Protocol',
+        'protocols.title': 'Session library',
         'protocols.count': '9 AVAILABLE',
 
         // ── Cockpit: Hypnos Duration ──
@@ -276,16 +306,46 @@ const LANG = {
         'footer.safety_note': 'Check the "Safety" tab in the top menu for full usage guidelines.'
     },
     pl: {
+        'porcelain.preparing': 'Przygotowuję dźwięk…',
+        'porcelain.audio_error': 'Nie udało się uruchomić dźwięku. Spróbuj ponownie.',
+        // Porcelain welcome and player
+        "porcelain.eyebrow": "Twoja codzienna chwila",
+        "porcelain.title": "Czas dla<br>Twojego umysłu.",
+        "porcelain.description": "Dźwięk do skupienia, odpoczynku i snu. W Twoim rytmie.",
+        "porcelain.art_caption": "Dźwięk. Uwaga. Równowaga.",
+        "porcelain.choose": "Czego dziś potrzebujesz?",
+        "porcelain.choose_hint": "Wybierz swoją sesję.",
+        "porcelain.focus": "Skupienie",
+        "porcelain.focus_desc": "Przestrzeń na to, co ważne.",
+        "porcelain.calm": "Wyciszenie",
+        "porcelain.calm_desc": "Chwila oddechu dla siebie.",
+        "porcelain.sleep": "Sen",
+        "porcelain.sleep_desc": "Twój wieczorny rytuał.",
+        "porcelain.sleep_meta": "Hypnos · wybierz czas",
+        "porcelain.headphones": "Przygotuj słuchawki. Znajdź wygodne miejsce.",
+        "porcelain.continue": "Przygotuj sesję",
+        "porcelain.footer": "Mały rytuał. Trochę przestrzeni dla siebie.",
+        "porcelain.learn": "Poznaj sposób działania",
+        "porcelain.science": "Podstawy naukowe",
+        "porcelain.workspace": "Przestrzeń dla Twojego umysłu.",
+        "porcelain.workspace_hint": "Wybierz sesję i dopasuj ją do siebie.",
+        "porcelain.selected": "Twoja wybrana sesja",
+        "porcelain.group_energy": "Skupienie i energia · izochroniczne",
+        "porcelain.group_rest": "Odpoczynek i równowaga · binauralne",
+        "porcelain.sessions": "sesji",
+        "porcelain.start": "Rozpocznij sesję",
+        "porcelain.stop": "Zakończ sesję",
+        "nav.settings": "Ustawienia",
         // ── Navigation ──
         'nav.report': 'Raport',
         'nav.programs': 'Programy',
         'nav.stats': 'Statystyki',
         'nav.safety': 'Bezpieczeństwo',
-        'nav.standby': 'Standby',
+        'nav.standby': 'Gotowy',
         'nav.close': 'Zamknij',
 
         // ── Settings Modal Header ──
-        'settings.title': 'Konfiguracja',
+        'settings.title': 'Ustawienia',
 
         // ── Landing Page ──
         'landing.hero': 'Zaawansowana platforma bio-hackingu. Wykorzystaj <span class="text-zinc-200">Binaural Beats</span>, <span class="text-zinc-200">Isochronic Tones</span> oraz <span class="text-zinc-200">Stochastyczny Rezonans</span> do precyzyjnej modulacji stanów świadomości.',
@@ -334,7 +394,7 @@ const LANG = {
         'calib.mode.full': 'Pełna kalibracja audio',
 
         // ── Status ──
-        'status.standby': 'Standby',
+        'status.standby': 'Gotowy',
         'status.active': 'AKTYWNY',
         'status.ready': 'Gotowy',
 
@@ -382,7 +442,7 @@ const LANG = {
         'cockpit.waiting': 'Oczekiwanie na start',
 
         // ── Cockpit: Circadian ──
-        'circadian.label': 'Circadian Sync',
+        'circadian.label': 'Rytm dnia',
         'circadian.analyzing': 'Analiza...',
         'circadian.init': 'Inicjalizacja',
         'circadian.cortisol': 'Okno: Kortyzol / Start',
@@ -392,7 +452,7 @@ const LANG = {
         'circadian.melatonin': 'Okno: Melatonina',
 
         // ── Cockpit: Protocol List ──
-        'protocols.title': 'Wybierz Protokół',
+        'protocols.title': 'Biblioteka sesji',
         'protocols.count': '9 DOSTĘPNYCH',
 
         // ── Cockpit: Hypnos Duration ──
@@ -473,6 +533,7 @@ const LANG = {
         'safety.tips_title': 'Wskazówki praktyczne',
         'safety.tips1': 'Przed snem wybieraj łagodne tryby (Hypnos/Restoration) i unikaj światła niebieskiego.',
         'safety.tips2': 'Rób przerwy między sesjami (min. 10 minut) i nawadniaj się.',
+        'safety.tips3': 'Przed dłuższą sesją przetestuj lewy i prawy kanał słuchawek w ustawieniach.',
         // ── Programs Modal ──
         'programs.title': 'Programy Kora',
         'programs.subtitle': 'Sekwencje kilku protokołów z pauzą między krokami.',
@@ -596,24 +657,17 @@ function setLang(lang) {
         el.innerHTML = t(key);
     });
 
-    // Update language switcher visual
-    const switcher = document.getElementById('langSwitcher');
-    if (switcher) switcher.textContent = lang.toUpperCase();
+    document.querySelectorAll('[data-language-switch]').forEach(button => {
+        button.textContent = lang.toUpperCase();
+        button.setAttribute('aria-label', lang === 'pl' ? 'Switch to English' : 'Przełącz na polski');
+    });
+    document.querySelectorAll('[data-science-link]').forEach(link => {
+        link.href = lang === 'pl' ? 'whitepaper-pl.html' : 'whitepaper.html';
+    });
 
     // Dispatch event for app.js to re-render dynamic content
     document.dispatchEvent(new CustomEvent('langChanged', { detail: { lang } }));
 }
 
-// Apply initial lang on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    document.documentElement.lang = _currentLang;
-
-    // Set switcher button text
-    const switcher = document.getElementById('langSwitcher');
-    if (switcher) switcher.textContent = _currentLang.toUpperCase();
-
-    // If user previously selected PL, apply translations immediately
-    if (_currentLang !== 'en') {
-        setLang(_currentLang);
-    }
-});
+// Translate the entire initial screen, including newly added labels.
+document.addEventListener('DOMContentLoaded', () => setLang(_currentLang));
