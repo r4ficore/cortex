@@ -2,13 +2,21 @@
 
 Statyczna aplikacja do sesji dźwiękowych i prowadzonego oddechu. Pięć ścieżek: Oddech, Skupienie, Wyciszenie, Sen i Energia. Interfejs oraz materiały są dostępne po polsku i angielsku.
 
+## Codzienne korzystanie
+
+- Start prowadzi od pięciu potrzeb bezpośrednio do gotowej propozycji. Oddech i Energia otwierają ćwiczenie lub Prime; Skupienie, Wyciszenie i Sen otwierają odpowiednio sekwencje work, reset i evening.
+- Biblioteka zachowuje wszystkie sesje i programy. Przy powrocie z przygotowania odtwarzane są filtry, pozycja listy i fokus. Instrukcje i podstawy naukowe są dostępne z Biblioteki.
+- Moje sesje łączą zapisane ustawienia i historię. Standardowe sesje oraz rytuały można uruchomić z zapisu jednym przyciskiem. Ustawienia dźwięku i obrazu pozostają w rozwijanej sekcji Dopasuj.
+
+Preferencje v5 migrują dane v4/v3 i starsze ustawienia. Kopie danych zawierają zapisane profile oraz ustawienia potrzebne do powtórzenia sesji. Pulsacja wymaga osobnego wyboru w przygotowaniu. Stare adresy `#path/…` i `#history` nadal działają. Logikę przejść, zapisów i powtarzania sprawdzają testy `tests/experience.test.js`.
+
 ## Uruchomienie
 
 ```sh
 python3 -m http.server 8770 --bind 127.0.0.1
 ```
 
-Otwórz `http://127.0.0.1:8770/`. Moduły JavaScript wymagają HTTP, więc nie otwieraj aplikacji bezpośrednio przez `file://`. Publikacja w GitHub Pages nie wymaga kompilowania ani instalowania zależności.
+Otwórz `http://127.0.0.1:8770/`. Moduły JavaScript wymagają HTTP, więc nie otwieraj aplikacji bezpośrednio przez `file://`. Podgląd źródeł nie wymaga kompilowania. Podgląd wydania i publikacja korzystają z `npm run build` oraz katalogu `dist/`, zgodnie z opisem poniżej.
 
 ## Sprawdzenie zmian
 

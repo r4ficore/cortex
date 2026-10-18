@@ -1,3 +1,10 @@
+import {
+  NavigationMemory,
+  canonicalRoute,
+  repeatSetup,
+  sessionProfile,
+  quietVisual,
+} from "./experience.js";
 import { prepareOffline, installApp } from "./offline.js";
 import {
   ritualFor,
@@ -66,6 +73,9 @@ const wake = new ScreenAwake(navigator.wakeLock, showWakeStatus);
 let importPreview = null;
 let frameHandle = null;
 const mediaMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const navigation = new NavigationMemory(location.hash.slice(1));
+let linkedNavigation = false;
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 const state = {
   flow: null,
   result: null,
@@ -142,7 +152,9 @@ function active() {
 }
 function render() {
   stopBreathPreview();
-  const route = location.hash.slice(1) || "home";
+  const rawRoute = location.hash.slice(1) || "home";
+  const route = canonicalRoute(rawRoute);
+  if (route !== rawRoute) history.replaceState(null, "", "#" + route);
   const [page, id] = route.split("/");
   state.route = page;
   const playerPage =
@@ -160,21 +172,19 @@ function render() {
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", night ? "#000000" : "#f7f8f5");
-  document.getElementById("header").innerHTML = views.header(
-    page === "path" ||
-      page === "prepare" ||
-      page === "program" ||
-      page === "ritual"
-      ? "home"
-      : page,
+  const selectedTab = navigation.context.tab;
+  document.body.classList.toggle(
+    "setup-page",
+    ["prepare", "ritual"].includes(page),
   );
-  document.getElementById("mobileNav").innerHTML = views.nav(page, true);
+  document.getElementById("header").innerHTML = views.header(selectedTab);
+  document.getElementById("mobileNav").innerHTML = views.nav(selectedTab, true);
   document
     .getElementById("mobileNav")
     .setAttribute("aria-label", t("Nawigacja", "Navigation"));
   document.title = `${t("Cortex — chwila dla Ciebie", "Cortex — a moment for you")}`;
-  if (page === "path") main.innerHTML = views.pathView(id);
-  else if (page === "library") main.innerHTML = views.library(state.filters);
+  if (page === "library")
+    main.innerHTML = views.library(state.filters, prefs());
   else if (page === "ritual" && ritualFor(id)) {
     if (state.ritualDraftId !== id) {
       state.ritualDraftId = id;
@@ -190,11 +200,15 @@ function render() {
     const selected = Object.hasOwn(sessions, id) ? id : "deepFocus";
     if (state.selected !== selected) {
       state.selected = selected;
+      const saved = prefs().sessionProfiles[selected];
+      if (saved && !active()) store.save(saved);
       state.visual = prefs().audioOnly
         ? "none"
         : sessions[selected]?.goal === "sleep"
           ? "night"
           : "calm";
+      if (saved)
+        state.visual = quietVisual(saved.visual, sessions[selected].goal);
     }
     if (selected === "breath")
       state.visual =
@@ -210,8 +224,8 @@ function render() {
     );
   } else if (page === "program")
     main.innerHTML = views.programView(id, active());
-  else if (page === "history")
-    main.innerHTML = views.historyView(store.history);
+  else if (page === "mine")
+    main.innerHTML = views.mySessions(prefs(), store.history, active());
   else if (page === "knowledge") main.innerHTML = views.knowledge();
   else if (page === "session")
     main.innerHTML = state.flow
@@ -220,10 +234,15 @@ function render() {
         : views.player(playerFlow(state.flow), currentPrefs())
       : state.result
         ? views.completed(state.result)
-        : views.home(prefs());
+        : views.home(prefs(), store.history, state.flow);
   else if (page === "complete" && state.result)
     main.innerHTML = views.completed(state.result);
-  else main.innerHTML = views.home(prefs());
+  else main.innerHTML = views.home(prefs(), store.history, state.flow);
+  main
+    .querySelectorAll("[data-back]")
+    .forEach((link) =>
+      link.setAttribute("href", "#" + navigation.context.back),
+    );
   if (!state.flow) {
     const recoverable = availableRecoveries();
     state.recoveryIds = recoverable.map((s) => s.id).join();
@@ -384,7 +403,8 @@ document.addEventListener("keydown", (event) => {
 function updateMini() {
   const mini = document.getElementById("miniPlayer"),
     f = state.flow;
-  mini.hidden = !f || state.route === "session";
+  mini.hidden =
+    !f || ["home", "session", "prepare", "ritual"].includes(state.route);
   if (!f) return;
   mini.innerHTML = `<a href="#session">${icon(pathFor(f.session.goal).icon)}<span><strong>${local(f.ritual?.name || f.session.title)}</strong><small id="miniTime">${f.stage === "between" ? t("Gotowy na kolejny etap", "Ready for the next step") : time(f.clock.duration - f.clock.position())}</small></span></a>${f.stage !== "between" ? views.button("pause", "", f.clock.status === "paused" ? "play" : "pause", "icon-btn", `aria-label="${f.clock.status === "paused" ? t("Wznów", "Resume") : t("Pauza", "Pause")}"`) : ""}`;
 }
@@ -643,6 +663,7 @@ async function start(id) {
       pattern: prefs().breathPattern,
       breathSound: breathAudio(prefs()),
       audioPrefs: audioSettings(prefs()),
+      sessionPrefs: sessionProfile(prefs(), state.visual),
       recoveryId: sessionId(),
       logId: sessionId(),
       visual: state.visual,
@@ -895,6 +916,17 @@ function saveLog(f, complete) {
     durationSeconds: Math.round(f.clock.position()),
     audioVersion: 2,
     audioPrefs: f.audioPrefs,
+    sessionPrefs: sessionProfile(
+      {
+        ...prefs(),
+        ...f.sessionPrefs,
+        ...f.audioPrefs,
+        ...(prelude
+          ? { breathDuration: 60, breathPattern: "4-6", prelude: false }
+          : {}),
+      },
+      f.visual,
+    ),
     pattern: prelude ? "4-6" : f.pattern,
     visual: f.visual,
     appliedLightHz: f.appliedLightHz ?? null,
@@ -1098,7 +1130,7 @@ function availableRecoveries() {
 setInterval(() => {
   if (state.flow) checkpoint();
   else if (
-    ["home", "session", "history"].includes(state.route) &&
+    ["home", "session", "mine"].includes(state.route) &&
     availableRecoveries()
       .map((s) => s.id)
       .join() !== state.recoveryIds
@@ -1173,7 +1205,7 @@ window.addEventListener("storage", (event) => {
     if (!saved || saved.owner !== ownerId) relinquish();
   } else if (
     !state.flow &&
-    ["home", "session", "history"].includes(state.route) &&
+    ["home", "session", "mine"].includes(state.route) &&
     event.key?.startsWith("cortex.active.v1.")
   )
     render();
@@ -1243,9 +1275,63 @@ dialog.addEventListener("click", (e) => {
       closeDialog();
   }
 });
+function openDisclosures(scope) {
+  return [...scope.querySelectorAll("details[open]")].map(
+    (el) => el.id || el.querySelector("summary")?.textContent.trim(),
+  );
+}
+function restoreDisclosures(scope, keys = []) {
+  scope.querySelectorAll("details").forEach((el) => {
+    if (keys.includes(el.id || el.querySelector("summary")?.textContent.trim()))
+      el.open = true;
+  });
+}
+function savedMessage() {
+  return store.available
+    ? t("Zapisano w Moich sesjach.", "Saved in My sessions.")
+    : t(
+        "Zapis działa do zamknięcia strony. Pamięć przeglądarki jest niedostępna.",
+        "Saved until this page closes. Browser storage is unavailable.",
+      );
+}
+async function replayEntry(id, play) {
+  if (active()) {
+    go("session");
+    return;
+  }
+  const setup = repeatSetup(
+    store.history.find((entry) => entry.id === id),
+    prefs(),
+  );
+  if (!setup) return;
+  if (setup.kind === "program") {
+    linkedNavigation = true;
+    go("program/" + setup.id);
+    return;
+  }
+  if (setup.kind === "ritual") {
+    state.ritualDraftId = setup.id;
+    state.ritualDraft = migratePreferences(setup.settings);
+    if (play) await startRitual(setup.id, state.ritualDraft);
+    else {
+      linkedNavigation = true;
+      go("ritual/" + setup.id);
+    }
+  } else {
+    store.save(setup.settings);
+    state.selected = setup.id;
+    state.visual = setup.visual;
+    state.pendingProgram = null;
+    if (play) await start(setup.id);
+    else {
+      linkedNavigation = true;
+      go("prepare/" + setup.id);
+    }
+  }
+}
 function updatePreference(key, value, rerender = true) {
   const scope = dialog.open ? dialog : main;
-  const openDetails = [...scope.querySelectorAll("details")].map((d) => d.open);
+  const openDetails = openDisclosures(scope);
   const focused = document.activeElement;
   const selector = focused?.dataset.pref
     ? `[data-pref="${focused.dataset.pref}"]`
@@ -1307,9 +1393,7 @@ function updatePreference(key, value, rerender = true) {
     if (dialog.open && dialog.dataset.type === "settings")
       dialog.innerHTML = views.settings(prefs(), store.available, active());
     else render();
-    scope
-      .querySelectorAll("details")
-      .forEach((d, i) => (d.open = openDetails[i] || d.open));
+    restoreDisclosures(scope, openDetails);
     if (selector) scope.querySelector(selector)?.focus({ preventScroll: true });
   }
 }
@@ -1319,6 +1403,7 @@ document.addEventListener("input", (e) => {
     state.filters.query = el.value;
     document.getElementById("libraryResults").innerHTML = views.libraryCards(
       state.filters,
+      prefs(),
     );
     return;
   }
@@ -1378,23 +1463,34 @@ document.addEventListener("change", async (e) => {
     return;
   }
   if (el.id === "visualMode") {
+    const opened = openDisclosures(main);
     state.visual = el.value;
     render();
-    document
-      .getElementById("visualMode")
-      ?.closest("details")
-      ?.setAttribute("open", "");
+    restoreDisclosures(main, opened);
     document.getElementById("visualMode")?.focus({ preventScroll: true });
   }
   if (el.id === "durationFilter") {
     state.filters.duration = el.value;
     document.getElementById("libraryResults").innerHTML = views.libraryCards(
       state.filters,
+      prefs(),
     );
   }
 });
 document.addEventListener("click", async (e) => {
   const readingLink = e.target.closest("a[href]");
+  if (
+    readingLink?.getAttribute("href").startsWith("#") &&
+    !readingLink.classList.contains("skip-link")
+  ) {
+    linkedNavigation = !readingLink.hasAttribute("data-back");
+    navigation.leave({
+      scroll: window.scrollY,
+      details: openDisclosures(main),
+      filters: { ...state.filters },
+      focusHref: readingLink.getAttribute("href"),
+    });
+  }
   if (
     state.flow &&
     readingLink &&
@@ -1449,30 +1545,52 @@ document.addEventListener("click", async (e) => {
     updatePreference("breathVisual", el.dataset.value !== "sound");
   } else if (a === "playRitual") await startRitual(el.dataset.id);
   else if (a === "skipRitual") skipRitual();
-  else if (a === "saveRitual") {
+  else if (a === "playSaved") {
+    const saved = prefs().sessionProfiles[el.dataset.id];
+    if (saved) {
+      if (active()) go("session");
+      else {
+        store.save(saved);
+        state.visual = quietVisual(saved.visual, sessions[el.dataset.id]?.goal);
+        state.pendingProgram = null;
+        await start(el.dataset.id);
+      }
+    }
+  } else if (a === "repeatLast") {
+    await replayEntry(el.dataset.id, true);
+  } else if (a === "replaySession") {
+    await replayEntry(el.dataset.id, false);
+  } else if (a === "saveSession") {
+    store.saveSession(
+      el.dataset.session,
+      sessionProfile(prefs(), state.visual),
+    );
+    el.textContent = t("Zapisz moje ustawienia", "Update my settings");
+    toast(savedMessage());
+  } else if (a === "saveResult") {
+    const result = state.result;
+    if (result?.ritualId) store.saveRitual(result.ritualId, result.ritualPrefs);
+    else if (result?.sessionId)
+      store.saveSession(
+        result.sessionId,
+        result.sessionPrefs ||
+          sessionProfile({ ...prefs(), ...result.audioPrefs }, result.visual),
+      );
+    toast(savedMessage());
+    el.textContent = t("Zapisano w Moich sesjach", "Saved in My sessions");
+  } else if (a === "saveRitual") {
     store.saveRitual(el.dataset.id, state.ritualDraft);
-    render();
+    el.textContent = t("Zapisz moje ustawienia", "Update my settings");
     toast(
       store.available
-        ? t(
-            "Rytuał zapisany. Czeka na ekranie startowym.",
-            "Ritual saved. Find it on Home.",
-          )
+        ? t("Zapisano w Moich sesjach.", "Saved in My sessions.")
         : t(
             "Pamięć jest niedostępna. Zapis działa tylko do zamknięcia strony.",
             "Storage is unavailable. Saved until this page closes only.",
           ),
     );
   } else if (a === "replayRitual") {
-    const entry = store.history.find((h) => h.id === el.dataset.id);
-    if (entry && ritualFor(entry.ritualId)) {
-      state.ritualDraftId = entry.ritualId;
-      state.ritualDraft = migratePreferences({
-        ...prefs(),
-        ...entry.ritualPrefs,
-      });
-      go("ritual/" + entry.ritualId);
-    }
+    await replayEntry(el.dataset.id, false);
   } else if (a === "usefulness") {
     store.feedback(el.dataset.id, el.dataset.value);
     if (state.result?.id === el.dataset.id)
@@ -1503,6 +1621,7 @@ document.addEventListener("click", async (e) => {
   else if (a === "startProgram") {
     const p = programs.find((p) => p.id === el.dataset.program);
     state.pendingProgram = { program: p, index: 0 };
+    linkedNavigation = true;
     go("prepare/" + p.steps[0].sessionId);
   } else if (a === "nextStep") await nextStep();
   else if (a === "endProgram") finishProgram();
@@ -1558,7 +1677,7 @@ document.addEventListener("click", async (e) => {
       new Blob(
         [
           JSON.stringify(
-            { version: 4, history: store.history, preferences: prefs() },
+            { version: 5, history: store.history, preferences: prefs() },
             null,
             2,
           ),
@@ -1590,6 +1709,23 @@ document.addEventListener("click", async (e) => {
   }
 });
 window.addEventListener("hashchange", () => {
+  // Browser Back/Forward restores the saved screen just like the in-app Back.
+  navigation.leave({
+    scroll: window.scrollY,
+    details: openDisclosures(main),
+    filters: { ...state.filters },
+  });
+  const route = canonicalRoute(location.hash.slice(1));
+  const context = navigation.enter(route, linkedNavigation);
+  linkedNavigation = false;
+  if (route.startsWith("library"))
+    state.filters = context.filters || {
+      goal: paths.some((p) => p.id === route.split("/")[1])
+        ? route.split("/")[1]
+        : "all",
+      duration: "all",
+      query: "",
+    };
   if (state.flow?.visual === "advanced" && location.hash !== "#session")
     state.flow.lightStopped = true;
   if (
@@ -1607,8 +1743,13 @@ window.addEventListener("hashchange", () => {
     state.ritualDraft = null;
   }
   render();
-  window.scrollTo(0, 0);
+  restoreDisclosures(main, context.details);
   main.focus({ preventScroll: true });
+  const previousLink = [...main.querySelectorAll("a[href]")].find(
+    (link) => link.getAttribute("href") === context.focusHref,
+  );
+  previousLink?.focus({ preventScroll: true });
+  window.scrollTo(0, context.scroll || 0);
 });
 window.addEventListener("pagehide", () => {
   state.token++;
@@ -1622,6 +1763,10 @@ window.addEventListener("pagehide", () => {
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) render();
 });
+if (navigation.current.startsWith("library/")) {
+  const goal = navigation.current.split("/")[1];
+  if (paths.some((p) => p.id === goal)) state.filters.goal = goal;
+}
 render();
 prepareOffline();
 
@@ -1647,7 +1792,7 @@ function playerFlow(f) {
     },
   };
 }
-async function startRitual(id) {
+async function startRitual(id, override) {
   if (state.flow) {
     go("session");
     return;
@@ -1655,9 +1800,10 @@ async function startRitual(id) {
   if (state.starting || !ritualFor(id)) return;
   stopBreathPreview();
   const settings = migratePreferences(
-    state.route === "ritual" && state.ritualDraftId === id
-      ? state.ritualDraft
-      : ritualPreferences(id, prefs()),
+    override ||
+      (state.route === "ritual" && state.ritualDraftId === id
+        ? state.ritualDraft
+        : ritualPreferences(id, prefs())),
   );
   state.starting = true;
   const token = ++state.token;

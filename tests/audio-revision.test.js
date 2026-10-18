@@ -106,7 +106,7 @@ test("new soundscapes have comparable RMS and no periodic fade-to-silence", () =
   }
   assert.equal(new Set(fingerprints).size, 4);
 });
-test("v3 preferences migrate to v4 without losing history, choices or enabling sound", () => {
+test("v3 preferences migrate to the current schema without losing history, choices or enabling sound", () => {
   const map = new Map([
     [
       "cortex.preferences.v3",
@@ -128,20 +128,25 @@ test("v3 preferences migrate to v4 without losing history, choices or enabling s
     getItem: (k) => map.get(k),
     setItem: (k, v) => map.set(k, v),
   });
-  assert.equal(store.prefs.version, 4);
+  assert.equal(store.prefs.version, 5);
   assert.equal(store.prefs.noiseType, "none");
   assert.equal(store.prefs.masterVolume, 0.32);
   assert.equal(store.prefs.breathVolume, 0.32);
   assert.equal(store.prefs.breathCues, false);
   assert.equal(store.history[0].id, "kept");
   store.save({ breathVolume: 0.4 });
-  assert.equal(JSON.parse(map.get("cortex.preferences.v4")).breathVolume, 0.4);
+  assert.equal(JSON.parse(map.get("cortex.preferences.v5")).breathVolume, 0.4);
 });
 test("breathing volume is independent of the sound-session master", async () => {
   const render = async (masterVolume, breathVolume) => {
     const a = new AudioEngine();
     a.ctx = new OfflineAudioContext(2, 5 * rate, rate);
-    a.playBreath("box", 16, 0, { ...defaults, breathCues: true, masterVolume, breathVolume });
+    a.playBreath("box", 16, 0, {
+      ...defaults,
+      breathCues: true,
+      masterVolume,
+      breathVolume,
+    });
     const b = await a.ctx.startRendering();
     return rms(b.getChannelData(0), 0, 4);
   };

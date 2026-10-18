@@ -1,3 +1,10 @@
+import { defaults } from "./store.js";
+import {
+  recommendations,
+  latestSession,
+  repeatSetup,
+  sessionDuration,
+} from "./experience.js";
 import { offlinePanel } from "./offline.js";
 import {
   rituals,
@@ -25,7 +32,10 @@ export const button = (action, label, symbol = "", cls = "btn", extra = "") =>
 const link = (href, label, symbol = "", cls = "btn") =>
   `<a class="${cls}" href="${href}">${symbol ? icon(symbol) : ""}${label}</a>`;
 const back = (href = "#home") =>
-  link(href, t("Wróć", "Back"), "back", "back-link");
+  link(href, t("Wróć", "Back"), "back", "back-link").replace(
+    'class="back-link"',
+    'class="back-link" data-back',
+  );
 const title = (eyebrow, heading, description = "") =>
   `<div class="page-head"><div><div class="eyebrow">${eyebrow}</div><h1>${heading}</h1></div>${description ? `<p>${description}</p>` : ""}</div>`;
 const breathArtwork = (pattern) =>
@@ -80,8 +90,7 @@ export function nav(current, mobile = false) {
   return [
     ["home", "home", t("Start", "Home")],
     ["library", "library", t("Biblioteka", "Library")],
-    ["history", "history", t("Historia", "History")],
-    ["knowledge", "book", t("Wiedza", "Learn")],
+    ["mine", "history", t("Moje sesje", "My sessions")],
   ]
     .map(
       ([id, symbol, name]) =>
@@ -90,34 +99,55 @@ export function nav(current, mobile = false) {
     .join("");
 }
 export function header(current) {
-  return `<a class="brand" href="#home" aria-label="Cortex"><img src="assets/images/cortex-mark.svg" alt="">cortex</a><nav class="desktop-nav" aria-label="${t("Nawigacja główna", "Main navigation")}">${nav(current)}</nav><div class="header-actions">${button("language", language.toUpperCase(), "", "icon-btn language-btn", `aria-label="${t("Switch to English", "Zmień na polski")}"`)}${button("settings", "", "settings", "icon-btn", `aria-label="${t("Ustawienia", "Settings")}"`)}</div>`;
+  return `<a class="brand" href="#home" aria-label="Cortex"><img src="assets/images/cortex-mark.svg" alt="">cortex</a><nav class="desktop-nav" aria-label="${t("Nawigacja główna", "Main navigation")}">${nav(current)}</nav><div class="header-actions">${button("settings", "", "settings", "icon-btn", `aria-label="${t("Ustawienia", "Settings")}"`)}</div>`;
 }
 export function pathCards() {
   return `<div class="paths">${paths.map((p) => `<a href="#${p.id === "breath" ? "prepare/breath" : "path/" + p.id}" class="path-card" data-goal="${p.id}"><span class="path-symbol">${icon(p.icon)}</span><h3>${local(p)}</h3><p>${p.intro[language === "pl" ? 0 : 1]}</p><span class="path-arrow">${icon("arrow", 17)}</span></a>`).join("")}</div>`;
 }
-export function home(prefs) {
-  return `<section class="home-hero"><div><div class="eyebrow">${t("Twoja codzienna chwila", "A little room for you")}</div><h1>${t("Czego dziś<br>potrzebujesz?", "What do you<br>need today?")}</h1><p class="intro">${t("Trochę oddechu. Więcej przestrzeni.<br>Znajdź swój rytm — na teraz.", "A little breath. A little space.<br>Find your rhythm, right here.")}</p></div><div class="hero-art">${orb("breath")}<span class="art-note">${t("Dźwięk · oddech · Ty", "Sound · breath · you")}</span></div></section>${pathCards()}${ritualCards(prefs)}<section class="home-bottom"><article><span class="quiet-icon">${icon("breath", 30)}</span><div><h3>${t("Zacznij od jednego oddechu", "Start with a single breath")}</h3><p>${minutes(prefs.breathDuration)}. ${t("Bez słuchawek, bez pośpiechu.", "No headphones. No rush.")}</p></div>${link("#prepare/breath", t("Spróbuj", "Try it"), "arrow", "btn btn-quiet")}</article><article><span class="quiet-icon">${icon("book", 28)}</span><div><h3>${t("Pierwszy raz w Cortex?", "New to Cortex?")}</h3><p>${t("Poznaj sesje i wybierz coś dla siebie.", "Get to know the sessions. Make yourself at home.")}</p></div>${link("#knowledge", t("Poznaj", "Explore"), "arrow", "btn btn-quiet")}</article></section><div class="app-note"><span>${t("Twój czas. Twoje tempo.", "Your time. Your pace.")}</span><a class="text-link" href="landing.html">${t("O Cortex", "About Cortex")}</a></div>`;
+export function home(prefs, history = [], flow = null) {
+  const last = latestSession(history),
+    setup = last && repeatSetup(last, prefs);
+  const resume = flow
+    ? `<section class="return-card" data-goal="${flow.session.goal}"><div><span class="eyebrow">${t("Sesja w toku", "Session in progress")}</span><h2>${local(flow.ritual?.name || flow.session.title)}</h2><p>${t("Wróć do swojego miejsca.", "Pick up where you left off.")}</p></div>${link("#session", t("Wróć do sesji", "Return to session"), "play", "btn btn-primary")}</section>`
+    : setup
+      ? `<section class="return-card" data-goal="${setup.goal}"><div><span class="eyebrow">${t("Ostatnio", "Last time")}</span><h2>${local(setup.kind === "program" ? setup.name : setup.kind === "ritual" ? ritualFor(setup.id).name : sessions[setup.id].title)}</h2><p>${durationLabel(setup.duration)} · ${local(pathFor(setup.goal))}</p></div>${button("repeatLast", setup.kind === "program" ? t("Zobacz program", "View programme") : t("Powtórz sesję", "Repeat session"), "play", "btn", `data-id="${esc(last.id)}"`)}<div id="startError" class="error" role="alert" hidden></div></section>`
+      : "";
+  return `<section class="start-heading"><div class="eyebrow">${t("Chwila dla Ciebie", "A moment for you")}</div><h1>${t("Czego dziś potrzebujesz?", "What do you need today?")}</h1><p>${t("Wybierz potrzebę. Twoja sesja jest gotowa.", "Choose a need. Your session is ready.")}</p></section>${flow ? resume : ""}<div class="need-grid">${paths.map((path) => `<a class="need-card" data-goal="${path.id}" href="#${recommendations[path.id]}"><span class="path-symbol">${icon(path.icon)}</span><span><strong>${local(path)}</strong><span class="need-description">${path.intro[language === "pl" ? 0 : 1]}</span></span>${icon("arrow", 18)}</a>`).join("")}</div>${!flow ? resume : ""}<div class="start-footer">${link("#knowledge", t("Jak korzystać z Cortex", "Getting started with Cortex"), "book", "text-link small")}<span>${t("W swoim rytmie.", "At your own pace.")}</span></div>`;
 }
 export function sessionCard(s, recommended = false) {
-  return `<a class="session-card" href="#prepare/${s.id}" data-goal="${s.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(s.goal).icon)}</span><span class="pill">${s.id === "hypnos" ? t("30–90 min lub bez limitu", "30–90 min or unlimited") : minutes(s.duration)}</span></div><div><p class="protocol">${s.id === "breath" ? t("Prowadzony oddech", "Guided breathing") : s.name}${recommended ? " · " + t("Na początek", "Start here") : ""}</p><h3>${local(s.title)}</h3></div><p>${local(s.description)}</p><span class="card-link">${t("Przygotuj sesję", "Prepare session")}${icon("arrow", 18)}</span></a>`;
+  return `<a class="session-card" href="#prepare/${s.id}" data-goal="${s.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(s.goal).icon)}</span><span class="pill">${s.id === "hypnos" ? t("30–90 min lub bez limitu", "30–90 min or unlimited") : minutes(s.duration)}</span></div><div><p class="protocol">${s.id === "breath" ? t("Prowadzony oddech", "Guided breathing") : s.name}${recommended ? " · " + t("Na początek", "Start here") : ""}</p><h3>${local(s.title)}</h3></div><p>${local(s.description)}</p><span class="card-link">${t("Zobacz sesję", "View session")}${icon("arrow", 18)}</span></a>`;
 }
-export function pathView(goal) {
-  const p = pathFor(goal),
-    list = Object.values(sessions)
-      .filter((s) => s.goal === p.id)
-      .sort((a, b) => (b.id === p.session) - (a.id === p.session));
-  return `${back()}<section class="path-hero" data-goal="${p.id}"><div><div class="overline">${icon(p.icon, 20)}${t("Twoja ścieżka", "Your path")}</div><h1>${local(p)}</h1><p>${p.intro[language === "pl" ? 0 : 1]}</p></div>${orb(p.id)}</section><div class="session-grid">${list.map((s) => sessionCard(s, s.id === p.session)).join("")}</div><p class="app-note">${goal === "energy" ? t("Wybierz charakter sesji. Głośność i wizualizacje ustawisz niezależnie.", "Choose the character of your session. Volume and visuals are separate choices.") : t("Zacznij od tego, co pasuje do Twojej chwili.", "Start with what fits your moment.")}</p>`;
-}
-export function libraryCards(filters) {
+export function libraryCards(filters, prefs = defaults) {
   return (
-    filterSessions(filters.goal, filters.duration, filters.query, language)
-      .map((s) => sessionCard(s))
-      .join("") ||
+    rituals
+      .filter((r) => {
+        const duration =
+          ritualPlan(r.id, ritualPreferences(r.id, prefs)).at(-1).end / 60;
+        return (
+          (filters.goal === "all" || filters.goal === r.goal) &&
+          (!filters.query ||
+            `${local(r.name)} ${local(r.description)}`
+              .toLocaleLowerCase()
+              .includes(filters.query.toLocaleLowerCase())) &&
+          (filters.duration === "all" ||
+            (filters.duration === "short" && duration <= 5) ||
+            (filters.duration === "medium" && duration > 5 && duration <= 15) ||
+            (filters.duration === "long" && duration > 15))
+        );
+      })
+      .map(
+        (r) =>
+          `<a class="session-card" href="#ritual/${r.id}" data-goal="${r.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(r.goal).icon)}</span><span class="pill">${minutes(ritualPlan(r.id, ritualPreferences(r.id, prefs)).at(-1).end)}</span></div><h3>${local(r.name)}</h3><p>${local(r.description)}</p><span class="card-link">${t("Zobacz sesję", "View session")}${icon("arrow", 18)}</span></a>`,
+      )
+      .join("") +
+      filterSessions(filters.goal, filters.duration, filters.query, language)
+        .map((s) => sessionCard(s))
+        .join("") ||
     `<div class="empty"><h2>${t("Spróbuj innego wyboru", "Try another combination")}</h2><p>${t("Brak sesji dla tych filtrów. Zmień czas lub ścieżkę.", "No sessions match these filters. Try another duration or path.")}</p>${button("clearFilters", t("Wyczyść filtry", "Clear filters"))}</div>`
   );
 }
-export function library(filters) {
-  return `${title(t("W swoim rytmie", "At your own pace"), t("Biblioteka", "Your library"), t("14 sesji dźwiękowych, oddech i programy. Wybierz to, czego dziś potrzebujesz.", "14 sound sessions, breathing and programmes. Find what you need today."))}<div class="filter-tabs" role="group" aria-label="${t("Ścieżka", "Path")}">${[["all", t("Wszystkie", "All")], ...paths.map((p) => [p.id, local(p)])].map(([id, name]) => `<button class="chip" data-action="filterGoal" data-value="${id}" aria-pressed="${filters.goal === id}">${name}</button>`).join("")}</div><div class="filters"><label class="search"><span class="sr-only">${t("Szukaj sesji", "Search sessions")}</span><input type="search" id="searchSessions" value="${esc(filters.query)}" placeholder="${t("Szukaj sesji lub potrzeby…", "Search for a session or intention…")}"></label><label><span class="sr-only">${t("Długość sesji", "Session length")}</span><select id="durationFilter">${[
+export function library(filters, prefs = defaults) {
+  return `${title(t("W swoim rytmie", "At your own pace"), t("Biblioteka", "Your library"), t("Wszystkie sesje, oddech i gotowe sekwencje w jednym miejscu.", "All sessions, breathing and ready-made sequences in one place."))}<div class="library-help">${link(language === "pl" ? "guide-pl.html" : "guide.html", t("Jak korzystać", "Getting started"), "book", "text-link small")}${link(language === "pl" ? "whitepaper-pl.html" : "whitepaper.html", t("Podstawy naukowe", "The science"), "", "text-link small")}</div><div class="filter-tabs" role="group" aria-label="${t("Ścieżka", "Path")}">${[["all", t("Wszystkie", "All")], ...paths.map((p) => [p.id, local(p)])].map(([id, name]) => `<button class="chip" data-action="filterGoal" data-value="${id}" aria-pressed="${filters.goal === id}">${name}</button>`).join("")}</div><div class="filters"><label class="search"><span class="sr-only">${t("Szukaj sesji", "Search sessions")}</span><input type="search" id="searchSessions" value="${esc(filters.query)}" placeholder="${t("Szukaj sesji lub potrzeby…", "Search for a session or intention…")}"></label><label><span class="sr-only">${t("Długość sesji", "Session length")}</span><select id="durationFilter">${[
     ["all", t("Dowolny czas", "Any duration")],
     ["short", t("Do 5 minut", "Up to 5 minutes")],
     ["medium", t("6–15 minut", "6–15 minutes")],
@@ -129,7 +159,7 @@ export function library(filters) {
     )
     .join(
       "",
-    )}</select></label></div><div id="libraryResults" class="session-grid" aria-live="polite">${libraryCards(filters)}</div><div class="section-title"><h2>${t("Zostań na dłużej", "Stay a little longer")}</h2><span class="small muted">${t("Programy · kilka sesji w jednej ścieżce", "Programmes · a few sessions, one journey")}</span></div><div class="programs">${programs.map((p) => `<article class="program-card"><div class="overline">${icon("clock", 18)}${minutes(p.steps.reduce((n, s) => n + s.durationMinutes * 60, 0))}</div><h3>${p.name}</h3><p>${local(p.description)}</p><div class="steps-inline">${p.steps.map((s) => sessionFor(s.sessionId).name).join(" → ")}</div>${link("#program/" + p.id, t("Zobacz program", "View programme"), "arrow", "btn btn-quiet")}</article>`).join("")}</div>`;
+    )}</select></label></div><div id="libraryResults" class="session-grid" aria-live="polite">${libraryCards(filters, prefs)}</div><div class="section-title"><h2>${t("Zostań na dłużej", "Stay a little longer")}</h2><span class="small muted">${t("Programy · kilka sesji w jednej ścieżce", "Programmes · a few sessions, one journey")}</span></div><div class="programs">${programs.map((p) => `<article class="program-card"><div class="overline">${icon("clock", 18)}${minutes(p.steps.reduce((n, s) => n + s.durationMinutes * 60, 0))}</div><h3>${p.name}</h3><p>${local(p.description)}</p><div class="steps-inline">${p.steps.map((s) => sessionFor(s.sessionId).name).join(" → ")}</div>${link("#program/" + p.id, t("Zobacz program", "View programme"), "arrow", "btn btn-quiet")}</article>`).join("")}</div>`;
 }
 let fieldSerial = 0;
 export const range = (key, label, prefs, max = 100) => {
@@ -148,6 +178,40 @@ const noiseField = (prefs) =>
         `<option value="${id}" ${prefs.noiseType === id ? "selected" : ""}>${l}</option>`,
     )
     .join("")}</select></label>`;
+const durationLabel = (seconds) =>
+  Number.isFinite(seconds) && seconds % 60
+    ? `${time(seconds)} min`
+    : minutes(seconds);
+const backgroundName = (id) =>
+  local(
+    backgrounds.find((b) => b.id === id) ||
+      backgrounds.find((b) => b.id === "none"),
+  );
+const visualName = (mode) =>
+  ({
+    calm: t("Spokojna forma", "Quiet form"),
+    none: t("Bez animacji", "No animation"),
+    night: t("Nocna forma", "Night visual"),
+    black: t("Czarny ekran", "Black screen"),
+    advanced: t("Rytmiczne światło", "Rhythmic light"),
+  })[mode];
+function setupSummary(prefs, breath, visual) {
+  return `<dl class="setup-summary">${breath ? `<div><dt>${t("Oddech", "Breathing")}</dt><dd>${prefs.breathPattern === "box" ? "Box · 4–4–4–4" : prefs.breathPattern.replaceAll("-", "–")} · ${prefs.breathCues ? (prefs.breathVisual ? t("obraz i dźwięk", "visual & sound") : t("dźwięk", "sound")) : t("obraz", "visual")}</dd></div>` : `<div><dt>${t("Dźwięk", "Sound")}</dt><dd>${backgroundName(prefs.noiseType)} · ${Math.round(prefs.masterVolume * 100)}%</dd></div>`}<div><dt>${breath ? t("Tło", "Background") : t("Ekran", "Screen")}</dt><dd>${breath ? backgroundName(prefs.breathBackground) : visualName(visual)}</dd></div></dl>`;
+}
+function setupLayout({
+  goal,
+  name,
+  description,
+  duration,
+  summary,
+  controls,
+  action,
+  save,
+  sequence,
+  alternative = true,
+}) {
+  return `${back()}<div class="setup-layout" data-goal="${goal}"><section class="setup-intro"><div class="overline">${icon(pathFor(goal).icon, 20)}${local(pathFor(goal))}</div><h1>${name}</h1><p>${description}</p><div class="setup-art" aria-hidden="true">${orb(goal)}</div></section><section class="setup-main" aria-label="${t("Twoja sesja", "Your session")}"><div class="setup-duration">${icon("clock", 20)}<strong>${durationLabel(duration)}</strong><span>${goal === "breath" ? t("dla oddechu", "to breathe") : t("dla siebie", "for yourself")}</span></div>${sequence ? `<p class="setup-sequence">${sequence}</p>` : ""}${summary}<div class="start-dock"><div id="startError" class="error" role="alert" hidden></div>${action}</div><details class="setup-adjust" id="setupAdjust"><summary><span>${icon("settings", 18)}${t("Dopasuj", "Adjust")}</span><span class="small muted">${t("Dźwięk i obraz", "Sound & visuals")}</span></summary><div class="form-stack">${controls}${save || ""}</div></details>${alternative ? link("#library/" + goal, t("Inne sesje w tej ścieżce", "Other sessions for this need"), "arrow", "text-link setup-alternatives") : ""}<a class="help text-link setup-help" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></section></div>`;
+}
 export function prepare(
   id,
   prefs,
@@ -160,7 +224,11 @@ export function prepare(
   const s = sessionFor(id),
     breath = id === "breath";
   const programStep = pendingProgram?.program.steps[pendingProgram.index];
-  return `${back("#" + (breath ? "home" : "path/" + s.goal))}<div class="prepare-layout" data-goal="${s.goal}"><section class="prepare-story"><div class="overline">${icon(pathFor(s.goal).icon)}${local(pathFor(s.goal))} ${!breath ? " · " + s.name : ""}</div><h1>${local(s.title)}</h1><p>${local(s.description)}</p><div class="session-meta"><span>${icon("clock", 18)}${programStep ? minutes(programStep.durationMinutes * 60) : breath ? time(practiceDuration(prefs.breathDuration, prefs.breathPattern)) : id === "hypnos" ? (prefs.hypnosDuration === "infinity" ? minutes(Infinity) : prefs.hypnosDuration + " min") : minutes(s.duration)}</span><span>${icon(breath ? "breath" : "headphones", 18)}${breath ? t("Bez słuchawek", "No headphones needed") : t("Słuchawki stereo", "Stereo headphones")}</span></div>${breath && prefs.breathPattern === "box" ? `<div class="breath-preview">${breathArtwork("box")}</div>` : orb(s.goal)}<p class="help">${breath ? t("Oddychaj łagodnie, w wygodnym dla siebie zakresie. W każdej chwili możesz wrócić do naturalnego oddechu.", "Breathe gently, within a comfortable range. You can return to your natural breath at any time.") : t("Znajdź wygodne miejsce. Zacznij od niskiej głośności i dopasuj ją do siebie.", "Find a comfortable place. Start with a low volume and adjust it to suit you.")}</p></section><section class="prepare-panel"><h2>${t("Twoja chwila", "Make it yours")}</h2>${programStep ? `<p class="help" style="margin-bottom:20px">${esc(pendingProgram.program.name)} · ${t("Etap", "Step")} ${pendingProgram.index + 1}/${pendingProgram.program.steps.length}</p>` : ""}<div class="form-stack">${
+  const duration = programStep
+    ? programStep.durationMinutes * 60 +
+      (prefs.prelude && pendingProgram.index === 0 ? 60 : 0)
+    : sessionDuration(id, prefs);
+  const controls = `${
     breath
       ? `<div class="field"><span>${t("Czas ćwiczenia", "Practice length")}</span>${choose(
           "breathDuration",
@@ -185,7 +253,7 @@ export function prepare(
                 prefs,
               )}</div>`
             : ""
-        }${range("masterVolume", t("Głośność", "Volume"), prefs, 110)}${noiseField(prefs)}<p class="help">${audioDescription(s, language, prefs.noiseType)}</p>${button("previewSession", t("Posłuchaj brzmienia · 12 s", "Preview the sound · 12 s"), "volume", "btn btn-quiet", active ? "disabled" : "")}${toggle("prelude", t("Minuta oddechu przed sesją", "One minute of breathing first"), t("Łagodny rytm 4–6. Możesz go pominąć.", "A gentle 4–6 rhythm. Skip it whenever you like."), prefs)}${prefs.prelude ? breathControls(prefs, active) + (prefs.breathCues ? range("breathVolume", t("Głośność oddechu", "Breathing volume"), prefs) : "") : ""}<details class="details"><summary>${t("Dopasuj więcej", "More options")}</summary><div class="form-stack">${range("beatVolume", t("Tony", "Tones"), prefs, 120)}${range("noiseVolume", t("Tło", "Background"), prefs, 120)}<label class="field"><span>${t("Intensywność dźwięku", "Sound intensity")}</span><select data-pref="intensity">${[
+        }${range("masterVolume", t("Głośność", "Volume"), prefs, 110)}${noiseField(prefs)}<p class="help">${audioDescription(s, language, prefs.noiseType)}</p>${button("previewSession", t("Posłuchaj brzmienia · 12 s", "Preview the sound · 12 s"), "volume", "btn btn-quiet", active ? "disabled" : "")}${toggle("prelude", t("Minuta oddechu przed sesją", "One minute of breathing first"), t("Łagodny rytm 4–6. Możesz go pominąć.", "A gentle 4–6 rhythm. Skip it whenever you like."), prefs)}${prefs.prelude ? breathControls(prefs, active) : ""}<details class="details"><summary>${t("Dopasuj więcej", "More options")}</summary><div class="form-stack">${range("beatVolume", t("Tony", "Tones"), prefs, 120)}${range("noiseVolume", t("Tło", "Background"), prefs, 120)}<label class="field"><span>${t("Intensywność dźwięku", "Sound intensity")}</span><select data-pref="intensity">${[
           ["low", t("Łagodna", "Low")],
           ["medium", t("Standardowa", "Standard")],
           ["high", t("Mocniejsza", "Higher")],
@@ -197,7 +265,54 @@ export function prepare(
           .join(
             "",
           )}</select></label><div><span class="small">${t("Test słuchawek", "Headphone check")}</span><div class="button-row">${button("testLeft", t("Lewy kanał", "Left channel"), "headphones")}${button("testRight", t("Prawy kanał", "Right channel"), "headphones")}</div></div><details class="details"><summary>${t("Parametry protokołu", "Protocol details")}</summary>${protocolTable(s, language)}<p class="help">${t("Sekwencja autorska · audio v2. Parametry opisują sygnał, nie stan mózgu.", "Original sequence · audio v2. Parameters describe the signal, not brain activity.")}</p>${evidenceHTML(s.goal, language)}</details></div></details>`
-  }<details class="details" ${s.goal === "sleep" ? "open" : ""}><summary>${t("Obraz i ruch", "Visuals and motion")}</summary><div class="form-stack"><label class="field"><span>${t("Wizualizacja", "Visual style")}</span><select id="visualMode">${visualOptions(visualMode, s, breath)}</select></label>${visualMode === "black" ? `<p class="help">${t("Czarny ekran odsłonisz jednym dotknięciem. To wygaszenie strony, nie blokada telefonu. Paski Safari mogą pozostać widoczne.", "Tap once to reveal the controls. This blacks out the page; it does not lock your phone. Safari bars may remain visible.")}</p>` : ""}${visualMode === "advanced" ? `<div class="light-setup"><p class="help">${t("Rozwiń widok, aby światło wypełniło ekran. Sterowanie schowa się po 3 sekundach; dotknij obrazu, aby je przywrócić.", "Expand the view to fill the screen with light. Controls hide after 3 seconds; tap the image to bring them back.")}</p><label class="field"><span>${t("Częstotliwość światła", "Light frequency")}</span><select id="lightMode"><option value="adaptive" ${lightSettings.mode === "adaptive" ? "selected" : ""}>${t("Dopasuj do ekranu", "Adapt to display")}</option><option value="protocol" ${lightSettings.mode === "protocol" ? "selected" : ""}>${t("Dokładnie według protokołu", "Follow the protocol exactly")}</option></select></label><p class="help">${t("Dopasowanie ogranicza częstotliwość światła do możliwości przeglądarki: około 60 klatek/s → maks. 20 Hz, 120 → maks. 40 Hz. Zobaczysz używaną wartość. To wariant wizualny, nie ten sam bodziec co oryginalny protokół; dźwięk pozostaje bez zmian.", "Adaptation caps light frequency to browser capability: about 60 frames/s → up to 20 Hz, 120 → up to 40 Hz. The applied value is shown. This is a visual variant, not the original protocol stimulus; audio is unchanged.")}</p><label class="field"><span>${t("Kontrast pulsacji", "Pulse contrast")}</span><select id="lightContrast"><option value="0.04" ${lightSettings.contrast === 0.04 ? "selected" : ""}>${t("Delikatny", "Gentle")}</option><option value="0.06" ${lightSettings.contrast === 0.06 ? "selected" : ""}>${t("Standardowy", "Standard")}</option><option value="0.08" ${lightSettings.contrast === 0.08 ? "selected" : ""}>${t("Wyraźniejszy", "More visible")}</option></select></label><p class="help">${t("Protokół tej sesji sięga", "This protocol reaches")} ${maxVisualFrequency(s)} Hz. ${t("Tryb dokładny wstrzyma światło tylko podczas etapu, którego ekran nie potrafi odtworzyć.", "Exact mode suspends light only during a stage the display cannot reproduce.")}</p><p class="light-warning">${t("Migotanie może wywołać napad, ból głowy lub nudności. Nie włączaj przy padaczce lub nadwrażliwości na migotanie. Przerwij przy dyskomforcie. Skuteczność tej wersji Cortex nie została potwierdzona.", "Flicker can trigger seizures, headache or nausea. Do not enable with epilepsy or sensitivity to flicker. Stop if uncomfortable. Effectiveness of this Cortex version has not been established.")}</p></div>` : ""}${toggle("reduceMotion", t("Ogranicz ruch", "Reduce motion"), t("Ustawienie systemowe jest zawsze respektowane.", "The system preference is always respected."), prefs)}</div></details><div id="startError" role="alert" hidden class="error"></div>${active ? link("#session", t("Wróć do trwającej sesji", "Return to current session"), "play", "btn btn-primary btn-wide") : button("start", busy ? t("Przygotowuję…", "Preparing…") : visualMode === "advanced" ? t("Rozpocznij z pulsacją", "Begin with light") : t("Rozpocznij", "Begin"), "play", "btn btn-primary btn-wide", `${busy ? "disabled" : ""} data-session="${s.id}"`)}<a class="help text-link" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></div></section></div>`;
+  }<details class="details"><summary>${t("Obraz i ruch", "Visuals and motion")}</summary><div class="form-stack"><label class="field"><span>${t("Wizualizacja", "Visual style")}</span><select id="visualMode">${visualOptions(visualMode, s, breath)}</select></label>${visualMode === "black" ? `<p class="help">${t("Czarny ekran odsłonisz jednym dotknięciem. To wygaszenie strony, nie blokada telefonu. Paski Safari mogą pozostać widoczne.", "Tap once to reveal the controls. This blacks out the page; it does not lock your phone. Safari bars may remain visible.")}</p>` : ""}${visualMode === "advanced" ? `<div class="light-setup"><p class="help">${t("Rozwiń widok, aby światło wypełniło ekran. Sterowanie schowa się po 3 sekundach; dotknij obrazu, aby je przywrócić.", "Expand the view to fill the screen with light. Controls hide after 3 seconds; tap the image to bring them back.")}</p><label class="field"><span>${t("Częstotliwość światła", "Light frequency")}</span><select id="lightMode"><option value="adaptive" ${lightSettings.mode === "adaptive" ? "selected" : ""}>${t("Dopasuj do ekranu", "Adapt to display")}</option><option value="protocol" ${lightSettings.mode === "protocol" ? "selected" : ""}>${t("Dokładnie według protokołu", "Follow the protocol exactly")}</option></select></label><p class="help">${t("Dopasowanie ogranicza częstotliwość światła do możliwości przeglądarki: około 60 klatek/s → maks. 20 Hz, 120 → maks. 40 Hz. Zobaczysz używaną wartość. To wariant wizualny, nie ten sam bodziec co oryginalny protokół; dźwięk pozostaje bez zmian.", "Adaptation caps light frequency to browser capability: about 60 frames/s → up to 20 Hz, 120 → up to 40 Hz. The applied value is shown. This is a visual variant, not the original protocol stimulus; audio is unchanged.")}</p><label class="field"><span>${t("Kontrast pulsacji", "Pulse contrast")}</span><select id="lightContrast"><option value="0.04" ${lightSettings.contrast === 0.04 ? "selected" : ""}>${t("Delikatny", "Gentle")}</option><option value="0.06" ${lightSettings.contrast === 0.06 ? "selected" : ""}>${t("Standardowy", "Standard")}</option><option value="0.08" ${lightSettings.contrast === 0.08 ? "selected" : ""}>${t("Wyraźniejszy", "More visible")}</option></select></label><p class="help">${t("Protokół tej sesji sięga", "This protocol reaches")} ${maxVisualFrequency(s)} Hz. ${t("Tryb dokładny wstrzyma światło tylko podczas etapu, którego ekran nie potrafi odtworzyć.", "Exact mode suspends light only during a stage the display cannot reproduce.")}</p><p class="light-warning">${t("Migotanie może wywołać napad, ból głowy lub nudności. Nie włączaj przy padaczce lub nadwrażliwości na migotanie. Przerwij przy dyskomforcie. Skuteczność tej wersji Cortex nie została potwierdzona.", "Flicker can trigger seizures, headache or nausea. Do not enable with epilepsy or sensitivity to flicker. Stop if uncomfortable. Effectiveness of this Cortex version has not been established.")}</p></div>` : ""}${toggle("reduceMotion", t("Ogranicz ruch", "Reduce motion"), t("Ustawienie systemowe jest zawsze respektowane.", "The system preference is always respected."), prefs)}</div></details>`;
+  const action = active
+    ? link(
+        "#session",
+        t("Wróć do trwającej sesji", "Return to current session"),
+        "play",
+        "btn btn-primary btn-wide",
+      )
+    : button(
+        "start",
+        busy
+          ? t("Przygotowuję…", "Preparing…")
+          : visualMode === "advanced"
+            ? t("Rozpocznij z pulsacją", "Begin with light")
+            : t("Rozpocznij", "Begin"),
+        "play",
+        "btn btn-primary btn-wide",
+        `${busy ? "disabled" : ""} data-session="${s.id}"`,
+      );
+  return setupLayout({
+    goal: s.goal,
+    name: local(s.title),
+    description: local(s.description),
+    duration,
+    summary: setupSummary(prefs, breath, visualMode),
+    controls,
+    action,
+    sequence: programStep
+      ? `${esc(pendingProgram.program.name)} · ${t("Etap", "Step")} ${pendingProgram.index + 1}/${pendingProgram.program.steps.length}`
+      : breath
+        ? t(
+            "Oddychaj łagodnie, w wygodnym dla siebie zakresie.",
+            "Breathe gently, within a comfortable range.",
+          )
+        : `${s.name}${prefs.prelude ? " · " + t("Minuta oddechu na początek", "One minute of breathing first") : ""} · ${t("Słuchawki stereo", "Stereo headphones")}`,
+    save: !programStep
+      ? button(
+          "saveSession",
+          prefs.sessionProfiles?.[id]
+            ? t("Zapisz moje ustawienia", "Update my settings")
+            : t("Dodaj do Moich sesji", "Add to My sessions"),
+          "",
+          "btn",
+          `data-session="${id}"`,
+        )
+      : "",
+    alternative: !programStep,
+  });
 }
 export function programView(id, active) {
   const p = programs.find((p) => p.id === id);
@@ -241,14 +356,14 @@ export function between(flow) {
 export function completed(result) {
   if (result.night)
     return `<section class="completion"><div class="eyebrow">${t("Rytuał zakończony", "Ritual finished")}</div><h1>${t("Spokojnej nocy.", "Rest well.")}</h1><p>${time(result.durationSeconds)}</p>${link("#home", t("Wróć do startu", "Back to home"), "arrow", "btn")}</section>`;
-  return `<section class="completion" data-goal="${result.goal}">${orb(result.goal)}<div class="eyebrow">${t("Chwila dla Ciebie", "A moment for you")}</div><h1>${t("Dobrze mieć tę chwilę.", "A little space, just for you.")}</h1><div class="completion-stat">${time(result.durationSeconds)}</div><p>${t("czasu dla siebie", "of time for yourself")} · ${esc(local(result.name))}</p>${!result.ritualId ? `<p class="small">${t("Jak się teraz czujesz?", "How do you feel now?")}</p><div class="rating-row" aria-label="${t("Ocena samopoczucia od 1 do 5", "How you feel, from 1 to 5")}">${[1, 2, 3, 4, 5].map((n) => `<button data-action="rate" data-value="${n}" aria-label="${n} / 5" aria-pressed="${result.rating === n}">${n}</button>`).join("")}</div>` : ""}${result.ritualId ? `<p class="small">${t("Czy ta chwila była pomocna?", "Was this moment helpful?")}</p>` + usefulness(result.id, result.usefulness) : ""}${link("#home", t("Wróć do startu", "Back to home"), "arrow", "btn btn-primary")}<p class="help" style="margin-top:18px">${t("Ocena jest opcjonalna i zostaje na tym urządzeniu.", "Your rating is optional and stays on this device.")}</p></section>`;
+  return `<section class="completion" data-goal="${result.goal}">${orb(result.goal)}<div class="eyebrow">${t("Chwila dla Ciebie", "A moment for you")}</div><h1>${t("Dobrze mieć tę chwilę.", "A little space, just for you.")}</h1><div class="completion-stat">${time(result.durationSeconds)}</div><p>${t("czasu dla siebie", "of time for yourself")} · ${esc(local(result.name))}</p>${!result.ritualId ? `<p class="small">${t("Jak się teraz czujesz?", "How do you feel now?")}</p><div class="rating-row" aria-label="${t("Ocena samopoczucia od 1 do 5", "How you feel, from 1 to 5")}">${[1, 2, 3, 4, 5].map((n) => `<button data-action="rate" data-value="${n}" aria-label="${n} / 5" aria-pressed="${result.rating === n}">${n}</button>`).join("")}</div>` : ""}${result.ritualId ? `<p class="small">${t("Czy ta chwila była pomocna?", "Was this moment helpful?")}</p>` + usefulness(result.id, result.usefulness) : ""}${result.sessionId && !result.programId ? `<div class="completion-save">${button("saveResult", t("Zapisz te ustawienia", "Save these settings"), "", "btn")}</div>` : ""}${link("#home", t("Wróć do startu", "Back to home"), "arrow", "btn btn-primary")}<p class="help" style="margin-top:18px">${t("Ocena jest opcjonalna i zostaje na tym urządzeniu.", "Your rating is optional and stays on this device.")}</p></section>`;
 }
-export function historyView(history) {
+export function historyView(history, embedded = false) {
   const total = history.reduce(
     (n, h) => n + (Number(h.durationSeconds) || 0),
     0,
   );
-  return `${title(t("Twoje chwile", "Your moments"), t("Historia", "History"), t("Czas, który znajdujesz dla siebie. Zapisany tylko na tym urządzeniu.", "The time you make for yourself. Saved only on this device."))}<div class="stats-strip"><div><strong>${history.length}</strong><span>${t("sesji", "sessions")}</span></div><div><strong>${Math.round(total / 60)}</strong><span>${t("minut dla siebie", "minutes for yourself")}</span></div></div>${
+  return `${embedded ? `<div class="section-title history-heading"><h2>${t("Historia", "History")}</h2></div>` : title(t("Twoje chwile", "Your moments"), t("Historia", "History"), t("Czas, który znajdujesz dla siebie. Zapisany tylko na tym urządzeniu.", "The time you make for yourself. Saved only on this device."))}<div class="stats-strip"><div><strong>${history.length}</strong><span>${t("sesji", "sessions")}</span></div><div><strong>${Math.round(total / 60)}</strong><span>${t("minut dla siebie", "minutes for yourself")}</span></div></div>${
     history.length
       ? history
           .slice()
@@ -260,17 +375,17 @@ export function historyView(history) {
             const s = sessionFor(h.sessionId),
               goal = paths.some((p) => p.id === h.goal) ? h.goal : s.goal;
             const date = new Date(h.endedAt || h.startedAt || 0);
-            return `<article class="history-row" data-goal="${goal}"><span class="path-symbol">${icon(pathFor(goal).icon)}</span><div><h3>${h.ritualId && ritualFor(h.ritualId) ? local(ritualFor(h.ritualId).name) : h.sessionId === "breath" ? local(s.title) : s.name}</h3><p>${local(pathFor(goal))} · ${Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString(language, { day: "numeric", month: "short" })}${h.programName ? " · " + esc(h.programName) : ""}</p></div><div class="history-time">${time(h.durationSeconds)}<p>${h.completed ? t("Ukończono", "Completed") : t("Zakończono wcześniej", "Finished early")}${h.rating ? " · " + esc(h.rating) + "/5" : ""}</p></div>${h.ritualId && ritualFor(h.ritualId) ? `<div class="history-ritual"><details><summary>${t("Ustawienia i ocena", "Settings and feedback")}</summary>${ritualHistorySettings(h)}${usefulness(h.id, h.usefulness)}</details>${button("replayRitual", t("Powtórz", "Repeat"), "play", "btn btn-quiet", `data-id="${esc(h.id)}"`)}</div>` : ""}</article>`;
+            return `<article class="history-row" data-goal="${goal}"><span class="path-symbol">${icon(pathFor(goal).icon)}</span><div><h3>${h.ritualId && ritualFor(h.ritualId) ? local(ritualFor(h.ritualId).name) : local(s.title)}</h3><p>${local(pathFor(goal))} · ${Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString(language, { day: "numeric", month: "short" })}${h.programName ? " · " + esc(h.programName) : ""}</p></div><div class="history-time">${time(h.durationSeconds)}<p>${h.completed ? t("Ukończono", "Completed") : t("Zakończono wcześniej", "Finished early")}${h.rating ? " · " + esc(h.rating) + "/5" : ""}</p></div>${h.ritualId && ritualFor(h.ritualId) ? `<div class="history-ritual"><details><summary>${t("Ustawienia i ocena", "Settings and feedback")}</summary>${ritualHistorySettings(h)}${usefulness(h.id, h.usefulness)}</details>${button("replayRitual", t("Powtórz", "Repeat"), "play", "btn btn-quiet", `data-id="${esc(h.id)}"`)}</div>` : `<div class="history-repeat">${button("replaySession", t("Powtórz", "Repeat"), "play", "btn btn-quiet", `data-id="${esc(h.id)}"`)}</div>`}</article>`;
           })
           .join("")
       : `<div class="empty">${icon("history", 32)}<h2>${t("Tu zapiszą się Twoje chwile", "Your moments will appear here")}</h2><p>${t("Po pierwszej sesji zobaczysz jej czas i wybraną ścieżkę.", "After your first session, you will see its duration and path.")}</p>${link("#home", t("Znajdź swoją chwilę", "Find your moment"), "arrow", "btn btn-primary")}</div>`
   }`;
 }
 export function knowledge() {
-  return `${title(t("Poznaj Cortex", "Get to know Cortex"), t("Zrozum swoją chwilę.", "Make it your own."), t("Proste wskazówki, przejrzyste źródła. Wszystko w jednym miejscu.", "Simple guidance, transparent sources. All in one place."))}<div class="knowledge-grid"><article class="knowledge-card">${icon("headphones", 28)}<h2>${t("Jak korzystać", "Getting started")}</h2><p>${t("Wybór sesji, prowadzenie oddechu, słuchawki i komfort użytkowania.", "Choosing a session, following your breath, headphones and comfortable use.")}</p>${link(language === "pl" ? "guide-pl.html" : "guide.html", t("Otwórz przewodnik", "Read the guide"), "arrow")}</article><article class="knowledge-card">${icon("book", 28)}<h2>${t("Podstawy naukowe", "The science, clearly")}</h2><p>${t("Co opisują badania, czego jeszcze nie wiemy i jak działa Cortex.", "What the research says, what remains uncertain and how Cortex works.")}</p>${link(language === "pl" ? "whitepaper-pl.html" : "whitepaper.html", t("Przeczytaj whitepaper", "Read the whitepaper"), "arrow")}</article></div><div class="notice" style="margin-top:24px"><strong>${t("Twoje odczucia są ważne", "Your comfort comes first")}</strong>${t("Cortex służy osobistym rytuałom odpoczynku i pracy. Nie mierzy stanu mózgu i nie jest narzędziem diagnozy ani leczenia.", "Cortex accompanies personal rest and work rituals. It does not measure brain activity and is not a tool for diagnosis or treatment.")}</div>`;
+  return `${back("#library")}${title(t("Poznaj Cortex", "Get to know Cortex"), t("Zrozum swoją chwilę.", "Make it your own."), t("Proste wskazówki, przejrzyste źródła. Wszystko w jednym miejscu.", "Simple guidance, transparent sources. All in one place."))}<div class="knowledge-grid"><article class="knowledge-card">${icon("headphones", 28)}<h2>${t("Jak korzystać", "Getting started")}</h2><p>${t("Wybór sesji, prowadzenie oddechu, słuchawki i komfort użytkowania.", "Choosing a session, following your breath, headphones and comfortable use.")}</p>${link(language === "pl" ? "guide-pl.html" : "guide.html", t("Otwórz przewodnik", "Read the guide"), "arrow")}</article><article class="knowledge-card">${icon("book", 28)}<h2>${t("Podstawy naukowe", "The science, clearly")}</h2><p>${t("Co opisują badania, czego jeszcze nie wiemy i jak działa Cortex.", "What the research says, what remains uncertain and how Cortex works.")}</p>${link(language === "pl" ? "whitepaper-pl.html" : "whitepaper.html", t("Przeczytaj whitepaper", "Read the whitepaper"), "arrow")}</article></div><div class="notice" style="margin-top:24px"><strong>${t("Twoje odczucia są ważne", "Your comfort comes first")}</strong>${t("Cortex służy osobistym rytuałom odpoczynku i pracy. Nie mierzy stanu mózgu i nie jest narzędziem diagnozy ani leczenia.", "Cortex accompanies personal rest and work rituals. It does not measure brain activity and is not a tool for diagnosis or treatment.")}</div>`;
 }
 export function settings(prefs, storeAvailable, active) {
-  return `<div class="dialog-head"><h2 id="dialogTitle">${t("Ustawienia", "Settings")}</h2>${button("closeDialog", "", "close", "icon-btn", `aria-label="${t("Zamknij", "Close")}"`)}</div><div class="dialog-body">${toggle("reduceMotion", t("Ogranicz ruch", "Reduce motion"), t("Respektujemy też ustawienie systemowe.", "Your system setting is also respected."), prefs)}${toggle("keepScreenAwake", t("Utrzymuj ekran podczas oddechu i światła", "Keep the screen on for breathing and light"), t("Zwalniane przy pauzie, czarnym ekranie i końcu. Dostępność zależy od przeglądarki i systemu.", "Released on pause, black screen and finish. Availability depends on your browser and system."), prefs)}${toggle("audioOnly", t("Domyślnie bez animacji", "No animation by default"), t("Zachowaj tylko tekst i sterowanie.", "Keep only text and controls."), prefs)}${toggle("prelude", t("Minuta oddechu przed sesją", "One minute of breathing first"), t("Opcjonalny wstęp w rytmie 4–6.", "An optional opening in a 4–6 rhythm."), prefs)}<hr class="divider">${range("masterVolume", t("Głośność", "Volume"), prefs, 110)}<div class="button-row">${button("testLeft", t("Test lewego kanału", "Test left channel"), "headphones")}${button("testRight", t("Test prawego kanału", "Test right channel"), "headphones")}</div><hr class="divider"><div><h3>${t("Twoje dane", "Your data")}</h3><p class="help">${storeAvailable ? t("Historia i preferencje zostają w tej przeglądarce. Nie wysyłamy ich na serwer.", "History and preferences stay in this browser. They are not sent to a server.") : t("Przeglądarka nie pozwala zapisać danych. Sesje działają, ale historia może zniknąć po zamknięciu strony.", "Browser storage is unavailable. Sessions still work, but your history may not persist.")}</p></div><div class="button-row">${button("exportData", t("Pobierz historię", "Download history"), "download")}${button("importData", t("Przenieś historię z pliku", "Import history from file"))}<input id="importFile" type="file" accept="application/json,.json" hidden>${button("export", t("Eksport sesji audio", "Export session audio"), "download", "btn", active ? "disabled" : "")}</div>${active ? `<p class="help">${t("Eksport audio będzie dostępny po zakończeniu sesji.", "Audio export is available after finishing your session.")}</p>` : ""}${offlinePanel()}<a class="text-link small" href="${language === "pl" ? "guide-pl.html" : "guide.html"}">${t("Instrukcja i komfort użytkowania", "Guide and comfortable use")}</a></div>`;
+  return `<div class="dialog-head"><h2 id="dialogTitle">${t("Ustawienia", "Settings")}</h2>${button("closeDialog", "", "close", "icon-btn", `aria-label="${t("Zamknij", "Close")}"`)}</div><div class="dialog-body"><div class="settings-language"><span>${t("Język", "Language")}</span>${button("language", language === "pl" ? "English" : "Polski", "", "btn")}</div>${toggle("reduceMotion", t("Ogranicz ruch", "Reduce motion"), t("Respektujemy też ustawienie systemowe.", "Your system setting is also respected."), prefs)}${toggle("keepScreenAwake", t("Utrzymuj ekran podczas oddechu i światła", "Keep the screen on for breathing and light"), t("Zwalniane przy pauzie, czarnym ekranie i końcu. Dostępność zależy od przeglądarki i systemu.", "Released on pause, black screen and finish. Availability depends on your browser and system."), prefs)}${toggle("audioOnly", t("Domyślnie bez animacji", "No animation by default"), t("Zachowaj tylko tekst i sterowanie.", "Keep only text and controls."), prefs)}${toggle("prelude", t("Minuta oddechu przed sesją", "One minute of breathing first"), t("Opcjonalny wstęp w rytmie 4–6.", "An optional opening in a 4–6 rhythm."), prefs)}<hr class="divider">${range("masterVolume", t("Głośność", "Volume"), prefs, 110)}<div class="button-row">${button("testLeft", t("Test lewego kanału", "Test left channel"), "headphones")}${button("testRight", t("Test prawego kanału", "Test right channel"), "headphones")}</div><hr class="divider"><div><h3>${t("Twoje dane", "Your data")}</h3><p class="help">${storeAvailable ? t("Historia i preferencje zostają w tej przeglądarce. Nie wysyłamy ich na serwer.", "History and preferences stay in this browser. They are not sent to a server.") : t("Przeglądarka nie pozwala zapisać danych. Sesje działają, ale historia może zniknąć po zamknięciu strony.", "Browser storage is unavailable. Sessions still work, but your history may not persist.")}</p></div><div class="button-row">${button("exportData", t("Pobierz historię", "Download history"), "download")}${button("importData", t("Przenieś historię z pliku", "Import history from file"))}<input id="importFile" type="file" accept="application/json,.json" hidden>${button("export", t("Eksport sesji audio", "Export session audio"), "download", "btn", active ? "disabled" : "")}</div>${active ? `<p class="help">${t("Eksport audio będzie dostępny po zakończeniu sesji.", "Audio export is available after finishing your session.")}</p>` : ""}${offlinePanel()}<a class="text-link small" href="${language === "pl" ? "guide-pl.html" : "guide.html"}">${t("Instrukcja i komfort użytkowania", "Guide and comfortable use")}</a></div>`;
 }
 
 export function usefulness(id, value) {
@@ -290,20 +405,12 @@ export function usefulness(id, value) {
     )
     .join("")}</div>`;
 }
-export function ritualCards(prefs) {
-  return `<section class="ritual-section" aria-labelledby="ritualTitle"><div class="section-title"><h2 id="ritualTitle">${t("Twój moment dnia", "Your moment of the day")}</h2><span class="small muted">${t("Jeden start. Płynny przebieg.", "One start. A seamless sequence.")}</span></div><div class="ritual-grid">${rituals
-    .map((r) => {
-      const p = ritualPreferences(r.id, prefs),
-        saved = Boolean(prefs.ritualProfiles?.[r.id]);
-      return `<article class="ritual-card" data-goal="${r.goal}"><span class="path-symbol">${icon(pathFor(r.goal).icon)}</span><p class="small muted">${time(ritualPlan(r.id, p).at(-1).end)}${saved ? " · " + t("Zapisany rytuał", "Saved ritual") : ""}</p><h3>${local(r.name)}</h3><p>${local(r.description)}</p><div class="button-row">${saved ? button("playRitual", t("Rozpocznij", "Begin"), "play", "btn btn-primary", `data-id="${r.id}"`) : ""}${link("#ritual/" + r.id, saved ? t("Dopasuj", "Adjust") : t("Przygotuj", "Prepare"), saved ? "" : "arrow", "btn btn-quiet")}</div></article>`;
-    })
-    .join("")}</div></section>`;
-}
 export function ritualPrepare(id, prefs, active, saved) {
   const r = ritualFor(id);
   if (!r) return home(prefs);
-  const steps = ritualPlan(id, prefs);
-  return `${back()}<div class="prepare-layout ritual-prepare" data-goal="${r.goal}"><section class="prepare-story"><div class="eyebrow">${t("Twój rytuał", "Your ritual")}</div><h1>${local(r.name)}</h1><p>${local(r.description)}</p><ol class="program-steps">${steps.map((step, i) => `<li><span class="step-number">${i + 1}</span><div><h3>${step.kind === "breath" ? t("Spokojny oddech", "Gentle breathing") : step.session.name}</h3><p>${time(step.session.duration)} · ${step.kind === "breath" ? prefs.breathPattern.replaceAll("-", "–") : local(step.session.title)}</p></div></li>`).join("")}<li><span class="step-number">${icon("check", 18)}</span><div><h3>${id === "evening" ? t("Spokojne zakończenie", "A quiet ending") : t("Łagodne wygaszenie", "A gentle fade")}</h3><p>${id === "evening" ? t("Ciemny ekran, bez pytania o ocenę.", "A dark screen, with no feedback prompt.") : t("Przejścia odbywają się automatycznie.", "Transitions happen automatically.")}</p></div></li></ol><p class="help">${id === "reset" ? t("Możesz zrobić pauzę albo zakończyć ćwiczenie w każdej chwili.", "Pause or finish the practice at any time.") : t("Możesz zatrzymać cały rytuał albo pominąć oddech. Ustawienia światła nie są częścią rytuału.", "Pause the entire ritual or skip breathing. Rhythmic light is not part of the ritual.")}</p></section><section class="prepare-panel"><h2>${t("Dopasuj tę chwilę", "Make this moment yours")}</h2><p class="ritual-total">${time(steps.at(-1).end)} · ${t("łącznie", "in total")}</p><div class="form-stack">${id !== "reset" ? toggle("prelude", t("Oddech na początek", "Begin with breathing"), t("Około minuty, zawsze pełne cykle.", "About a minute, always complete cycles."), prefs) : ""}${
+  const steps = ritualPlan(id, prefs),
+    breath = id === "reset";
+  const controls = `${id !== "reset" ? toggle("prelude", t("Oddech na początek", "Begin with breathing"), t("Około minuty, zawsze pełne cykle.", "About a minute, always complete cycles."), prefs) : ""}${
     id === "reset" || prefs.prelude
       ? `<label class="field"><span>${t("Rytm oddechu", "Breathing rhythm")}</span><select data-pref="breathPattern">${[
           ["4-6", "4–6"],
@@ -330,7 +437,76 @@ export function ritualPrepare(id, prefs, active, saved) {
           )
           .join("")}</select></label>`
       : ""
-  }${id === "evening" ? `<label class="field"><span>${t("Czas Hypnos", "Hypnos duration")}</span><select data-pref="hypnosDuration">${["30", "45", "90", "infinity"].map((v) => `<option value="${v}" ${prefs.hypnosDuration === v ? "selected" : ""}>${v === "infinity" ? t("Bez limitu", "Unlimited") : v + " min"}</option>`).join("")}</select></label>` : ""}<div id="startError" role="alert" class="error" hidden></div>${active ? link("#session", t("Wróć do trwającej sesji", "Return to current session"), "play", "btn btn-primary") : button("playRitual", t("Rozpocznij rytuał", "Begin ritual"), "play", "btn btn-primary btn-wide", `data-id="${id}"`)}${button("saveRitual", saved ? t("Zapisz zmiany rytuału", "Save ritual changes") : t("Zapisz jako mój rytuał", "Save as my ritual"), "", "btn", `data-id="${id}"`)}<p class="help">${t("Zapis jest lokalny. Następnym razem uruchomisz swój rytuał prosto ze startu.", "Saved locally. Next time, start your ritual directly from Home.")}</p></div></section></div>`;
+  }${id === "evening" ? `<label class="field"><span>${t("Czas Hypnos", "Hypnos duration")}</span><select data-pref="hypnosDuration">${["30", "45", "90", "infinity"].map((v) => `<option value="${v}" ${prefs.hypnosDuration === v ? "selected" : ""}>${v === "infinity" ? t("Bez limitu", "Unlimited") : v + " min"}</option>`).join("")}</select></label>` : ""}`;
+  return setupLayout({
+    goal: r.goal,
+    name: local(r.name),
+    description: local(r.description),
+    duration: steps.at(-1).end,
+    summary: setupSummary(prefs, breath, prefs.ritualVisual),
+    controls,
+    sequence:
+      steps
+        .map(
+          (step) =>
+            `${step.kind === "breath" ? t("Oddech", "Breathing") : step.session.name} · ${minutes(step.session.duration)}`,
+        )
+        .join(" → ") +
+      (id === "evening"
+        ? " · " + t("Ciche zakończenie", "A quiet ending")
+        : ""),
+    action: active
+      ? link(
+          "#session",
+          t("Wróć do trwającej sesji", "Return to current session"),
+          "play",
+          "btn btn-primary btn-wide",
+        )
+      : button(
+          "playRitual",
+          t("Rozpocznij", "Begin"),
+          "play",
+          "btn btn-primary btn-wide",
+          `data-id="${id}"`,
+        ),
+    save:
+      button(
+        "saveRitual",
+        saved
+          ? t("Zapisz moje ustawienia", "Update my settings")
+          : t("Dodaj do Moich sesji", "Add to My sessions"),
+        "",
+        "btn",
+        `data-id="${id}"`,
+      ) +
+      `<p class="help">${t("Zapisane ustawienia znajdziesz w Moich sesjach.", "Find your saved settings in My sessions.")}</p>`,
+  });
+}
+
+export function mySessions(prefs, history, active = false) {
+  const saved = [
+    ...rituals
+      .filter((r) => prefs.ritualProfiles?.[r.id])
+      .map((r) => ({
+        id: r.id,
+        name: local(r.name),
+        goal: r.goal,
+        duration: ritualPlan(r.id, ritualPreferences(r.id, prefs)).at(-1).end,
+        route: "ritual/" + r.id,
+        action: "playRitual",
+      })),
+    ...Object.entries(prefs.sessionProfiles || {})
+      .filter(([id]) => sessions[id])
+      .map(([id, settings]) => ({
+        id,
+        name: local(sessions[id].title),
+        goal: sessions[id].goal,
+        duration: sessionDuration(id, settings),
+        route: "prepare/" + id,
+        action: "playSaved",
+      })),
+  ];
+  return `${title(t("W swoim rytmie", "At your own pace"), t("Moje sesje", "My sessions"), t("Twoje ustawienia i historia, zapisane na tym urządzeniu.", "Your settings and history, saved on this device."))}<section aria-labelledby="savedTitle"><div class="section-title"><h2 id="savedTitle">${t("Zapisane", "Saved")}</h2></div>${saved.length ? `<div class="saved-grid">${saved.map((item) => `<article class="saved-card" data-goal="${item.goal}"><span class="path-symbol">${icon(pathFor(item.goal).icon)}</span><h3>${item.name}</h3><p>${durationLabel(item.duration)} · ${local(pathFor(item.goal))}</p><div class="button-row">${active ? link("#session", t("Wróć do sesji", "Return to session"), "play", "btn btn-primary") : button(item.action, t("Rozpocznij", "Begin"), "play", "btn btn-primary", `data-id="${item.id}"`)}${link("#" + item.route, t("Dopasuj", "Adjust"), "", "btn btn-quiet")}</div></article>`).join("")}</div>` : `<div class="saved-empty"><p>${t("Zapisz ulubione ustawienia po sesji lub w opcji Dopasuj. Następnym razem wystarczy jeden przycisk.", "Save your favourite settings after a session or under Adjust. Next time, start with one tap.")}</p>${link("#home", t("Wybierz sesję", "Choose a session"), "arrow", "text-link")}</div>`}<div id="startError" class="error" role="alert" hidden></div></section>${historyView(history, true)}`;
 }
 
 function ritualHistorySettings(entry) {

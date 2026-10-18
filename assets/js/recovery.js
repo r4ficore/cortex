@@ -1,3 +1,4 @@
+import { sessionProfile, quietVisual } from "./experience.js";
 import { ritualPlan, ritualAt, ritualFor, ritualVisual } from "./rituals.js";
 import { sessions, programs, makeSession } from "./catalog.js";
 import { SessionController } from "./session.js";
@@ -35,6 +36,7 @@ export function snapshotFlow(f, owner) {
     pattern: f.pattern,
     breathSound: f.breathSound,
     audioPrefs: f.audioPrefs,
+    sessionPrefs: f.sessionPrefs,
     visual: f.visual,
     lightMode: f.lightMode,
     lightContrast: f.lightContrast,
@@ -118,6 +120,13 @@ export function restoreFlow(s, now) {
     pattern: current?.pattern || p.breathPattern,
     breathSound: s.breathSound === true,
     audioPrefs: ritualPrefs || audioSettings(p),
+    sessionPrefs:
+      s.sessionPrefs && typeof s.sessionPrefs === "object"
+        ? sessionProfile(
+            migratePreferences(s.sessionPrefs),
+            quietVisual(s.sessionPrefs.visual),
+          )
+        : undefined,
     visual: current
       ? ritualVisual(current, ritualPrefs) === "black"
         ? "night"

@@ -1,3 +1,4 @@
+import { sessionProfile, quietVisual } from "./experience.js";
 import { ritualFor, ritualFields } from "./rituals.js";
 import { sessions, paths } from "./catalog.js";
 import { migratePreferences } from "./store.js";
@@ -59,6 +60,11 @@ export function parseBackup(text) {
       "soundBackground",
     ])
       if (typeof h[k] === "string" && h[k].length <= 128) item[k] = h[k];
+    if (h.sessionPrefs && typeof h.sessionPrefs === "object")
+      item.sessionPrefs = sessionProfile(
+        migratePreferences(h.sessionPrefs),
+        quietVisual(h.sessionPrefs.visual, sessions[h.sessionId].goal),
+      );
     if (h.audioPrefs && typeof h.audioPrefs === "object") {
       const p = migratePreferences(h.audioPrefs);
       item.audioPrefs = Object.fromEntries(

@@ -1,9 +1,11 @@
+import { sessions } from "./catalog.js";
+import { sessionFields, quietVisual } from "./experience.js";
 import { ritualFields, ritualFor } from "./rituals.js";
 import { backgroundIds } from "./background-catalog.js";
-const KEY = "cortex.preferences.v4";
+const KEY = "cortex.preferences.v5";
 const HISTORY = "cortex.history.v3";
 export const defaults = {
-  version: 4,
+  version: 5,
   lang: "pl",
   goal: "focus",
   lastSessionId: "deepFocus",
@@ -23,6 +25,7 @@ export const defaults = {
   breathBackgroundVolume: 0.3,
   ritualVisual: "calm",
   ritualProfiles: {},
+  sessionProfiles: {},
   prelude: false,
   reduceMotion: null,
   audioOnly: false,
@@ -95,13 +98,25 @@ export function migratePreferences(raw = {}, legacyLang) {
       ritualFields.map((k) => [k, clean[k]]),
     );
   }
+  p.sessionProfiles = {};
+  for (const [id, profile] of Object.entries(raw.sessionProfiles || {})) {
+    if (!Object.hasOwn(sessions, id) || !profile || typeof profile !== "object")
+      continue;
+    const clean = migratePreferences(
+      Object.fromEntries(sessionFields.map((k) => [k, profile[k]])),
+    );
+    p.sessionProfiles[id] = {
+      ...Object.fromEntries(sessionFields.map((k) => [k, clean[k]])),
+      visual: quietVisual(profile.visual, sessions[id].goal),
+    };
+  }
   p.keepScreenAwake = raw.keepScreenAwake !== false;
   p.reduceMotion =
     typeof raw.reduceMotion === "boolean" ? raw.reduceMotion : null;
   // Advanced stimulation is deliberately never persisted or inherited.
   delete p.visualMode;
   delete p.safeVisuals;
-  p.version = 4;
+  p.version = 5;
   if (
     typeof p.lastSessionId !== "string" ||
     !/^[a-zA-Z0-9]{1,64}$/.test(p.lastSessionId)
@@ -128,6 +143,7 @@ export function createStore(storage) {
   }
   let prefs = migratePreferences(
     read(KEY) ||
+      read("cortex.preferences.v4") ||
       read("cortex.preferences.v3") ||
       read("koraUserPreferences") ||
       {},
@@ -245,6 +261,12 @@ export function createStore(storage) {
       });
       write(KEY, prefs);
       return prefs.ritualProfiles[id];
+    },
+    saveSession(id, settings) {
+      if (!Object.hasOwn(sessions, id)) return;
+      const existing = read(KEY)?.sessionProfiles || prefs.sessionProfiles;
+      return this.save({ sessionProfiles: { ...existing, [id]: settings } })
+        .sessionProfiles[id];
     },
     rate(id, rating) {
       syncHistory();
