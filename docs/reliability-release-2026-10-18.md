@@ -18,7 +18,7 @@ Zakres tej iteracji: potwierdzone usterki i poprawki funkcjonalne P1/P2 z audytu
 
 ## Sprawdzenie
 
-60 testów obejmuje rzeczywiste PCM dla pauzy podczas wejścia, plateau, wyjścia i tuż przed końcem (z metodą natywną i bez niej), wznowienie wygaszania, checkpointy, programy i nieskończony Hypnos, brak pamięci lokalnej, łączenie kart i import, pełne cykle, nierówne klatki i ponowny pomiar, semantykę eksportu Hypnos, metadane, 24 kHz, kontrolę przepływu fragmentów i asynchroniczne zwolnienie Wake Lock.
+61 testów obejmuje rzeczywiste PCM dla pauzy podczas wejścia, plateau, wyjścia i tuż przed końcem (z metodą natywną i bez niej), wznowienie wygaszania, checkpointy, programy i nieskończony Hypnos, brak pamięci lokalnej, łączenie kart i import, pełne cykle, nierówne klatki i ponowny pomiar, semantykę eksportu Hypnos, metadane, 24 kHz, kontrolę przepływu fragmentów i asynchroniczne zwolnienie Wake Lock.
 
 W podglądzie wydania sprawdzono: oddech pudełkowy, pauzę, odświeżenie i odzyskanie tego samego miejsca, historię bez duplikacji, zachowanie zielonego szumu po przeładowaniu, import istniejącej historii bez duplikacji oraz rzeczywisty eksport minutowego Hypnos i jego JSON. Pełne pole światła schowało kontrolki i wskazywało rzeczywiste 20 Hz przy 60 klatkach/s; po zmianie wymiarów ponownie mierzyło ekran.
 

@@ -19,7 +19,7 @@ export class ScreenAwake {
       const lock = this.lock;
       this.lock = null;
       if (lock) await lock.release().catch(() => {});
-      this.report("inactive");
+      if (generation === this.generation) this.report("inactive");
       return;
     }
     if (this.lock && !this.lock.released) return;

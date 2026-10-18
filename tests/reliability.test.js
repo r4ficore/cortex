@@ -374,3 +374,20 @@ test("streaming WAV waits for each write acknowledgement and emits the selected 
   await done;
   assert.equal(messages.at(-1).done, true);
 });
+
+
+test("a slow wake-lock release cannot overwrite a newer successful acquisition", async () => {
+  let releaseOld;
+  let requests = 0;
+  const wake = new ScreenAwake({request: async () => ({
+    released: false,
+    release: ++requests === 1 ? () => new Promise(r => { releaseOld = r; }) : async () => {},
+    addEventListener() {},
+  })});
+  await wake.setWanted(true);
+  const releasing = wake.setWanted(false);
+  await wake.setWanted(true);
+  releaseOld(); await releasing;
+  assert.equal(wake.status, "active");
+  assert.ok(wake.lock);
+});
