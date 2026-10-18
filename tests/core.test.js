@@ -21,13 +21,32 @@ import { createStore, migratePreferences } from "../assets/js/store.js";
 import { wavHeader, pcm } from "../assets/js/wav.js";
 const normalise = (o) =>
   JSON.parse(JSON.stringify(o, (_, x) => (x === Infinity ? "Infinity" : x)));
-test("all 14 original protocols and 5 programmes retain their audio definitions", () => {
+test("audio revision retains 14 IDs, timing, L/R frequencies, visuals and 5 programmes", () => {
   const baseline = JSON.parse(
     readFileSync(new URL("./protocols-baseline.json", import.meta.url)),
   );
-  assert.deepEqual(normalise(protocols), baseline.sessions);
+  assert.deepEqual(
+    Object.keys(protocols).sort(),
+    Object.keys(baseline.sessions).sort(),
+  );
+  for (const [id, s] of Object.entries(protocols)) {
+    const old = baseline.sessions[id];
+    assert.equal(s.audioVersion, 2);
+    assert.equal(normalise(s.duration), old.duration);
+    assert.deepEqual(
+      normalise(
+        s.phases.map((p) => [p.start, p.end, p.audio.l, p.audio.r, p.visual]),
+      ),
+      old.phases.map((p) => [p.start, p.end, p.audio.l, p.audio.r, p.visual]),
+    );
+    for (const p of s.phases) {
+      assert.ok(
+        Number.isFinite(p.audio.vol_s) && Number.isFinite(p.audio.vol_e),
+      );
+      assert.ok(p.audio.am.depth >= 0 && p.audio.am.depth <= 1);
+    }
+  }
   assert.deepEqual(normalise(originals), baseline.programs);
-  assert.equal(Object.keys(protocols).length, 14);
   assert.equal(programs.length, 5);
 });
 test("five paths have a valid default and energy is separate from focus", () => {
@@ -101,9 +120,9 @@ test("4–6, box and 4–7–8 boundary phases and continuity", () => {
 test("phase lookup, envelopes and frequency spread remain deterministic", () => {
   const s = makeSession("prime");
   assert.equal(phaseAt(s, 120), s.phases[1]);
-  assert.equal(phaseVolume(s.phases[0], 60), 0.2);
+  assert.equal(phaseVolume(s.phases[0], 60), 0.16);
   assert.deepEqual(frequencies({ l: 220, r: 234 }), [220, 234]);
-  assert.deepEqual(frequencies({ l: 220, r: 234 }, "low"), [220.7, 233.3]);
+  assert.deepEqual(frequencies({ l: 220, r: 234 }, "low"), [220, 234]);
 });
 test("legacy preferences and logs migrate without enabling advanced visuals", () => {
   const map = new Map([
@@ -168,7 +187,7 @@ test("unavailable or corrupt storage keeps the app functional", () => {
     breathDuration: 999,
   });
   assert.equal(p.masterVolume, 1.1);
-  assert.equal(p.noiseType, "brown");
+  assert.equal(p.noiseType, "soundscape");
   assert.equal(p.breathDuration, 180);
 });
 test("WAV header is stereo 16-bit PCM with a correct frame size", () => {

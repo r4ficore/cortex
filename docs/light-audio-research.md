@@ -82,33 +82,35 @@ Nie wyznaczono biologicznie optymalnej jasności dla Cortex. Przyjęte poziomy s
 
 [Orozco Perez, Dumas i Lehmann, 2020](https://www.eneuro.org/content/7/2/ENEURO.0232-19.2020) porównali binauralne i monauralne bodźce 7 i 40 Hz. Oba wywoływały odpowiedzi słuchowe, z różnicami siły odpowiedzi; wynik nie uprawnia do utożsamiania ich działania. Przegląd [Ingendoh i wsp., 2023](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0286023) wykazał niespójność wyników synchronizacji EEG. Dlatego naprawa generatora potwierdza **właściwości sygnału**, nie korzyść zdrowotną aplikacji.
 
-### Zidentyfikowane błędy i naprawy
+### Aktualizacja: korekta audio v2
 
-| Obszar | Przed audytem | Po audycie |
-| --- | --- | --- |
-| `iso` w Clarity | Stała modulacja 2 Hz niezależna od pary tonów 220/236 Hz. | Jawna modulacja amplitudy 16 Hz przy standardowej intensywności. |
-| `pulse` i `hard` | Flagi istniały w katalogu, ale były ignorowane. Problem obecny także przed Porcelaną. | `pulse`: sinusoidalna AM o głębokości 0,5; `iso`/`hard`: głębokość 1. Częstotliwość wynika z efektywnej różnicy L/R. Są to nowe jawne definicje DSP, nie odkryte „oryginalne dawki”. |
-| Zmiany etapów | Natychmiastowe skoki częstotliwości i wzmocnienia. | Krótkie przejścia 20 ms częstotliwości, wzmocnienia i głębokości AM. Docelowe pary tonów pozostają zachowane. |
-| Koniec po wznowieniu | Przy końcówce krótszej niż sekundę obwiednia mogła mieć zaplanowany wzrost już po końcu sesji. | Czasy wejścia i wyjścia dostosowane do pozostałego czasu, bez zdarzeń poza końcem. |
-| Zapas sygnału | Brak jawnego wspólnego współczynnika zapasu. | Wspólne wzmocnienie wyjściowe 0,85; szum ograniczony do [-1,1]. Zapas potwierdzony testem PCM. |
-| WAV | Inne poziomy miksu i czasy obwiedni; ignorowanie intensywności i bieżących suwaków. | Wspólna definicja modulacji, szumu i fade; WAV uwzględnia suwaki i intensywność. Mono i wymuszona AM pozostają jawnymi transformacjami eksportu. |
-| Stały fragment WAV | Początek i koniec bez wygaszenia, możliwość kliku. | Krótkie wygaszenia również w stałym fragmencie; plik nie jest reklamowany jako bezszwowa pętla. |
-| Zegar | Dźwięk był planowany 40 ms po początku licznika. | Początek zegara sesji wyrównany do zaplanowanego startu grafu audio. Nie oznacza kalibracji opóźnienia sprzętowego audio–ekran. |
-| Tło | Powtarzana 4-sekundowa próbka szumu. | Pętla 16-sekundowa z zerowanymi końcami; zmniejszona częstotliwość powtórzeń. Nie jest to nieskończony unikalny szum. |
+Pierwszy audyt wykrył nieobsługiwane flagi AM, modulację 2 Hz w Clarity, krótką pętlę szumu i różnice eksportu. Głębsza korekta zastępuje wcześniejsze przejścia 20 ms i przestrajanie przez intensywność. Szczegółowy zakres, tabela wszystkich 14 sesji i odbiór znajdują się w dokumencie `docs/audio-revision-2.md` w repozytorium.
 
-Definicje wszystkich 14 sesji i 5 programów pozostają niezmienione. Zmieniła się interpretacja wcześniej nieobsługiwanych pól i wykonanie DSP. Intensywność niska/wysoka nadal zachowuje wcześniejsze mnożniki rozstawu częstotliwości 0,9/1,1 oraz poziomu 0,6/1,3; interfejs ujawnia efektywne parametry. Nie dodano rzekomo terapeutycznych częstotliwości ani podnoszenia głośności przy wyborze Energii.
+| Obszar | Bieżąca implementacja v2 |
+| --- | --- |
+| Częstotliwości | Docelowe pary L/R zachowane. Intensywność zmienia poziom, nigdy częstotliwość. Clarity ma w głównym etapie różnicę L/R 16 Hz i AM 16 Hz. |
+| Modulacja | Jawne częstotliwości i głębokości AM; normalizacja energii RMS nośnej. Płytsza modulacja w sesjach snu i części Wyciszenia. Nie jest to model jednakowej odczuwanej głośności. |
+| Przejścia | Płynne przejścia 4–12 s i ciągłe poziomy etapów zamiast skoków. Wznowienie wewnątrz przejścia wraca do wartości pośredniej. |
+| Tło | Cztery opcjonalne tła harmoniczne. Pętla 32 s z nakładaniem szumu na złączu, bez okresowego zaniku do ciszy. Zachowany wybór szumów i braku tła. |
+| Sen | Łagodniejsza modulacja i 30-sekundowe końcowe wygaszenie w sesjach o skończonym czasie. Brak deklaracji sterowania fazą REM. |
+| Oddech | Ciągły syntetyczny szum powietrza, cztery zróżnicowane cykle, cisza podczas zatrzymań, niezależna głośność. |
+| WAV | Wspólna oś parametrów, tło i wygaszenia. Wariant sinusoidalnej AM używa jednej nośnej; mono łączy tony obu kanałów. Zmiana długości lub nośnej jest własnym wariantem użytkownika. |
+| Dane | Preferencje v4 zachowują wcześniejsze wybory i historię. Nowe wpisy oznaczają wersję audio. |
 
-### Weryfikacja sygnału
+Nie wszystkie definicje dźwięku są już identyczne z dawną wersją: świadomie zmieniono poziomy, głębokości części AM, przejścia i tło. Identyfikatory, czasy, docelowe pary L/R i programy pozostają zachowane. Są to korekty jakości sygnału i brzmienia; nie nowe dawki terapeutyczne.
 
-Oprócz testów logiki użyto `OfflineAudioContext` z implementacji node-web-audio-api do renderowania **rzeczywistego grafu AudioEngine**. Analiza próbek 48 kHz sprawdza separację kanałów, amplitudy nośnych i bocznych składowych AM. To dokładniejsze niż samo sprawdzenie, jakie liczby wpisano do `AudioParam`, lecz nadal nie pomiar wyjścia iPhone’a.
+### Weryfikacja sygnału v2
 
-- Clarity: nośna 220 Hz, składowe 204/236 Hz, stosunek każdej do nośnej około 0,500; potwierdzona AM 16 Hz.
-- Gamma Lift: nośna 260 Hz, składowe 220/300 Hz, stosunek około 0,500; potwierdzona pełna AM 40 Hz.
-- Overdrive: nośna 440 Hz, składowe 400/480 Hz, stosunek około 0,167; potwierdzona częściowa AM 40 Hz.
-- Test obciążeniowy 39 etapów, maksymalnych suwaków, wysokiej intensywności i białego szumu: najwyższy szczyt około 0,77415, czyli −2,22 dBFS; bez próbek poza zakresem.
-- Dodatkowy test porównuje amplitudy nośnej i składowych bocznych między WAV i grafem na żywo, przy tych samych ustawieniach i wyłączonym szumie.
+Oprócz testów logiki użyto `OfflineAudioContext` z implementacji node-web-audio-api do renderowania rzeczywistego grafu AudioEngine. Analiza próbek 48 kHz sprawdza separację kanałów, amplitudy nośnych i składowych bocznych AM. Nie jest pomiarem wyjścia iPhone’a.
 
-Losowy szum nie daje identycznych próbek między odtworzeniem i eksportem; zgodność dotyczy rodzaju i skali sygnału. Przy pauzie graf jest wygaszany i odtwarzany od tego samego miejsca protokołu; nie zachowujemy dokładnej fazy oscylatora sprzed pauzy. Obwiednia łagodzi ponowne wejście. Głośność cyfrowa nie określa dB SPL: potrzebny byłby pomiar konkretnych słuchawek. Brak cyfrowego przesterowania nie oznacza bezpieczeństwa dowolnej głośności sprzętowej.
+- Clarity: nośna 220 Hz, składowe 204/236 Hz, stosunek każdej do nośnej około 0,500; AM 16 Hz.
+- Gamma Lift: nośna 260 Hz, składowe 220/300 Hz, stosunek około 0,500; pełna AM 40 Hz.
+- Overdrive: nośna 440 Hz, składowe 400/480 Hz, stosunek około 0,167; częściowa AM 40 Hz.
+- Test 39 etapów przy maksymalnym zdefiniowanym poziomie, maksymalnych suwakach, wysokiej intensywności i białym tle: najwyższy szczyt 0,46948, czyli około −6,57 dBFS.
+- Testy dawnych skoków w Overdrive i Clarity wykazują różnicę RMS przed i po przejściu poniżej 0,5 dB, zamiast około 9–10 dB.
+- WAV porównano z grafem live również z tłem, przy wysokiej intensywności, przez przejścia etapów i granicę 32-sekundowej pętli. Różnice RMS w badanych oknach pozostają poniżej 0,12 dB.
+
+Przy pauzie graf jest wygaszany i odtwarzany od tego samego miejsca protokołu; nie zachowujemy dokładnej fazy oscylatora sprzed pauzy. Obwiednia łagodzi ponowne wejście. Głośność cyfrowa nie określa dB SPL: potrzebny byłby pomiar konkretnych słuchawek. Brak cyfrowego przesterowania nie dowodzi komfortu każdego odbiorcy ani skuteczności klinicznej aplikacji.
 
 ## Oddech, noc i iPhone
 

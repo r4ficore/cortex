@@ -32,6 +32,18 @@
       <option value="1024,600">1024 × 600</option>
     </select>
   </label>
+  <label
+    >Test surface
+    <select id="surface">
+      <option value="index.html#prepare/breath">Breathing</option>
+      <option value="index.html#prepare/deepFocus">Focus</option>
+      <option value="index.html#prepare/equilibrium">Unwind</option>
+      <option value="index.html#prepare/hypnos">Sleep</option>
+      <option value="index.html#prepare/overdrive">Energy</option>
+      <option value="whitepaper-pl.html#audio-revision">Whitepaper PL</option>
+      <option value="whitepaper.html#audio-revision">Whitepaper EN</option>
+    </select>
+  </label>
   <!-- Same app, element fullscreen explicitly unavailable; iframe dimensions
        exercise actual layout/viewport units without pretending to be an iPhone. -->
   <iframe
@@ -40,6 +52,9 @@
     allow="fullscreen 'none'"
   ></iframe>
   <script>
+    document.getElementById("surface").addEventListener("change", (event) => {
+      document.querySelector("iframe").src = "../../" + event.target.value;
+    });
     document.getElementById("viewport").addEventListener("change", (event) => {
       const [width, height] = event.target.value.split(",");
       const frame = document.querySelector("iframe");

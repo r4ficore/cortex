@@ -1,14 +1,15 @@
-const KEY = "cortex.preferences.v3";
+const KEY = "cortex.preferences.v4";
 const HISTORY = "cortex.history.v3";
 export const defaults = {
-  version: 3,
+  version: 4,
   lang: "pl",
   goal: "focus",
   lastSessionId: "deepFocus",
   masterVolume: 0.5,
   beatVolume: 0.95,
   noiseVolume: 0.75,
-  noiseType: "brown",
+  noiseType: "soundscape",
+  breathVolume: 0.5,
   intensity: "medium",
   hypnosDuration: "30",
   breathDuration: 180,
@@ -31,11 +32,11 @@ export function migratePreferences(raw = {}, legacyLang) {
   p.goal = ["breath", "focus", "calm", "sleep", "energy"].includes(raw.goal)
     ? raw.goal
     : "focus";
-  p.noiseType = ["brown", "pink", "white", "none"].includes(
+  p.noiseType = ["soundscape", "brown", "pink", "white", "none"].includes(
     raw.noiseType || raw.preferredNoiseType,
   )
     ? raw.noiseType || raw.preferredNoiseType
-    : "brown";
+    : "soundscape";
   p.breathPattern = ["4-6", "4-7-8", "box"].includes(raw.breathPattern)
     ? raw.breathPattern
     : "4-6";
@@ -48,8 +49,16 @@ export function migratePreferences(raw = {}, legacyLang) {
     ["masterVolume", 1.1],
     ["beatVolume", 1.2],
     ["noiseVolume", 1.2],
+    ["breathVolume", 1],
   ])
     p[k] = num(raw[k] ?? defaults[k], defaults[k], 0, max);
+  if (raw.breathVolume === undefined)
+    p.breathVolume = num(
+      raw.masterVolume ?? defaults.breathVolume,
+      defaults.breathVolume,
+      0,
+      1,
+    );
   p.hypnosDuration = ["30", "45", "90", "infinity"].includes(
     String(raw.hypnosDuration),
   )
@@ -65,7 +74,7 @@ export function migratePreferences(raw = {}, legacyLang) {
   // Advanced stimulation is deliberately never persisted or inherited.
   delete p.visualMode;
   delete p.safeVisuals;
-  p.version = 3;
+  p.version = 4;
   return p;
 }
 export function createStore(storage) {
@@ -86,7 +95,10 @@ export function createStore(storage) {
     available = false;
   }
   let prefs = migratePreferences(
-    read(KEY) || read("koraUserPreferences") || {},
+    read(KEY) ||
+      read("cortex.preferences.v3") ||
+      read("koraUserPreferences") ||
+      {},
     lang,
   );
   const rawHistory = read(HISTORY) ?? read("koraSessionLogs") ?? [];

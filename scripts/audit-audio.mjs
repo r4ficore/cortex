@@ -10,8 +10,8 @@ const magnitude = (d, hz) => {
     im = 0;
   for (let i = 0; i < rate; i++) {
     const a = (2 * Math.PI * hz * i) / rate;
-    re += d[rate * 2 + i] * Math.cos(a);
-    im += d[rate * 2 + i] * Math.sin(a);
+    re += d[rate * 5 + i] * Math.cos(a);
+    im += d[rate * 5 + i] * Math.sin(a);
   }
   return (2 * Math.hypot(re, im)) / rate;
 };
@@ -22,15 +22,14 @@ for (const s of Object.values(sessions).filter((s) => s.id !== "breath")) {
       p.audio.vol ?? 0,
       p.audio.vol_s ?? 0,
       p.audio.vol_e ?? 0,
-      0.2,
     );
     const session = {
       ...s,
-      duration: 8,
-      phases: [{ ...p, start: 0, end: 8, audio: { ...p.audio, vol: volume } }],
+      duration: 60,
+      phases: [{ ...p, start: 0, end: 60, audio: { ...p.audio, vol: volume } }],
     };
     const a = new AudioEngine();
-    a.ctx = new OfflineAudioContext(2, rate * 4, rate);
+    a.ctx = new OfflineAudioContext(2, rate * 8, rate);
     a.play(session, 0, {
       ...defaults,
       masterVolume: 1.1,
@@ -57,7 +56,9 @@ for (const s of Object.values(sessions).filter((s) => s.id !== "breath")) {
       stage: index + 1,
       l: p.audio.l,
       r: p.audio.r,
-      modulation: modulationSpec(p.audio),
+      modulation: modulationSpec(p.audio, "high"),
+      intensity: "high",
+      volume,
       peak,
       peakDbFS: 20 * Math.log10(peak),
       rms: Math.sqrt(energy / count),
@@ -66,12 +67,12 @@ for (const s of Object.values(sessions).filter((s) => s.id !== "breath")) {
 }
 const probes = [];
 for (const [id, offset, carrier, mod] of [
-  ["clarity", 180, 220, 16],
-  ["gammaLift", 180, 260, 40],
-  ["overdrive", 60, 440, 40],
+  ["clarity", 190, 220, 16],
+  ["gammaLift", 190, 260, 40],
+  ["overdrive", 70, 440, 40],
 ]) {
   const a = new AudioEngine();
-  a.ctx = new OfflineAudioContext(2, rate * 4, rate);
+  a.ctx = new OfflineAudioContext(2, rate * 8, rate);
   a.play(makeSession(id), offset, { ...defaults, noiseType: "none" });
   const b = await a.ctx.startRendering(),
     d = new Float32Array(b.length);
@@ -90,6 +91,9 @@ for (const [id, offset, carrier, mod] of [
 const result = {
   engine:
     "node-web-audio-api OfflineAudioContext (not physical output or Safari)",
+  audioVersion: 2,
+  scope:
+    "Each stage rendered at its maximum defined level for 8 seconds, maximum sliders, high intensity, normalized white background. Not a physical headphone measurement.",
   sampleRate: rate,
   phaseCount: rows.length,
   maxPeak: Math.max(...rows.map((r) => r.peak)),

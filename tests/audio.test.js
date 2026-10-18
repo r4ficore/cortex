@@ -72,9 +72,8 @@ test("every audio session schedules its complete timeline without animation call
       (n) =>
         n.kind === "oscillator" && n.frequency.events.some((e) => e[1] >= 60),
     );
-    assert.equal(
-      oscillators[0].frequency.events.filter((e) => e[0] === "set").length,
-      session.phases.length,
+    assert.ok(
+      oscillators[0].frequency.events.some((e) => e[0] === "ramp"),
       s.id,
     );
     assert.equal(
@@ -156,4 +155,21 @@ test("blocked audio startup reports an error before a graph is created", async (
   assert.equal(audio.graph, null);
   delete globalThis.Tone;
   await assert.rejects(audio.unlock(), /unavailable/);
+});
+test("resuming halfway through a stage transition starts at the interpolated carrier", async () => {
+  const { audioTimeline, timelineAt } = await import(
+    "../assets/js/audio-timeline.js"
+  );
+  const audio = new AudioEngine();
+  audio.ctx = context();
+  const s = makeSession("overdrive");
+  audio.play(s, 62, { ...defaults, noiseType: "none" });
+  const carriers = audio.ctx.nodes.filter(
+    (n) =>
+      n.kind === "oscillator" && n.frequency.events.some((e) => e[1] >= 60),
+  );
+  const expected = timelineAt(audioTimeline(s), 62);
+  assert.equal(carriers[0].frequency.events[0][1], expected.l);
+  assert.equal(carriers[1].frequency.events[0][1], expected.r);
+  assert.ok(carriers[1].frequency.events[0][1] < 480);
 });

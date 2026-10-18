@@ -1,27 +1,23 @@
-import { frequencies, intensityProfiles } from "./session.js";
+import { intensityProfiles } from "./session.js";
 export const OUTPUT_HEADROOM = 0.85;
-export const NOISE_GAIN = 0.04;
-export const TRANSITION_SECONDS = 0.02;
-// The legacy labels had no consistent DSP implementation. v2 defines them
-// explicitly, with smooth AM rather than a square-wave click train.
+export const NOISE_GAIN = 0.16;
+// AM is explicitly defined per stage; comfort settings do not change its rate.
 export function modulationSpec(audio, intensity = "medium", force = false) {
-  const [l, r] = frequencies(audio, intensity);
-  const depth =
-    force || ["iso", "hard"].includes(audio.mod)
-      ? 1
-      : audio.mod === "pulse"
-        ? 0.5
-        : 0;
-  return { rate: depth ? Math.abs(r - l) : 0, depth, base: 1 - depth / 2 };
+  const depth = force ? 1 : (audio.am?.depth ?? 0);
+  return {
+    rate: force ? Math.abs(audio.r - audio.l) : (audio.am?.rate ?? 0),
+    depth,
+    base: 1 - depth / 2,
+  };
 }
-export function modulationSample(cycles, depth) {
-  return 1 - depth / 2 + (depth / 2) * Math.sin(2 * Math.PI * (cycles % 1));
+export function fadeTimes(duration, profile = {}) {
+  return {
+    in: Math.min(profile.fadeIn ?? 3, duration / 2),
+    out: Math.min(profile.fadeOut ?? 8, duration / 2),
+  };
 }
-export function fadeTimes(duration) {
-  return { in: Math.min(1, duration / 2), out: Math.min(3, duration / 2) };
-}
-export function fadeAt(t, duration) {
-  const f = fadeTimes(duration);
+export function fadeAt(t, duration, profile = {}) {
+  const f = fadeTimes(duration, profile);
   return Math.max(0, Math.min(1, t / f.in, (duration - t) / f.out));
 }
 export function noiseGenerator(type, random = Math.random) {

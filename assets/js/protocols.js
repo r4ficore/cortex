@@ -1,20 +1,25 @@
-// Preserved audio/phase definitions from ecddf71. Product copy lives in catalog.js.
+// Audio revision 2: explicit AM and continuous levels. See docs/audio-revision-2.md.
+// Original IDs, stage timings, L/R frequencies and visual definitions are retained.
 export const protocols = {
   hypnos: {
     id: "hypnos",
     name: "Hypnos",
     duration: Infinity,
-    baseHz: "Delta 0.5-2Hz",
+    baseHz: "8 → 1 Hz (L/R)",
     phases: [
       {
-        name: "Indukcja Snu",
+        name: "Opening",
         start: 0,
         end: 900,
         audio: {
           l: 100,
           r: 108,
-          vol_s: 0.2,
-          vol_e: 0.15,
+          vol_s: 0.11,
+          vol_e: 0.1,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 6,
@@ -23,13 +28,18 @@ export const protocols = {
         },
       },
       {
-        name: "Głęboki Sen",
+        name: "Main",
         start: 900,
         end: Infinity,
         audio: {
           l: 60,
           r: 61,
-          vol: 0.15,
+          vol_s: 0.1,
+          vol_e: 0.1,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 0.5,
@@ -38,22 +48,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "sleep",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   prime: {
     id: "prime",
     name: "Prime",
     duration: 300,
-    baseHz: "Alpha -> Beta",
+    baseHz: "8 → 14 Hz (L/R)",
     phases: [
       {
-        name: "Inicjacja Alpha",
+        name: "Opening",
         start: 0,
         end: 120,
         audio: {
           l: 220,
           r: 228,
-          vol_s: 0.1,
-          vol_e: 0.3,
+          vol_s: 0.14,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -62,13 +79,18 @@ export const protocols = {
         },
       },
       {
-        name: "Aktywacja Beta",
+        name: "Main",
         start: 120,
         end: 300,
         audio: {
           l: 220,
           r: 234,
-          vol: 0.35,
+          vol_s: 0.18,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 14,
@@ -77,22 +99,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "energy",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   overdrive: {
     id: "overdrive",
     name: "Overdrive",
     duration: 300,
-    baseHz: "Gamma 40Hz",
+    baseHz: "30 → 40 → 20 Hz (L/R)",
     phases: [
       {
-        name: "Ramp Up",
+        name: "Opening",
         start: 0,
         end: 60,
         audio: {
           l: 440,
           r: 470,
-          vol_s: 0.3,
-          vol_e: 0.5,
+          vol_s: 0.15,
+          vol_e: 0.2,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f_s: 20,
@@ -101,13 +130,18 @@ export const protocols = {
         },
       },
       {
-        name: "Gamma Peak",
+        name: "Main",
         start: 60,
         end: 240,
         audio: {
           l: 440,
           r: 480,
-          mod: "pulse",
+          vol_s: 0.2,
+          vol_e: 0.2,
+          am: {
+            rate: 40,
+            depth: 0.5,
+          },
         },
         visual: {
           f: 40,
@@ -116,14 +150,18 @@ export const protocols = {
         },
       },
       {
-        name: "Cool Down",
+        name: "Closing",
         start: 240,
         end: 300,
         audio: {
           l: 440,
           r: 460,
-          vol_s: 0.5,
-          vol_e: 0.2,
+          vol_s: 0.2,
+          vol_e: 0.14,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f_s: 30,
@@ -132,22 +170,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "energy",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   deepFocus: {
     id: "deepFocus",
     name: "Deep Focus",
     duration: 900,
-    baseHz: "Beta 14-18Hz",
+    baseHz: "14 → 18 → 14 Hz (L/R)",
     phases: [
       {
-        name: "Indukcja",
+        name: "Opening",
         start: 0,
         end: 120,
         audio: {
           l: 210,
           r: 224,
-          vol_s: 0.1,
-          vol_e: 0.3,
+          vol_s: 0.14,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -156,13 +201,18 @@ export const protocols = {
         },
       },
       {
-        name: "Tunel",
+        name: "Main",
         start: 120,
         end: 780,
         audio: {
           l: 230,
           r: 248,
-          vol: 0.4,
+          vol_s: 0.18,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 14,
@@ -171,14 +221,18 @@ export const protocols = {
         },
       },
       {
-        name: "Wyjście",
+        name: "Closing",
         start: 780,
         end: 900,
         audio: {
           l: 210,
           r: 224,
-          vol_s: 0.3,
-          vol_e: 0.1,
+          vol_s: 0.18,
+          vol_e: 0.13,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -187,22 +241,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "focus",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   clarity: {
     id: "clarity",
     name: "Clarity",
     duration: 720,
-    baseHz: "Isochronic 12Hz",
+    baseHz: "12 → 16 → 12 Hz (L/R)",
     phases: [
       {
-        name: "Centrowanie",
+        name: "Opening",
         start: 0,
         end: 180,
         audio: {
           l: 220,
           r: 232,
-          vol_s: 0.2,
-          vol_e: 0.35,
+          vol_s: 0.14,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -210,13 +271,18 @@ export const protocols = {
         },
       },
       {
-        name: "Analiza",
+        name: "Main",
         start: 180,
         end: 600,
         audio: {
           l: 220,
           r: 236,
-          mod: "iso",
+          vol_s: 0.18,
+          vol_e: 0.18,
+          am: {
+            rate: 16,
+            depth: 1,
+          },
         },
         visual: {
           f: 12,
@@ -224,14 +290,18 @@ export const protocols = {
         },
       },
       {
-        name: "Synteza",
+        name: "Closing",
         start: 600,
         end: 720,
         audio: {
           l: 220,
           r: 232,
-          vol_s: 0.35,
-          vol_e: 0.1,
+          vol_s: 0.18,
+          vol_e: 0.13,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -239,22 +309,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "focus",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   genesis: {
     id: "genesis",
     name: "Genesis",
     duration: 600,
-    baseHz: "Theta 6Hz",
+    baseHz: "10 → 6 → 10 Hz (L/R)",
     phases: [
       {
-        name: "Zejście",
+        name: "Opening",
         start: 0,
         end: 120,
         audio: {
           l: 180,
           r: 190,
-          vol_s: 0.2,
-          vol_e: 0.3,
+          vol_s: 0.12,
+          vol_e: 0.16,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -263,13 +340,18 @@ export const protocols = {
         },
       },
       {
-        name: "Theta Flow",
+        name: "Main",
         start: 120,
         end: 500,
         audio: {
           l: 150,
           r: 156,
-          vol: 0.35,
+          vol_s: 0.16,
+          vol_e: 0.16,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 6,
@@ -278,14 +360,18 @@ export const protocols = {
         },
       },
       {
-        name: "Powrót",
+        name: "Closing",
         start: 500,
         end: 600,
         audio: {
           l: 180,
           r: 190,
-          vol_s: 0.3,
-          vol_e: 0.1,
+          vol_s: 0.16,
+          vol_e: 0.12,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -294,22 +380,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "focus",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   equilibrium: {
     id: "equilibrium",
     name: "Equilibrium",
     duration: 420,
-    baseHz: "Solid Alpha 10Hz",
+    baseHz: "12 → 10 → 8 Hz (L/R)",
     phases: [
       {
-        name: "Uziemienie",
+        name: "Opening",
         start: 0,
         end: 60,
         audio: {
           l: 200,
           r: 212,
-          vol_s: 0.15,
-          vol_e: 0.25,
+          vol_s: 0.12,
+          vol_e: 0.16,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 12,
@@ -318,13 +411,18 @@ export const protocols = {
         },
       },
       {
-        name: "Stabilizacja",
+        name: "Main",
         start: 60,
         end: 360,
         audio: {
           l: 200,
           r: 210,
-          vol: 0.3,
+          vol_s: 0.16,
+          vol_e: 0.16,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -333,14 +431,18 @@ export const protocols = {
         },
       },
       {
-        name: "Wyciszenie",
+        name: "Closing",
         start: 360,
         end: 420,
         audio: {
           l: 200,
           r: 208,
-          vol_s: 0.25,
-          vol_e: 0.1,
+          vol_s: 0.16,
+          vol_e: 0.11,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -349,22 +451,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "calm",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   restoration: {
     id: "restoration",
     name: "Restoration",
     duration: 900,
-    baseHz: "Delta 3Hz",
+    baseHz: "8 → 3 → 8 Hz (L/R)",
     phases: [
       {
-        name: "Zwolnienie",
+        name: "Opening",
         start: 0,
         end: 180,
         audio: {
           l: 100,
           r: 108,
-          vol_s: 0.15,
-          vol_e: 0.25,
+          vol_s: 0.12,
+          vol_e: 0.15,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -373,13 +482,18 @@ export const protocols = {
         },
       },
       {
-        name: "Delta Immersion",
+        name: "Main",
         start: 180,
         end: 800,
         audio: {
           l: 100,
           r: 103,
-          vol: 0.3,
+          vol_s: 0.15,
+          vol_e: 0.15,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 3,
@@ -388,14 +502,18 @@ export const protocols = {
         },
       },
       {
-        name: "Przebudzenie",
+        name: "Closing",
         start: 800,
         end: 900,
         audio: {
           l: 100,
           r: 108,
-          vol_s: 0.25,
-          vol_e: 0.1,
+          vol_s: 0.15,
+          vol_e: 0.11,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 6,
@@ -404,22 +522,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "calm",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   presence: {
     id: "presence",
     name: "Presence",
     duration: 420,
-    baseHz: "Alpha 10Hz",
+    baseHz: "10 → 10 Hz (L/R)",
     phases: [
       {
-        name: "Flow",
+        name: "Opening",
         start: 0,
         end: 360,
         audio: {
           l: 240,
           r: 250,
-          vol_s: 0.2,
-          vol_e: 0.35,
+          vol_s: 0.12,
+          vol_e: 0.16,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 10,
@@ -427,14 +552,18 @@ export const protocols = {
         },
       },
       {
-        name: "Spokój",
+        name: "Main",
         start: 360,
         end: 420,
         audio: {
           l: 240,
           r: 250,
-          vol_s: 0.35,
-          vol_e: 0.1,
+          vol_s: 0.16,
+          vol_e: 0.12,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -442,22 +571,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "focus",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   auroraReset: {
     id: "auroraReset",
     name: "Aurora Reset",
     duration: 1800,
-    baseHz: "Delta-Theta 1.5-9Hz",
+    baseHz: "4 → 8 → 5 Hz (L/R)",
     phases: [
       {
-        name: "Prime",
+        name: "Opening",
         start: 0,
         end: 300,
         audio: {
           l: 160,
           r: 164,
-          vol_s: 0.12,
-          vol_e: 0.18,
+          vol_s: 0.1,
+          vol_e: 0.12,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 5,
@@ -466,15 +602,18 @@ export const protocols = {
         },
       },
       {
-        name: "Anchor",
+        name: "Main",
         start: 300,
         end: 1200,
         audio: {
           l: 180,
           r: 188,
-          vol_s: 0.18,
-          vol_e: 0.25,
-          mod: "pulse",
+          vol_s: 0.12,
+          vol_e: 0.12,
+          am: {
+            rate: 8,
+            depth: 0.15,
+          },
         },
         visual: {
           f: 9,
@@ -483,14 +622,18 @@ export const protocols = {
         },
       },
       {
-        name: "Stabilize",
+        name: "Closing",
         start: 1200,
         end: 1800,
         audio: {
           l: 170,
           r: 175,
-          vol_s: 0.22,
-          vol_e: 0.12,
+          vol_s: 0.12,
+          vol_e: 0.08,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 6,
@@ -499,22 +642,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "sleep",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   cortexForge: {
     id: "cortexForge",
     name: "Cortex Forge",
     duration: 2040,
-    baseHz: "Beta/Gamma 12-40Hz",
+    baseHz: "14 → 18 → 12 Hz (L/R)",
     phases: [
       {
-        name: "Ignite",
+        name: "Opening",
         start: 0,
         end: 240,
         audio: {
           l: 230,
           r: 244,
-          vol_s: 0.18,
-          vol_e: 0.32,
+          vol_s: 0.14,
+          vol_e: 0.18,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 12,
@@ -523,15 +673,18 @@ export const protocols = {
         },
       },
       {
-        name: "Drive",
+        name: "Main",
         start: 240,
         end: 1800,
         audio: {
           l: 250,
           r: 268,
-          vol_s: 0.3,
-          vol_e: 0.42,
-          mod: "pulse",
+          vol_s: 0.18,
+          vol_e: 0.18,
+          am: {
+            rate: 18,
+            depth: 0.35,
+          },
         },
         visual: {
           f: 18,
@@ -540,14 +693,18 @@ export const protocols = {
         },
       },
       {
-        name: "Cool",
+        name: "Closing",
         start: 1800,
         end: 2040,
         audio: {
           l: 210,
           r: 222,
-          vol_s: 0.32,
-          vol_e: 0.15,
+          vol_s: 0.18,
+          vol_e: 0.13,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 12,
@@ -556,22 +713,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "focus",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   parasymPathway: {
     id: "parasymPathway",
     name: "Parasym Pathway",
     duration: 1440,
-    baseHz: "Theta-Delta 3-8Hz",
+    baseHz: "6 → 3 → 8 Hz (L/R)",
     phases: [
       {
-        name: "Release",
+        name: "Opening",
         start: 0,
         end: 300,
         audio: {
           l: 170,
           r: 176,
-          vol_s: 0.12,
-          vol_e: 0.22,
+          vol_s: 0.11,
+          vol_e: 0.15,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 7,
@@ -580,15 +744,18 @@ export const protocols = {
         },
       },
       {
-        name: "Deep Sink",
+        name: "Main",
         start: 300,
         end: 1020,
         audio: {
           l: 140,
           r: 143,
-          vol_s: 0.22,
-          vol_e: 0.2,
-          mod: "pulse",
+          vol_s: 0.15,
+          vol_e: 0.14,
+          am: {
+            rate: 3,
+            depth: 0.2,
+          },
         },
         visual: {
           f: 4,
@@ -597,14 +764,18 @@ export const protocols = {
         },
       },
       {
-        name: "Rebalance",
+        name: "Closing",
         start: 1020,
         end: 1440,
         audio: {
           l: 170,
           r: 178,
-          vol_s: 0.2,
-          vol_e: 0.14,
+          vol_s: 0.14,
+          vol_e: 0.1,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 8,
@@ -613,22 +784,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "calm",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   remSculpt: {
     id: "remSculpt",
     name: "REM Sculpt",
     duration: 2100,
-    baseHz: "Theta/Alpha 4-10Hz",
+    baseHz: "6 → 6 → 8 Hz (L/R)",
     phases: [
       {
-        name: "Hypnagogic Gate",
+        name: "Opening",
         start: 0,
         end: 600,
         audio: {
           l: 170,
           r: 176,
           vol_s: 0.1,
-          vol_e: 0.22,
+          vol_e: 0.12,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 7,
@@ -637,15 +815,18 @@ export const protocols = {
         },
       },
       {
-        name: "REM Drift",
+        name: "Main",
         start: 600,
         end: 1800,
         audio: {
           l: 160,
           r: 166,
-          vol_s: 0.22,
-          vol_e: 0.28,
-          mod: "pulse",
+          vol_s: 0.12,
+          vol_e: 0.12,
+          am: {
+            rate: 6,
+            depth: 0.15,
+          },
         },
         visual: {
           f: 6,
@@ -654,14 +835,18 @@ export const protocols = {
         },
       },
       {
-        name: "Wake Buffer",
+        name: "Closing",
         start: 1800,
         end: 2100,
         audio: {
           l: 180,
           r: 188,
-          vol_s: 0.28,
-          vol_e: 0.15,
+          vol_s: 0.12,
+          vol_e: 0.08,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 9,
@@ -670,22 +855,29 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "sleep",
+    audioVersion: 2,
+    evidence: "context-only",
   },
   gammaLift: {
     id: "gammaLift",
     name: "Gamma Lift",
     duration: 960,
-    baseHz: "Gamma 35-40Hz",
+    baseHz: "18 → 40 → 12 Hz (L/R)",
     phases: [
       {
-        name: "Ramp",
+        name: "Opening",
         start: 0,
         end: 180,
         audio: {
           l: 240,
           r: 258,
-          vol_s: 0.22,
-          vol_e: 0.36,
+          vol_s: 0.14,
+          vol_e: 0.2,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 16,
@@ -694,15 +886,18 @@ export const protocols = {
         },
       },
       {
-        name: "Peak",
+        name: "Main",
         start: 180,
         end: 660,
         audio: {
           l: 260,
           r: 300,
-          vol_s: 0.36,
-          vol_e: 0.4,
-          mod: "hard",
+          vol_s: 0.2,
+          vol_e: 0.2,
+          am: {
+            rate: 40,
+            depth: 1,
+          },
         },
         visual: {
           f: 38,
@@ -711,14 +906,18 @@ export const protocols = {
         },
       },
       {
-        name: "Landing",
+        name: "Closing",
         start: 660,
         end: 960,
         audio: {
           l: 230,
           r: 242,
-          vol_s: 0.35,
-          vol_e: 0.16,
+          vol_s: 0.2,
+          vol_e: 0.14,
+          am: {
+            rate: 0,
+            depth: 0,
+          },
         },
         visual: {
           f: 12,
@@ -727,6 +926,9 @@ export const protocols = {
         },
       },
     ],
+    soundProfile: "energy",
+    audioVersion: 2,
+    evidence: "context-only",
   },
 };
 export const programs = [

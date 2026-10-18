@@ -557,6 +557,7 @@ async function start(id) {
       clock,
       pattern: prefs().breathPattern,
       breathSound: prefs().breathCues,
+      audioPrefs: { noiseType: prefs().noiseType },
       visual: state.visual,
       program: p?.program || null,
       stepIndex: p?.index || 0,
@@ -616,14 +617,19 @@ function stopBreathPreview() {
   clearTimeout(breathPreviewTimer);
   if (breathPreviewPlaying && !state.flow) audio.stop();
   breathPreviewPlaying = false;
-  const button = document.querySelector('[data-action="previewBreath"]');
+  const button = document.querySelector(
+    '[data-action="previewBreath"], [data-action="previewSession"]',
+  );
   if (button) {
     button.innerHTML =
-      icon("volume") + t("Posłuchaj jednego cyklu", "Listen to one cycle");
+      icon("volume") +
+      (button.dataset.action === "previewSession"
+        ? t("Posłuchaj brzmienia · 12 s", "Preview the sound · 12 s")
+        : t("Posłuchaj jednego cyklu", "Listen to one cycle"));
     button.setAttribute("aria-pressed", "false");
   }
 }
-async function previewBreath() {
+async function previewBreath(kind = "breath") {
   if (state.flow || state.starting) return;
   if (breathPreviewPlaying) {
     stopBreathPreview();
@@ -634,9 +640,26 @@ async function previewBreath() {
   try {
     await audio.unlock();
     if (token !== breathPreviewToken || state.flow) return;
-    const duration = cycleDuration(prefs().breathPattern);
-    audio.playBreath(prefs().breathPattern, duration, 0, prefs());
-    const button = document.querySelector('[data-action="previewBreath"]');
+    const duration =
+      kind === "breath" ? cycleDuration(prefs().breathPattern) : 12;
+    if (kind === "breath")
+      audio.playBreath(prefs().breathPattern, duration, 0, prefs());
+    else {
+      const session = makeSession(state.selected);
+      const stage = session.phases[1] || session.phases[0];
+      audio.play(
+        {
+          ...session,
+          duration,
+          phases: [{ ...stage, start: 0, end: duration }],
+        },
+        0,
+        prefs(),
+      );
+    }
+    const button = document.querySelector(
+      '[data-action="previewBreath"], [data-action="previewSession"]',
+    );
     if (button) {
       button.innerHTML = icon("stop") + t("Zatrzymaj odsłuch", "Stop preview");
       button.setAttribute("aria-pressed", "true");
@@ -647,8 +670,8 @@ async function previewBreath() {
     stopBreathPreview();
     showStartError(
       t(
-        "Nie udało się odtworzyć oddechu. Spróbuj ponownie.",
-        "Could not play the breathing sound. Please try again.",
+        "Nie udało się odtworzyć dźwięku. Spróbuj ponownie.",
+        "Could not play the sound. Please try again.",
       ),
     );
   }
@@ -681,7 +704,10 @@ async function resume() {
     if (f.session.id !== "breath" || f.breathSound) await audio.unlock();
     if (state.flow !== f || token !== state.token) return;
     if (f.stage === "session" && f.session.id !== "breath")
-      audio.play(f.session, f.clock.position(), prefs());
+      audio.play(f.session, f.clock.position(), {
+        ...prefs(),
+        ...f.audioPrefs,
+      });
     else if (f.breathSound)
       audio.playBreath(
         f.stage === "prelude" ? "4-6" : f.pattern,
@@ -716,7 +742,7 @@ function enterSound() {
   const f = state.flow;
   if (!f || f.stage !== "prelude") return;
   try {
-    audio.play(f.session, 0, prefs());
+    audio.play(f.session, 0, { ...prefs(), ...f.audioPrefs });
   } catch {
     pause();
     toast(
@@ -753,6 +779,9 @@ function saveLog(f, complete) {
     startedAt: f.startedAt,
     endedAt: Date.now(),
     durationSeconds: Math.round(f.clock.position()),
+    audioVersion: 2,
+    soundBackground:
+      prelude || f.session.id === "breath" ? null : f.audioPrefs.noiseType,
     completed: complete,
     programId: f.program?.id || null,
     programName: f.program?.name || null,
@@ -807,6 +836,7 @@ async function nextStep() {
     const step = f.program.steps[f.stepIndex + 1];
     const session = makeSession(step.sessionId, step.durationMinutes * 60);
     audio.play(session, 0, prefs());
+    f.audioPrefs = { noiseType: prefs().noiseType };
     f.stepIndex++;
     f.session = session;
     f.stage = "session";
@@ -1057,6 +1087,7 @@ document.addEventListener("click", async (e) => {
         : el.dataset.value,
     );
   } else if (a === "previewBreath") await previewBreath();
+  else if (a === "previewSession") await previewBreath("session");
   else if (a === "start") await start(el.dataset.session);
   else if (a === "pause") {
     if (state.flow?.clock.status === "paused") await resume();
@@ -1121,7 +1152,7 @@ document.addEventListener("click", async (e) => {
       new Blob(
         [
           JSON.stringify(
-            { version: 3, history: store.history, preferences: prefs() },
+            { version: 4, history: store.history, preferences: prefs() },
             null,
             2,
           ),

@@ -59,13 +59,10 @@ export function phaseVolume(phase, elapsed) {
   return a.vol_s !== undefined ? a.vol_s + (a.vol_e - a.vol_s) * progress : 0.2;
 }
 export const intensityProfiles = {
-  low: { gain: 0.6, delta: 0.9 },
-  medium: { gain: 1, delta: 1 },
-  high: { gain: 1.3, delta: 1.1 },
+  low: { gain: 0.7 },
+  medium: { gain: 1 },
+  high: { gain: 1.15 },
 };
-export function frequencies(audio, intensity = "medium") {
-  const { delta } = intensityProfiles[intensity] || intensityProfiles.medium;
-  const mid = (audio.l + audio.r) / 2,
-    diff = ((audio.r - audio.l) / 2) * delta;
-  return [mid - diff, mid + diff];
+export function frequencies(audio) {
+  return [audio.l, audio.r];
 }
