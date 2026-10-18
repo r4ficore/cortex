@@ -1,3 +1,4 @@
+import { readCampaign, campaignPreferences, linkLanguage } from "./campaign.js";
 import {
   NavigationMemory,
   canonicalRoute,
@@ -73,6 +74,15 @@ const wake = new ScreenAwake(navigator.wakeLock, showWakeStatus);
 let importPreview = null;
 let frameHandle = null;
 const mediaMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const entryCampaign = readCampaign(location.href);
+const entryLanguage = linkLanguage(location.href);
+if (entryCampaign || entryLanguage) {
+  const entryURL = new URL(location.href);
+  entryURL.searchParams.delete("start");
+  entryURL.searchParams.delete("lang");
+  if (entryCampaign) entryURL.hash = entryCampaign.route;
+  history.replaceState(null, "", entryURL);
+}
 const navigation = new NavigationMemory(location.hash.slice(1));
 let linkedNavigation = false;
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
@@ -132,7 +142,13 @@ function applyPreferences() {
   document.body.classList.toggle("reduce-motion", reduced());
   updateMotionNote();
 }
-setLanguage(prefs().lang);
+if (entryCampaign) {
+  state.ritualDraftId = entryCampaign.ritual;
+  state.ritualDraft = migratePreferences(
+    campaignPreferences(entryCampaign.id, prefs()),
+  );
+}
+setLanguage(entryLanguage || prefs().lang);
 applyPreferences();
 mediaMotion.addEventListener("change", applyPreferences);
 

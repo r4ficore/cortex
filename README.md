@@ -37,11 +37,11 @@ node scripts/build-docs.mjs
 ## Strony
 
 - `index.html` — aplikacja, biblioteka, oddech, odtwarzacz, programy, historia i eksport.
-- `landing.html` — prezentacja pięciu ścieżek.
+- `landing.html`, `landing-en.html` — ilustrowana strona promocyjna PL/EN z demonstracją oddechu.
 - `guide-pl.html`, `guide.html` — instrukcja PL/EN.
 - `whitepaper-pl.html`, `whitepaper.html` — opis działania i kontekst badań PL/EN.
 
-Wszystkie strony korzystają z `assets/css/design.css`. Tone.js 14.7.77 jest dostarczany lokalnie wraz z licencją MIT. Aplikacja nie potrzebuje CDN, kont ani serwera z danymi użytkowników.
+Aplikacja i dokumenty korzystają z `assets/css/design.css`. Strona promocyjna ma izolowane style `assets/css/marketing.css`. Tone.js 14.7.77 jest dostarczany lokalnie wraz z licencją MIT. Aplikacja nie potrzebuje CDN, kont ani serwera z danymi użytkowników.
 
 ## Dokumentacja
 
@@ -78,3 +78,26 @@ history import, complete breathing cycles, screen wake lock, and bounded-memory
 WAV export. Recovery checkpoints remain local and are written every five seconds
 and at lifecycle boundaries. Interrupted light never auto-starts after recovery.
 See `docs/reliability-release-2026-10-18.md` for validation and device limits.
+
+## Strona promocyjna i linki kampanii
+
+Treść PL/EN: `assets/js/marketing.js`; generowanie: `node scripts/build-docs.mjs`.
+Demonstracja ładuje tylko moduły oddechu i udostępniania. Nie uruchamia audio,
+nie zapisuje historii ani preferencji. Trwa dwa cykle 4–6; pauzuje po ukryciu karty
+lub opuszczeniu sekcji. Ograniczenie ruchu zachowuje tekst i odliczanie.
+
+Publiczne wejścia do przygotowania (bez automatycznego odtwarzania):
+
+- `index.html?start=break&lang=pl#ritual/reset`: 180 sekund oddechu 4–6.
+- `index.html?start=work&lang=pl#ritual/work`: Deep Focus, 15 minut.
+- `index.html?start=evening&lang=pl#ritual/evening`: Hypnos, 30 minut, czarny ekran.
+
+Język może mieć wartość `pl` lub `en`. Parametry kampanii są jednorazowym szkicem
+przygotowania; nie nadpisują zapisanych profili, głośności ani języka preferencji.
+Przycisk zapisania ustawień nadal zapisuje dopiero na wyraźne żądanie użytkownika.
+Udostępnianie przekazuje tylko identyfikator publicznej propozycji i język.
+
+Ilustracje WebP mają warianty rozdzielczości. Obrazy marketingowe nie należą do
+obowiązkowego precache aplikacji. Podglądy linków w `social/` mają stałe adresy.
+Build weryfikuje również warianty `srcset`, sitemap oraz obecność obrazów OG.
+Regresje demonstracji, wejść kampanii, profili i udostępniania: `tests/marketing.test.js`.

@@ -1,6 +1,5 @@
 import { audioContext, evidenceHTML, protocolTable } from "./audio-info.js";
 import { sessions } from "./catalog.js";
-import { orb } from "./visual.js";
 import { icon } from "./i18n.js";
 const sources = {
   gamma:
@@ -180,44 +179,4 @@ export function documentHTML(lang, type) {
         : "The guide";
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f8f5"><title>${title} — Cortex</title><meta name="description" content="${lang === "pl" ? "Działanie Cortex, instrukcje, źródła i granice wiedzy." : "How Cortex works, guidance, sources and the limits of current knowledge."}"><link rel="icon" href="assets/images/cortex-mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/design.css"><script type="module" src="assets/js/reading.js"></script></head><body>${documentBody(lang, type)}</body></html>`;
 }
-export function marketingBody(lang) {
-  const l = (pl, en) => (lang === "pl" ? pl : en);
-  const routeCards = [
-    [
-      "breath",
-      "Oddech",
-      "Breathe",
-      "Zatrzymaj się i znajdź swój rytm.",
-      "Pause and find your rhythm.",
-    ],
-    [
-      "focus",
-      "Skupienie",
-      "Focus",
-      "Zrób przestrzeń na jedno zadanie.",
-      "Make room for one thing.",
-    ],
-    [
-      "calm",
-      "Wyciszenie",
-      "Unwind",
-      "Zwolnij i odetchnij.",
-      "Let the day slow down.",
-    ],
-    [
-      "sleep",
-      "Sen",
-      "Sleep",
-      "Przygotuj się do odpoczynku.",
-      "Ease into your evening.",
-    ],
-    [
-      "energy",
-      "Energia",
-      "Energy",
-      "Złap energię do działania.",
-      "Find your momentum.",
-    ],
-  ];
-  return `<header class="site-header"><a class="brand" href="index.html"><img src="assets/images/cortex-mark.svg" alt="">cortex</a><div class="header-actions"><button class="icon-btn language-btn" data-language aria-label="${l("Switch to English", "Zmień na polski")}">${lang.toUpperCase()}</button><a class="btn btn-primary" href="index.html">${l("Otwórz Cortex", "Open Cortex")}</a></div></header><main class="page"><section class="marketing-hero"><div class="home-hero"><div><div class="eyebrow">${l("Dźwięk i oddech. W Twoim rytmie.", "Sound and breath. At your pace.")}</div><h1>${l("Trochę przestrzeni.<br>Dla Ciebie.", "A little space.<br>Just for you.")}</h1><p class="intro">${l("Pięć sposobów na chwilę dla siebie — od pierwszego spokojnego oddechu po wejście w działanie.", "Five ways to make time for yourself — from a quiet breath to finding your momentum.")}</p><a class="btn btn-primary" href="index.html">${l("Znajdź swoją chwilę", "Find your moment")} ${icon("arrow", 19)}</a></div><div class="hero-art">${orb("breath")}</div></div></section><section class="marketing-section"><h2>${l("Czego dziś potrzebujesz?", "What do you need today?")}</h2><p>${l("Wybierz swoją intencję. Cortex pomoże znaleźć odpowiednią sesję i przeprowadzi Cię przez jej kolejne kroki.", "Choose your intention. Cortex helps you find a session and guides you through each step.")}</p><div class="paths">${routeCards.map(([id, pl, en, pld, end]) => `<a href="index.html#${id === "breath" ? "prepare/breath" : "path/" + id}" class="path-card" data-goal="${id}"><span class="path-symbol">${icon(id)}</span><h3>${l(pl, en)}</h3><p>${l(pld, end)}</p><span class="path-arrow">${icon("arrow", 17)}</span></a>`).join("")}</div></section><section class="marketing-section"><div class="eyebrow">${l("Prosty rytuał", "A simple ritual")}</div><h2>${l("Mniej ustawiania.<br>Więcej bycia tu.", "Less setting up.<br>More being here.")}</h2><div class="steps-grid"><article><h3>01 · ${l("Wybierz", "Choose")}</h3><p>${l("Krótki oddech, skupienie, wyciszenie, sen lub energia.", "A short breath, focus, unwinding, sleep or energy.")}</p></article><article><h3>02 · ${l("Dopasuj", "Settle in")}</h3><p>${l("Wygodne miejsce, komfortowa głośność i wybrane tło.", "A comfortable place, a gentle volume and your choice of background.")}</p></article><article><h3>03 · ${l("Zostań na chwilę", "Take a moment")}</h3><p>${l("Podążaj za oddechem lub słuchaj. Pauza jest zawsze pod ręką.", "Follow your breath or simply listen. Pause is always within reach.")}</p></article></div></section><section class="marketing-section"><div class="knowledge-grid"><article class="knowledge-card"><h2>${l("Spokój także w interfejsie.", "A quieter interface, too.")}</h2><p>${l("Czytelne sterowanie, delikatny ruch i możliwość korzystania bez animacji. Twoja historia zostaje na Twoim urządzeniu.", "Clear controls, gentle movement and an option to use Cortex without animation. Your history stays on your device.")}</p><a class="text-link" href="${lang === "pl" ? "guide-pl.html" : "guide.html"}">${l("Poznaj sposób działania", "Read the guide")}</a></article><article class="knowledge-card"><h2>${l("Ciekawość. Bez obietnic na wyrost.", "Curiosity. With perspective.")}</h2><p>${l("Przeczytaj, co wiemy o dźwięku i oddechu, jakie są ograniczenia badań i co robi sama aplikacja.", "Read what we know about sound and breathing, where research has limits and what the app itself does.")}</p><a class="text-link" href="${lang === "pl" ? "whitepaper-pl.html" : "whitepaper.html"}">${l("Podstawy naukowe", "The science")}</a></article></div></section><footer class="footer"><span>${l("Twój czas. Twoje tempo.", "Your time. Your pace.")}</span><a href="index.html">${l("Otwórz Cortex", "Open Cortex")} ${icon("arrow", 18)}</a></footer></main>`;
-}
+export { marketingBody } from "./marketing.js";

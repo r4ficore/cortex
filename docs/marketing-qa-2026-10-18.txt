@@ -1,0 +1,34 @@
+CORTEX — ODBIÓR STRONY PROMOCYJNEJ
+18.10.2026 · podgląd przed publikacją
+
+WYNIK
+Pełna strona PL/EN, cztery oryginalne ilustracje, rzeczywiste zrzuty produktu, demonstracja oddechu, trzy wejścia kampanii, udostępnianie oraz komplet materiałów do promocji są przygotowane lokalnie. Nie opublikowano zmian na GitHub Pages ani postów.
+
+AUTOMATYCZNA WERYFIKACJA
+91 testów: 91 zaliczonych, 0 niepowodzeń. Dotychczasowe testy aplikacji i osiem nowych testów marketingu.
+Sprawdzono: dwa cykle 4–6, koniec po 20 sekundach, pauzę i wznowienie bez resetu, podwójny start, ograniczenie ruchu, reakcję rzeczywistego modułu strony na visibilitychange/pagehide/IntersectionObserver, dokładne czasy kampanii, zachowanie głośności i zapisanych profili, dozwolone identyfikatory i języki, trzy drogi udostępniania i anulowanie, statyczną treść PL/EN.
+Syntax check, kontrola lokalnych odnośników, build i git diff --check: zaliczone.
+Build sprawdza src/href/srcset, obecność stabilnych obrazów OG oraz wyłączenie ilustracji i obrazów społecznościowych z obowiązkowego precache. Wydanie zawiera 73 pliki produktu.
+
+SPRAWDZENIE W PRZEGLĄDARCE
+Szerokości 320, 390, 430, 768, 1024, 1280 i 1440 px; dodatkowo 640 px, 1024 × 600 i 844 × 390. Obie wersje językowe.
+Brak przewijania poziomego. Pomiary widocznych linków, przycisków i summary: cele dotykowe co najmniej 44 × 44 px. Ilustracje zachowują pełne kadry; zrzuty produktu mają prawdziwe proporcje 390 × 780.
+Kontrast sprawdzonych par tekst/tło w nowym arkuszu przekracza 4,5:1; skorygowano dwa kolory drobnych podpisów. Fokus klawiatury jest widoczny; FAQ otwiera się klawiszem Enter.
+Demonstracja: widoczne zmiany skali i fazy, pauza, wznowienie, koniec i ponowienie; przewinięcie poza demonstrację zatrzymuje ją. Zmiana karty w narzędziu podglądu nie odwzorowywała wiarygodnie visibilityState, dlatego reakcję na rzeczywiste zdarzenia cyklu życia sprawdzono w dodatkowym automatycznym teście modułu strony.
+Linki z wersji EN otwierają przygotowanie w EN: oddech 3 min / 4–6, Deep Focus 15 min, Hypnos 30 min / czarny ekran. Nie uruchamiają odtwarzania. Rozpoczęcie oddechu wymaga łącznie dwóch działań: link na stronie, następnie Begin.
+Gotowe wydanie aplikacji potwierdziło w ustawieniach „Ready for offline use”. Nowe ilustracje nie są pobierane w obowiązkowym pakiecie offline.
+Strona z blokadą skryptów przez CSP nadal wyświetla treść, linki i działające natywne FAQ. Demonstracja pozostaje nieaktywna.
+
+ROZMIAR
+Około 185 KB: HTML, CSS, wymagane moduły JS, logo i największa ilustracja główna, przed dodatkowymi obrazami lazy-load.
+Około 670 KB: konserwatywna suma zawierająca ponadto WSZYSTKIE warianty ilustracji i zrzuty produktu w OBU językach. To rozmiary plików bez kompresji HTTP, nie pomiar laboratoryjny sieci ani Lighthouse. Buforowanie istniejącej aplikacji może niezależnie pobierać jej aktualizację.
+
+GRANICE TESTU
+To testy przeglądarkowe z emulacją wymiarów, a nie odbiór na fizycznym iPhonie.
+Powiększenie sprawdzono jako CSS zoom 200% oraz układ o szerokości 640 px odpowiadającej reflow z 1280 px przy powiększeniu. Natywny zoom przeglądarki nie był dostępny w narzędziu podglądu. Fizyczny Safari, systemowy arkusz udostępniania i systemowe ustawienie ograniczenia ruchu pozostają do sprawdzenia na urządzeniu. Logika tych funkcji została objęta testami automatycznymi.
+Nie wysłano treści do serwisów społecznościowych. Wygląd podglądu linku w konkretnym serwisie można potwierdzić dopiero po publikacji nowych publicznych obrazów i metadanych.
+
+PODGLĄD
+PL: http://127.0.0.1:8785/landing.html
+EN: http://127.0.0.1:8785/landing-en.html
+Telefon w tej samej sieci: http://192.168.1.186:8785/landing.html

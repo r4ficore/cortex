@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run check
-      - run: node scripts/build-docs.mjs && git diff --exit-code -- guide.html guide-pl.html whitepaper.html whitepaper-pl.html landing.html
+      - run: node scripts/build-docs.mjs && git diff --exit-code -- guide.html guide-pl.html whitepaper.html whitepaper-pl.html landing.html landing-en.html
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

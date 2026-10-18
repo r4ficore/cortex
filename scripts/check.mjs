@@ -11,6 +11,7 @@ for (const dir of ["assets/js", "scripts", "tests"])
 for (const page of [
   "index.html",
   "landing.html",
+  "landing-en.html",
   "guide.html",
   "guide-pl.html",
   "whitepaper.html",
