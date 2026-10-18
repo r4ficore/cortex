@@ -5,6 +5,7 @@ const pages = [
   "index.html",
   "landing.html",
   "landing-en.html",
+  "refresh.html",
   "guide.html",
   "guide-pl.html",
   "whitepaper.html",
@@ -36,16 +37,23 @@ const version = hash.digest("hex").slice(0, 16);
 await rm("dist", { recursive: true, force: true });
 await mkdir(`dist/releases/${version}`, { recursive: true });
 await cp("assets", `dist/releases/${version}/assets`, { recursive: true });
+// Lazy images must also survive a deployment while a landing tab stays open.
+await cp("assets/images/marketing", "dist/assets/images/marketing", {
+  recursive: true,
+});
+await rm(`dist/releases/${version}/assets/images/marketing`, {
+  recursive: true,
+});
 for (const file of assets.filter((p) => p.startsWith("assets/js/"))) {
   const compiled = (await readFile(file, "utf8")).replaceAll(
-    /(?<=["\s])assets\//g,
+    /(?<=["\s])assets\/(?!images\/marketing\/)/g,
     `releases/${version}/assets/`,
   );
   await writeFile(`dist/releases/${version}/${file}`, compiled);
 }
 for (const page of pages) {
   const html = (await readFile(page, "utf8")).replaceAll(
-    /(?<=["\s])assets\//g,
+    /(?<=["\s])assets\/(?!images\/marketing\/)/g,
     `releases/${version}/assets/`,
   );
   await writeFile(`dist/${page}`, html);
@@ -58,7 +66,10 @@ await writeFile("dist/manifest.webmanifest", manifest);
 await cp("social", "dist/social", { recursive: true });
 await cp("sitemap.xml", "dist/sitemap.xml");
 const precache = [
-  ...pages,
+  ...pages.filter(
+    (page) =>
+      !["landing.html", "landing-en.html", "refresh.html"].includes(page),
+  ),
   "manifest.webmanifest",
   ...assets
     .filter((p) => !p.startsWith("assets/images/marketing/"))
@@ -88,6 +99,13 @@ for (const page of pages) {
     );
   }
   for (const reference of references) {
+    if (
+      reference.includes("assets/images/marketing/") &&
+      reference.startsWith("releases/")
+    )
+      throw Error(
+        `Marketing image depends on a disposable release: ${reference}`,
+      );
     if (/^(https?:|data:|mailto:)/.test(reference)) continue;
     const path = decodeURIComponent(reference.split(/[?#]/)[0]);
     if (path && !published.has(path))
@@ -100,7 +118,9 @@ for (const locale of ["pl", "en"])
 if (
   precache.some(
     (path) =>
-      path.includes("assets/images/marketing/") || path.startsWith("social/"),
+      path.includes("assets/images/marketing/") ||
+      path.startsWith("social/") ||
+      ["landing.html", "landing-en.html", "refresh.html"].includes(path),
   )
 )
   throw Error(

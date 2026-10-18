@@ -2,11 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
+import { clearMarketingPages } from "../assets/js/marketing-cache.js";
 
 async function worker({ failInstall = false } = {}) {
   const listeners = {},
     buckets = new Map(),
-    fetched = [];
+    fetched = [],
+    fetchOptions = [];
   let claimed = 0,
     skipped = 0;
   const caches = {
@@ -23,6 +25,9 @@ async function worker({ failInstall = false } = {}) {
         },
         async match(u) {
           return map.get(u);
+        },
+        async delete(u) {
+          return map.delete(u);
         },
       };
     },
@@ -62,8 +67,9 @@ async function worker({ failInstall = false } = {}) {
     self,
     caches,
     URL,
-    fetch: async (request) => {
+    fetch: async (request, options) => {
       fetched.push(request.url);
+      fetchOptions.push(options);
       return { body: "network" };
     },
   });
@@ -83,6 +89,8 @@ async function worker({ failInstall = false } = {}) {
   return {
     buckets,
     fetched,
+    fetchOptions,
+    caches,
     lifecycle,
     request,
     claimed: () => claimed,
@@ -117,10 +125,81 @@ test("offline cache serves the Pages subpath, deep hash entry, documents and exa
 });
 test("an incomplete offline install is discarded and the old working release survives", async () => {
   const w = await worker({ failInstall: true });
-  w.buckets.set("cortex-/cortex/-old", new Map());
+  const previous = new Map([
+    ["https://example.test/cortex/landing.html", "previous landing"],
+  ]);
+  w.buckets.set("cortex-/cortex/-old", previous);
   await assert.rejects(w.lifecycle("install"));
   assert.equal(w.buckets.has("cortex-/cortex/-new"), false);
   assert.equal(w.buckets.has("cortex-/cortex/-old"), true);
+  assert.equal(previous.size, 1);
+});
+
+test("install removes stale marketing HTML without replacing an open player's offline release", async () => {
+  const w = await worker();
+  const root = "https://example.test/cortex/";
+  const previous = new Map([
+    [root + "landing.html", { body: "old landing without images" }],
+    [root + "landing-en.html", { body: "old English landing" }],
+    [root + "index.html", { body: "open player" }],
+    [root + "releases/old/assets/js/audio.js", { body: "active audio" }],
+  ]);
+  const other = new Map([[root + "landing.html", "not our cache"]]);
+  w.buckets.set("cortex-/cortex/-old", previous);
+  w.buckets.set("cortex-/another-app/-old", other);
+  await w.lifecycle("install");
+  assert.equal(previous.has(root + "landing.html"), false);
+  assert.equal(previous.has(root + "landing-en.html"), false);
+  assert.equal(previous.get(root + "index.html").body, "open player");
+  assert.equal(
+    previous.get(root + "releases/old/assets/js/audio.js").body,
+    "active audio",
+  );
+  assert.equal(other.size, 1);
+  assert.equal(w.claimed(), 0);
+  assert.equal(w.skipped(), 0);
+});
+
+test("public landing pages bypass stale caches and revalidate HTTP while app stays offline-first", async () => {
+  const w = await worker();
+  await w.lifecycle("install");
+  w.buckets
+    .get("cortex-/cortex/-new")
+    .set("https://example.test/cortex/landing.html", { body: "obsolete" });
+  for (const page of ["landing.html", "landing-en.html", "refresh.html"]) {
+    assert.equal(
+      (await w.request("/cortex/" + page + "?refresh=1")).body,
+      "network",
+    );
+    assert.equal(w.fetchOptions.at(-1).cache, "no-cache");
+  }
+  assert.equal(
+    (await w.request("/cortex/index.html")).body,
+    "https://example.test/cortex/index.html",
+  );
+  assert.equal(w.fetched.length, 3);
+});
+
+test("one-click refresh repairs legacy workers without removing application caches or other projects", async () => {
+  const w = await worker();
+  const root = "https://example.test/cortex/";
+  const previous = new Map([
+    [root + "landing.html", "stale"],
+    [root + "index.html", "player"],
+    [root + "releases/old/assets/js/audio.js", "audio"],
+  ]);
+  const unrelated = new Map([[root + "landing.html", "unrelated"]]);
+  w.buckets.set("cortex-/cortex/-old", previous);
+  w.buckets.set("other-cache", unrelated);
+  assert.equal(
+    await clearMarketingPages(w.caches, root + "refresh.html?lang=pl"),
+    1,
+  );
+  assert.deepEqual([...previous.values()], ["player", "audio"]);
+  assert.equal(unrelated.size, 1);
+  assert.equal(w.buckets.size, 2);
+  assert.equal(await clearMarketingPages(w.caches, root + "refresh.html"), 0);
+  assert.equal(await clearMarketingPages(undefined, root), 0);
 });
 test("only activation cleans up previous Cortex releases, retaining other applications", async () => {
   const w = await worker();

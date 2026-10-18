@@ -12,6 +12,7 @@ for (const page of [
   "index.html",
   "landing.html",
   "landing-en.html",
+  "refresh.html",
   "guide.html",
   "guide-pl.html",
   "whitepaper.html",

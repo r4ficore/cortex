@@ -98,6 +98,11 @@ Przycisk zapisania ustawień nadal zapisuje dopiero na wyraźne żądanie użytk
 Udostępnianie przekazuje tylko identyfikator publicznej propozycji i język.
 
 Ilustracje WebP mają warianty rozdzielczości. Obrazy marketingowe nie należą do
-obowiązkowego precache aplikacji. Podglądy linków w `social/` mają stałe adresy.
+obowiązkowego precache aplikacji. Ilustracje w `assets/images/marketing/` oraz
+podglądy linków w `social/` mają stałe adresy, niezależne od wydania odtwarzacza.
+Landing jest pobierany z sieci i nie korzysta z zapisanej wersji HTML aplikacji.
+Wejście przez `refresh.html` (lub `refresh.html?lang=en`) usuwa wyłącznie stare
+kopie stron promocyjnych i otwiera aktualny landing. Nie usuwa historii,
+preferencji ani zasobów odtwarzacza i nie przeładowuje pozostałych kart.
 Build weryfikuje również warianty `srcset`, sitemap oraz obecność obrazów OG.
 Regresje demonstracji, wejść kampanii, profili i udostępniania: `tests/marketing.test.js`.

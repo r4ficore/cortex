@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Cortex — otwórz aktualną stronę</title>
+    <link rel="stylesheet" href="assets/css/marketing.css" />
+    <script type="module" src="assets/js/landing-refresh.js"></script>
+  </head>
+  <body>
+    <main class="m-wrap m-section" style="max-width: 680px">
+      <a class="m-brand" href="landing.html"
+        ><img
+          src="assets/images/cortex-mark.svg"
+          width="34"
+          height="34"
+          alt=""
+        />cortex</a
+      >
+      <h1 style="font-size: clamp(32px, 6vw, 48px); margin: 40px 0 24px">
+        Chwila dla aktualnej wersji.
+      </h1>
+      <p id="refreshStatus" role="status">Otwieram aktualną stronę Cortex…</p>
+      <div class="m-hero-actions">
+        <button id="refreshRetry" class="m-btn m-primary" hidden>
+          Spróbuj ponownie
+        </button>
+        <a id="refreshContinue" class="m-text-link" href="landing.html"
+          >Przejdź do strony</a
+        >
+      </div>
+      <noscript
+        ><p>
+          Włącz JavaScript, aby odświeżyć zapisaną wersję strony. / Enable
+          JavaScript to refresh the saved website.
+        </p></noscript
+      >
+    </main>
+  </body>
+</html>
