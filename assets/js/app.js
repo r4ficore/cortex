@@ -18,8 +18,7 @@ import {
 } from "./platform.js";
 import {
   FrameMonitor,
-  supportsStimulation,
-  maxVisualFrequency,
+  availableLightHz,
   visualFrequency,
   visualCycles,
   lightSample,
@@ -50,6 +49,7 @@ const state = {
   selected: "",
   nightResult: false,
   expanded: false,
+  lightSettings: { mode: "adaptive", contrast: 0.06 },
   visual: "calm",
   pendingProgram: null,
   route: "home",
@@ -146,6 +146,7 @@ function render() {
       state.starting,
       active(),
       state.pendingProgram,
+      state.lightSettings,
     );
   } else if (page === "program")
     main.innerHTML = views.programView(id, active());
@@ -171,10 +172,11 @@ function render() {
     progress: document.getElementById("playerProgress"),
     pause: document.getElementById("pauseButton"),
     tip: document.getElementById("playerTip"),
-    light: document.getElementById("lightDisc"),
+    light: document.getElementById("lightField"),
     lightStatus: document.getElementById("lightStatus"),
     motionNote: document.getElementById("motionNote"),
   };
+  if (refs.light && state.flow) state.flow.lastLightReason = null;
   visualResize?.disconnect();
   const stage = main.querySelector(".player-stage");
   if (stage) visualResize?.observe(stage);
@@ -230,6 +232,13 @@ function updateMotionNote() {
 }
 function syncExpandedView() {
   const expanded = state.expanded || Boolean(document.fullscreenElement);
+  const player = document.getElementById("player");
+  const immersive =
+    expanded &&
+    state.flow?.visual === "advanced" &&
+    state.flow?.stage === "session";
+  player?.classList.toggle("light-immersive", immersive);
+  showLightControls(immersive && state.flow?.lastLightReason === "ready");
   const button = document.querySelector('[data-action="fullscreen"]');
   if (button) {
     button.setAttribute(
@@ -243,8 +252,54 @@ function syncExpandedView() {
   }
   fitPlayer();
 }
+let controlsTimer;
+function showLightControls(autoHide = false) {
+  clearTimeout(controlsTimer);
+  const player = document.getElementById("player");
+  if (!player) return;
+  player.classList.remove("light-clean");
+  player
+    .querySelectorAll(".player-top, .player-bottom, .light-info")
+    .forEach((el) => (el.inert = false));
+  if (autoHide && player.classList.contains("light-immersive"))
+    controlsTimer = setTimeout(hideLightControls, 3000);
+}
+function hideLightControls() {
+  const player = document.getElementById("player");
+  if (
+    !player?.classList.contains("light-immersive") ||
+    !["ready", "paused"].includes(state.flow?.lastLightReason) ||
+    dialog.open
+  )
+    return;
+  const controls = [
+    ...player.querySelectorAll(".player-top, .player-bottom, .light-info"),
+  ];
+  if (controls.some((el) => el.contains(document.activeElement)))
+    player.querySelector(".light-reveal")?.focus({ preventScroll: true });
+  controls.forEach((el) => (el.inert = true));
+  player.classList.add("light-clean");
+}
+document.addEventListener("pointerdown", (event) => {
+  if (
+    event.target.closest(
+      ".light-immersive .player-top, .light-immersive .player-bottom, .light-immersive .light-info",
+    )
+  )
+    showLightControls(false);
+});
+document.addEventListener("pointermove", (event) => {
+  if (
+    event.pointerType === "mouse" &&
+    Math.abs(event.movementX) + Math.abs(event.movementY) > 2 &&
+    document.querySelector(".light-immersive")
+  )
+    showLightControls(true);
+});
 document.addEventListener("fullscreenchange", syncExpandedView);
 document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" && document.querySelector(".light-immersive"))
+    showLightControls(false);
   if (
     event.key === "Escape" &&
     state.expanded &&
@@ -340,7 +395,13 @@ function updatePlayer() {
   }
 }
 function updateLight(f, elapsed, paused) {
-  const assessment = frameMonitor.assess(maxVisualFrequency(f.session));
+  const baseline = frameMonitor.assess(0);
+  if (baseline.ok && f.lightLimit == null)
+    f.lightLimit = availableLightHz(baseline.fps);
+  const requested = visualFrequency(phaseAt(f.session, elapsed), elapsed);
+  const ceiling = f.lightMode === "protocol" ? 40 : (f.lightLimit ?? 0);
+  const applied = Math.min(requested, ceiling);
+  const assessment = frameMonitor.assess(applied || requested);
   const reason = paused
     ? "paused"
     : reduced()
@@ -349,58 +410,78 @@ function updateLight(f, elapsed, paused) {
         ? "hidden"
         : f.lightStopped
           ? "stopped"
-          : assessment.reason;
+          : baseline.reason !== "ready"
+            ? baseline.reason
+            : applied <= 0
+              ? "slow"
+              : assessment.reason;
   const ready = reason === "ready";
-  if (
-    f.lightStarted &&
-    !ready &&
-    ["unstable", "slow", "hidden"].includes(reason)
-  )
+  if (f.lightStarted && ["unstable", "hidden"].includes(reason))
+    f.lightStopped = true;
+  if (f.lightStarted && reason === "slow" && f.lightMode !== "protocol")
     f.lightStopped = true;
   if (ready) {
     if (f.lightStartedAt == null) f.lightStartedAt = elapsed;
     f.lightStarted = true;
-  }
+  } else f.lightStartedAt = null;
   const sample = lightSample(
-    visualCycles(f.session, elapsed),
+    visualCycles(f.session, elapsed, ceiling),
     f.lightContrast,
     ready ? Math.min(1, (elapsed - f.lightStartedAt) / 2) : 0,
   );
   refs.light.style.backgroundColor = `rgb(${sample.channel},${sample.channel},${sample.channel})`;
+  const adapted = f.lightMode !== "protocol" && applied < requested - 0.05;
   const message = {
     measuring: t(
-      "Sprawdzanie tempa klatek… światło jest statyczne.",
-      "Checking frame cadence… light is static.",
+      "Sprawdzam ekran… pulsacja rozpocznie się po pomiarze.",
+      "Checking the display… pulsation begins after measurement.",
     ),
-    ready: `${visualFrequency(phaseAt(f.session, elapsed), elapsed).toFixed(1)} Hz · ${t("tempo klatek", "frame cadence")} ≈ ${Math.round(assessment.fps)}/s`,
-    slow: t(
-      "Za wolne odświeżanie dla tego protokołu. Światło pozostaje statyczne.",
-      "Frame cadence is too low for this protocol. Light stays static.",
-    ),
+    ready: `${t("Światło", "Light")} ${applied.toFixed(1)} Hz${adapted ? ` · ${t("protokół", "protocol")} ${requested.toFixed(1)} Hz` : ""} · ${Math.round(assessment.fps)} ${t("klatek/s", "frames/s")}`,
+    slow: `${t("Protokół", "Protocol")}: ${requested.toFixed(1)} Hz. ${t("Ten ekran: do", "This display: up to")} ${availableLightHz(baseline.fps)} Hz.`,
     unstable: t(
-      "Nierówne tempo klatek. Pulsacja wyłączona.",
-      "Uneven frame cadence. Pulsation is off.",
+      "Tempo klatek jest nierówne. Sprawdź ponownie, aby wznowić światło.",
+      "Frame cadence is uneven. Check again to resume light.",
     ),
     stopped: t(
-      "Pulsacja zatrzymana. Pauza i Wznów, aby sprawdzić ponownie.",
-      "Pulsation stopped. Pause and Resume to recheck.",
+      "Światło wstrzymane po przerwie w wyświetlaniu. Sprawdź ponownie, aby wznowić.",
+      "Light paused after a display interruption. Check again to resume.",
     ),
     reduced: t(
       "Ograniczenie ruchu wyłącza pulsację.",
       "Reduced motion disables pulsation.",
     ),
-    paused: t("Pauza · światło jest statyczne.", "Paused · light is static."),
+    paused: t("Pauza · światło jest zatrzymane.", "Paused · light is stopped."),
     hidden: t("Pulsacja wstrzymana.", "Pulsation suspended."),
   }[reason];
-  if (
-    refs.lightStatus &&
-    (f.lastLightReason !== reason || elapsed - (f.lastLightReport ?? -1) >= 1)
-  ) {
-    if (refs.lightStatus.textContent !== message)
+  const reasonChanged = f.lastLightReason !== reason;
+  if (reasonChanged || elapsed - (f.lastLightReport ?? -1) >= 1) {
+    if (refs.lightStatus && refs.lightStatus.textContent !== message)
       refs.lightStatus.textContent = message;
+    const retry = document.getElementById("retryLight");
+    const adapt = document.getElementById("adaptLight");
+    if (retry) retry.hidden = !["stopped", "unstable"].includes(reason);
+    if (refs.lightStatus)
+      refs.lightStatus.closest(".light-info").dataset.state = reason;
+    const hide = document.querySelector('[data-action="hideLightControls"]');
+    if (hide) hide.disabled = !["ready", "paused"].includes(reason);
+    if (adapt)
+      adapt.hidden = !(reason === "slow" && f.lightMode === "protocol");
     f.lastLightReason = reason;
     f.lastLightReport = elapsed;
   }
+  if (reasonChanged) showLightControls(ready);
+}
+function retryLight(adapt = false) {
+  const f = state.flow;
+  if (!f || f.visual !== "advanced") return;
+  if (adapt) f.lightMode = "adaptive";
+  frameMonitor.reset();
+  f.lightLimit = null;
+  f.lightStopped = false;
+  f.lightStarted = false;
+  f.lightStartedAt = null;
+  f.lastLightReason = null;
+  showLightControls(false);
 }
 function setPlayerVisual(value) {
   const f = state.flow;
@@ -431,19 +512,8 @@ function setMedia() {
 }
 async function start(id) {
   if (state.starting || state.flow) return;
-  const advanced =
-    state.visual === "advanced" && supportsStimulation(sessionFor(id));
-  const lightContrast =
-    Number(document.getElementById("lightContrast")?.value) || 0.04;
-  if (advanced && !document.getElementById("advancedConsent")?.checked) {
-    showStartError(
-      t(
-        "Potwierdź wybór pulsacji lub wybierz spokojną formę.",
-        "Confirm pulsation or choose the quiet form.",
-      ),
-    );
-    return;
-  }
+  const lightContrast = state.lightSettings.contrast;
+  const lightMode = state.lightSettings.mode;
   state.starting = true;
   const token = ++state.token;
   const startButton = document.querySelector('[data-action="start"]');
@@ -490,6 +560,8 @@ async function start(id) {
       logged: false,
       startedAt: Date.now(),
       lightContrast,
+      lightMode,
+      lightLimit: null,
       lightStarted: false,
       lightStopped: false,
       lightStartedAt: null,
@@ -557,6 +629,7 @@ async function resume() {
     if (f.stage === "session" && f.session.id !== "breath")
       audio.play(f.session, f.clock.position(), prefs());
     frameMonitor.reset();
+    f.lightLimit = null;
     f.lightStopped = false;
     f.lightStarted = false;
     f.lightStartedAt = null;
@@ -854,6 +927,13 @@ document.addEventListener("change", (e) => {
       el.type !== "range",
     );
   }
+  if (el.id === "lightMode")
+    state.lightSettings.mode =
+      el.value === "protocol" ? "protocol" : "adaptive";
+  if (el.id === "lightContrast")
+    state.lightSettings.contrast = [0.04, 0.06, 0.08].includes(Number(el.value))
+      ? Number(el.value)
+      : 0.06;
   if (el.id === "playerVisual") {
     setPlayerVisual(el.value);
     return;
@@ -925,6 +1005,10 @@ document.addEventListener("click", async (e) => {
     go("prepare/" + p.steps[0].sessionId);
   } else if (a === "nextStep") await nextStep();
   else if (a === "endProgram") finishProgram();
+  else if (a === "showLightControls") showLightControls(false);
+  else if (a === "hideLightControls") hideLightControls();
+  else if (a === "retryLight") retryLight();
+  else if (a === "adaptLight") retryLight(true);
   else if (a === "disableLight") setPlayerVisual("calm");
   else if (a === "fullscreen") {
     const player = document.getElementById("player");
@@ -936,6 +1020,9 @@ document.addEventListener("click", async (e) => {
     if (!player.isConnected) state.expanded = false;
     document.body.classList.toggle("player-expanded", state.expanded);
     syncExpandedView();
+    // Resizing/reparenting into native fullscreen may drop a frame. Measure
+    // the new surface afresh instead of treating that transition as a fault.
+    if (state.flow?.visual === "advanced") retryLight();
   } else if (a === "testLeft" || a === "testRight") {
     el.disabled = true;
     try {

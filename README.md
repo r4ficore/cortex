@@ -37,6 +37,7 @@ Wszystkie strony korzystają z `assets/css/design.css`. Tone.js 14.7.77 jest dos
 
 ## Dokumentacja
 
+- [Pełne pole światła — odbiór poprawki](docs/fullscreen-light-qa.md)
 - [Badania światła i audyt audio](docs/light-audio-research.md)
 - [Odbiór poprawek światła, oddechu i trybu nocnego](docs/light-audio-qa.md)
 - [Architektura i system wizualny](docs/system-design.md)

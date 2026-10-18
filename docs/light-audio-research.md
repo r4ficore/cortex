@@ -8,7 +8,7 @@ Rytmiczne światło jest rzeczywistym bodźcem sensorycznym. Może wywoływać m
 
 Nie istnieje jednak zweryfikowana tabela „częstotliwość → gwarantowany stan psychiczny” dla Cortex. Odpowiedź wywołana w EEG, pobudzenie, poprawa uwagi, sen i korzyść kliniczna to odrębne wyniki. Nie można utożsamić dwóch tonów różniących się o 40 Hz z 40 impulsami dźwiękowymi na sekundę ani dowolnego migania ekranu z panelem LED użytym w badaniu.
 
-Przywrócony tryb światła jest opcjonalnym eksperymentem sensorycznym w sesjach Skupienia i Energii. Korzysta z zapisanych częstotliwości, kontroluje tempo wywołań klatek i ogranicza zmianę luminancji. Nie jest odtworzeniem dawki klinicznej. Sen ma domyślnie nocną formę i łatwo dostępne całkowite wygaszenie strony. Oddech ma znacznie czytelniejszy ruch, bez szybkiego migotania.
+Przywrócony tryb światła jest opcjonalnym eksperymentem sensorycznym w sesjach Skupienia i Energii. Oferuje zapisane częstotliwości albo jawnie wybrany wariant dopasowany do ekranu, kontroluje tempo wywołań klatek i ogranicza zmianę luminancji. Jednolite pole może wypełniać całą stronę, bez stałych kontrolek. Nie jest odtworzeniem dawki klinicznej. Sen ma domyślnie nocną formę i łatwo dostępne całkowite wygaszenie strony. Oddech ma znacznie czytelniejszy ruch, bez szybkiego migotania.
 
 ## Jak przeprowadzono przegląd
 
@@ -50,24 +50,31 @@ Przywrócono oddzielny renderer sinusoidalnej zmiany luminancji. Wykorzystuje `v
 | Overdrive | rampa 20–35 → 40 → rampa 30–10 Hz | około 120/s |
 | Gamma Lift | 16 → 38 → 12 Hz | około 114/s |
 
-Gamma Lift zachowuje historyczne **38 Hz obrazu i 40 Hz różnicy tonów** w środkowym etapie. Nie nazywamy tego synchronizowanym protokołem GENUS 40 Hz. Zachowanie katalogu nie oznacza naukowej walidacji tej konkretnej kombinacji. Częstotliwości 14/18/38 Hz pozostają eksperymentalnym wyborem istniejącego produktu; przegląd nie ustalił ich klinicznej przewagi.
+W trybie dokładnym Gamma Lift zachowuje historyczne **38 Hz obrazu i 40 Hz różnicy tonów** w środkowym etapie. Nie nazywamy tego synchronizowanym protokołem GENUS 40 Hz. Zachowanie katalogu nie oznacza naukowej walidacji tej konkretnej kombinacji. Częstotliwości 14/18/38 Hz pozostają eksperymentalnym wyborem istniejącego produktu; przegląd nie ustalił ich klinicznej przewagi.
 
-Przed pierwszym migotaniem zbieramy co najmniej 90 odstępów `requestAnimationFrame`; okno dochodzi do 180 próbek. Analizujemy medianę, 95. percentyl i ostatnią klatkę. Przyjmujemy co najmniej trzy próbki na cykl sinusoidy (2% tolerancji pomiaru) jako **decyzję inżynierską**, nie standard kliniczny. Przy 60 klatkach/s 40 Hz jest zablokowane. Nie zamieniamy automatycznie 40 Hz na 20 Hz. Przerwanie płynności już uruchomionej pulsacji zatrzymuje ją do świadomego ponownego sprawdzenia przez Pauza/Wznów. Ukrycie karty lub opuszczenie odtwarzacza także wyłącza pulsację.
+Przed pierwszym migotaniem zbieramy co najmniej 90 odstępów `requestAnimationFrame`; okno dochodzi do 180 próbek. Analizujemy medianę, 95. percentyl i ostatnią klatkę. Przyjmujemy co najmniej trzy próbki na cykl sinusoidy (2% tolerancji pomiaru) jako **decyzję inżynierską**, nie standard kliniczny.
+
+Wcześniejszy warunek używał maksymalnej częstotliwości całej sesji, przez co Overdrive pozostawał statyczny od początku przy 60 klatkach/s. Poprawka rozdziela dwa jawnie opisane warianty:
+
+- **Dopasuj do ekranu:** użytkownik wybiera ograniczanie częstotliwości do zmierzonego pułapu. Przy 60 klatkach/s jest to 20 Hz, przy 30 — 10 Hz, przy 120 — 40 Hz. Pułap zostaje ustalony po pomiarze; nie skacze między klatkami. Rampy są całkowane z uwzględnieniem obcięcia. Ekran pokazuje zastosowaną i żądaną wartość, gdy się różnią. Jest to zmieniony bodziec, **nie odtworzenie 40 Hz ani GENUS**. Audio zachowuje swoje parametry.
+- **Dokładnie według protokołu:** zachowuje oryginalną częstotliwość i ocenia wyłącznie bieżący etap. Przy 60 klatkach/s etap 40 Hz pozostaje bez pulsacji; interfejs proponuje świadome dopasowanie. Późniejszy zgodny etap może działać. Nie blokujemy już całego protokołu jego maksymalną częstotliwością.
+
+Nierówne klatki po uruchomieniu, ukrycie karty albo opuszczenie odtwarzacza zatrzymują pulsację. Przycisk „Sprawdź ponownie” ponawia pomiar bez resetowania audio. Rozwinięcie odtwarzacza i wznowienie po pauzie również rozpoczynają pomiar od nowa, ponieważ zmiana powierzchni może chwilowo zaburzyć tempo klatek.
 
 To pomiar tempa callbacków, **nie pomiar fotodiodą rzeczywistych błysków matrycy**. Przeglądarka może pominąć prezentację klatki mimo callbacku. Zmienny refresh, tryb oszczędzania energii, kompozytor, PWM ekranu i latencja wyjścia pozostają poza tą kontrolą. 120 Hz na specyfikacji telefonu nie gwarantuje 120 callbacków/s w Safari. [Dokumentacja `requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame), [wyjaśnienie WebKit](https://webkit.github.io/explainers/animation-frame-rate/).
 
 ### Luminancja, kontrast, powierzchnia i kształt
 
-- Małe neutralne pole o średnicy maksymalnie 148 CSS px; na małych ekranach dodatkowo 30vw i 28svh. Pełny ekran powiększa odtwarzacz, nie znosi limitu pola.
-- Średnia liniowa luminancja sRGB: 0,18. Zmiana szczyt–szczyt: 0,04 lub 0,06. To odpowiednio około 11% i 17% kontrastu Michelsona wokół tej średniej.
-- Wartości liniowe przeliczamy na sRGB przed wyświetleniem. Po zaokrągleniu do 8 bitów zmiana nadal wynosi mniej niż 0,07; obejmuje ją automatyczny test. Kontrolowany sygnał pozostaje poniżej zmiany 0,10 definiującej ogólny błysk w kryterium W3C.
+- Jednolite neutralne pole wypełnia odtwarzacz. „Rozwiń widok” rozszerza je na całą dostępną stronę; po 3 sekundach znika nazwa, licznik i sterowanie. Dotknięcie przywraca kontrolki. Przycisk „Ukryj sterowanie” ponownie usuwa nakładki, a Escape lub „Zwiń widok” wraca do odtwarzacza. Systemowych pasków Safari nie da się w ten sposób zagwarantowanie usunąć.
+- Średnia liniowa luminancja sRGB: 0,06. Zmiana szczyt–szczyt: 0,04, 0,06 lub 0,08, domyślnie 0,06. Odpowiada to około 33%, 50% i 67% kontrastu Michelsona wokół tej średniej. Niższe tło umożliwia wyraźniejszą względną modulację przy ograniczonej bezwzględnej zmianie luminancji.
+- Wartości liniowe przeliczamy na sRGB przed wyświetleniem. Po zaokrągleniu do 8 bitów maksymalna zmiana pozostaje poniżej 0,085, co obejmuje automatyczny test. Kontrolowany sygnał pozostaje poniżej zmiany 0,10 definiującej ogólny błysk w kryterium W3C; nie opieramy pełnego pola na wyjątku małej powierzchni.
 - Sinusoidalna modulacja ma łagodniejsze przejścia niż prostokątny stroboskop. Nie opisujemy jej jako 50% wypełnienia „włącz/wyłącz”. Nie odtwarzamy wysokokontrastowych prostokątnych błysków z poprzedniego rendereru.
-- Brak nasyconej czerwieni, migających pasów i migotania całego tła. Dekoracja pozostaje statyczna w tym trybie. Narastanie kontrastu przez 2 s.
+- Brak nasyconej czerwieni, migających pasów i nałożonej membrany. Kontrast narasta przez 2 s po poprawnym pomiarze. Gdy pulsacja jest zatrzymana, pozostaje stała średnia jasność i dostępne sterowanie.
 - Parametr historyczny `bri` nie jest traktowany jako skalibrowana jasność. Renderer korzysta z jawnych, ograniczonych poziomów opisanych powyżej.
 
 W3C uwzględnia częstotliwość, zmianę luminancji, czerwone błyski i obszar; samo „nie więcej niż 2 Hz” nie jest jedyną metodą ograniczenia ryzyka. Jednak zgodność modelu kolorów nie gwarantuje tolerancji danej osoby, szczególnie przy HDR, ustawieniach ekranu i nieznanej odległości. Nie przeprowadzono niezależnego testu PEAT/Harding ani pomiaru fizycznego ekranu. [WCAG 2.2, kryterium 2.3.1](https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html).
 
-Migotanie może wywołać napad także u osoby nieświadomej nadwrażliwości. Znaczenie mają jasność, kontrast, powierzchnia, barwa i indywidualna podatność. Zakres 5–30 Hz jest szczególnie prowokujący; 40 Hz nie jest uniwersalną „bezpieczną granicą”. Tryb wymaga osobnego wyboru i ostrzeżenia, nie zapamiętuje zgody, respektuje ograniczony ruch, nie nakłada się na oddech i ma stale dostępny przycisk wyłączenia. Ostrzeżenie samo w sobie nie zastępuje ograniczeń technicznych. [Epilepsy Foundation](https://www.epilepsy.com/what-is-epilepsy/seizure-triggers/photosensitivity).
+Migotanie może wywołać napad także u osoby nieświadomej nadwrażliwości. Znaczenie mają jasność, kontrast, powierzchnia, barwa i indywidualna podatność. Zakres 5–30 Hz jest szczególnie prowokujący; 40 Hz nie jest uniwersalną „bezpieczną granicą”. Tryb wymaga osobnego wyboru w przygotowaniu i naciśnięcia „Rozpocznij z pulsacją”. Krótka informacja o ryzyku towarzyszy ustawieniom; dodatkowy checkbox został usunięty. Tryb nie jest dziedziczony przez kolejne sesje, respektuje ograniczony ruch i nie nakłada się na oddech. Dotknięcie pola natychmiast przywraca przyciski pauzy i wyłączenia. Ostrzeżenie samo w sobie nie zastępuje ograniczeń technicznych. [Epilepsy Foundation](https://www.epilepsy.com/what-is-epilepsy/seizure-triggers/photosensitivity).
 
 Nie wyznaczono biologicznie optymalnej jasności dla Cortex. Przyjęte poziomy są ograniczeniem projektowym, a **nie dawką o dowiedzionej skuteczności**. Zwiększenie ich do wartości laboratoryjnych wymagałoby odrębnego sprzętu, kalibracji, protokołu badania i nadzoru; nie jest zwykłym podniesieniem suwaka CSS.
 
@@ -116,6 +123,8 @@ Od iOS 18 prawdziwy przełącznik `input type=checkbox switch` może dawać syst
 Na przeglądarkach udostępniających Vibration API pojawia się opcja oddechu dotykiem: jeden krótki impuls dla wdechu, dwa dla wydechu, domyślnie wyłączona. Samo istnienie API nie gwarantuje fizycznego silnika wibracji. Dla dowolnych wzorców na iPhonie potrzebna byłaby aplikacja natywna lub opakowanie z mostem do Core Haptics. Tego mostu nie ma w tej statycznej wersji.
 
 ## Granice odbioru i następny etap walidacji
+
+Odbiór naprawy pełnego pola obejmuje także pomiar kolorów pikseli na kolejnych rzeczywistych zrzutach przeglądarki — sama zmiana wartości w DOM nie dowodziłaby odmalowywania obrazu. Szczegóły: `fullscreen-light-qa.md`.
 
 Automatyczne testy i emulacja rozmiarów ekranu są oddzielone od badania fizycznego urządzenia. Brakuje pomiaru fotodiodą, luksomierzem i miernikiem dźwięku oraz odsłuchu na rzeczywistym iPhonie. Nie sprawdzono klinicznej skuteczności ani indywidualnej tolerancji żadnej sekwencji Cortex.
 

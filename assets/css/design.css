@@ -2155,14 +2155,6 @@ dialog::backdrop {
   opacity: 0.18 !important;
   transform: none;
 }
-.light-disc {
-  width: min(148px, 30vw, 28svh);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: rgb(118, 118, 118);
-  position: relative;
-  contain: paint;
-}
 .light-stage .breath-caption {
   position: absolute;
   bottom: 0;
@@ -2307,9 +2299,6 @@ body.player-expanded .player,
   flex-direction: column;
   gap: 8px;
 }
-.light-disc {
-  flex-shrink: 0;
-}
 .light-info {
   position: relative;
   display: flex;
@@ -2317,6 +2306,166 @@ body.player-expanded .player,
   align-items: center;
   gap: 4px;
   max-width: 100%;
+}
+
+/* A uniform light field; expanded mode contains no permanent overlays. */
+.light-setup {
+  display: grid;
+  gap: 14px;
+}
+.light-warning {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.light-field {
+  position: absolute;
+  inset: 0;
+  background: rgb(69, 69, 69);
+  border-radius: 20px;
+  contain: paint;
+}
+.light-stage .light-info {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(460px, calc(100% - 24px));
+  max-width: none;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--paper);
+  z-index: 3;
+}
+.light-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.light-actions .btn {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.light-hint {
+  font-size: 11px;
+  text-align: center;
+  color: var(--muted);
+}
+.light-info[data-state]:not([data-state="ready"]) .light-hint {
+  display: none;
+}
+.light-reveal,
+.light-hide {
+  display: none;
+}
+.player.light-immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding: 0;
+  margin: 0;
+  background: rgb(69, 69, 69);
+}
+.light-immersive .player-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.light-immersive .light-field {
+  border-radius: 0;
+}
+.light-immersive .light-reveal {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.light-immersive .player-top,
+.light-immersive .player-bottom {
+  position: absolute;
+  z-index: 3;
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 14px 18px;
+  margin: 0;
+}
+.light-immersive .player-top {
+  top: max(16px, env(safe-area-inset-top));
+  left: 16px;
+  right: 16px;
+}
+.light-immersive .player-bottom {
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(480px, calc(100% - 32px));
+  gap: 8px;
+}
+.light-immersive .light-info {
+  top: 132px;
+  bottom: auto;
+}
+.light-immersive .light-hide {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.light-immersive.light-clean .player-top,
+.light-immersive.light-clean .player-bottom,
+.light-immersive.light-clean .light-info {
+  visibility: hidden;
+  pointer-events: none;
+}
+.light-immersive.light-clean .light-reveal {
+  outline: none;
+  cursor: none;
+}
+@media (max-height: 480px) and (min-width: 500px) {
+  .light-immersive .player-top {
+    left: 12px;
+    right: auto;
+    top: 12px;
+    width: calc(50% - 24px);
+    padding: 10px;
+  }
+  .light-immersive .light-info {
+    left: 12px;
+    top: 118px;
+    transform: none;
+    width: calc(50% - 24px);
+    padding: 8px;
+  }
+  .light-immersive .player-bottom {
+    left: auto;
+    right: 12px;
+    top: 12px;
+    bottom: auto;
+    transform: none;
+    width: calc(50% - 24px);
+    padding: 10px;
+    gap: 4px;
+  }
+  .light-immersive .player-top h1 {
+    font-size: 18px;
+  }
+  .light-immersive .light-hint {
+    display: none;
+  }
 }
 .light-stage .breath-caption {
   display: none;

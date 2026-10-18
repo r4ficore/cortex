@@ -7,6 +7,8 @@ import {
   visualCycles,
   lightSample,
   supportsStimulation,
+  availableLightHz,
+  cappedRampCycles,
 } from "../assets/js/stimulation.js";
 import { makeSession } from "../assets/js/catalog.js";
 import { breathAt } from "../assets/js/breath.js";
@@ -40,16 +42,39 @@ test("40 Hz is blocked at 60 fps, allowed at stable 120 fps, and blocked on drop
 test("rendered 8-bit light stays below 0.1 relative-luminance swing, including invalid contrast requests", () => {
   const linear = (v) =>
     v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  for (const swing of [0.04, 0.06, 1]) {
+  for (const swing of [0.04, 0.06, 0.08, 1]) {
     const values = Array.from({ length: 1000 }, (_, i) =>
       linear(lightSample(i / 1000, swing).channel / 255),
     );
-    assert.ok(Math.max(...values) - Math.min(...values) < 0.07);
-    assert.ok(Math.min(...values) > 0.14);
+    assert.ok(Math.max(...values) - Math.min(...values) < 0.085);
+    assert.ok(Math.min(...values) > 0.015);
+    assert.ok(Math.max(...values) < 0.11);
   }
   assert.equal(supportsStimulation(makeSession("hypnos")), false);
   assert.equal(supportsStimulation(makeSession("equilibrium")), false);
   assert.equal(supportsStimulation(makeSession("prime")), true);
+});
+test("explicit display adaptation uses 20 Hz at 60 fps and never labels it 40 Hz", () => {
+  assert.equal(availableLightHz(60), 20);
+  assert.equal(availableLightHz(59), 20);
+  assert.equal(availableLightHz(30), 10);
+  assert.equal(availableLightHz(120), 40);
+  assert.equal(availableLightHz(144), 40);
+  const s = makeSession("overdrive");
+  const limit = availableLightHz(60);
+  const original = visualFrequency(s.phases[1], 100);
+  assert.equal(original, 40);
+  assert.equal(Math.min(original, limit), 20);
+  assert.equal(assessFrames(Array(180).fill(1000 / 60), Math.min(original, limit)).ok, true);
+  assert.equal(assessFrames(Array(180).fill(1000 / 60), original).reason, "slow");
+  assert.equal(visualCycles(s, 60, limit), 1200);
+  assert.equal(visualCycles(s, 61, limit), 1220);
+});
+test("capped ramps integrate the plateau correctly in both directions", () => {
+  assert.equal(cappedRampCycles(30, 10, 60, 20), 1050);
+  assert.equal(cappedRampCycles(10, 30, 60, 20), 1050);
+  assert.equal(cappedRampCycles(8, 14, 60, 20), 660);
+  assert.equal(cappedRampCycles(20, 35, 60, 20), 1200);
 });
 test("inhale grows visibly, exhale contracts, and reduced motion stays static", () => {
   const props = {};
