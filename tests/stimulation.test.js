@@ -10,8 +10,8 @@ import {
 } from "../assets/js/stimulation.js";
 import { makeSession } from "../assets/js/catalog.js";
 import { breathAt } from "../assets/js/breath.js";
-import { updateOrb } from "../assets/js/visual.js";
-import { sessionId } from "../assets/js/platform.js";
+import { updateOrb, fitBreathingForm } from "../assets/js/visual.js";
+import { sessionId, requestPlayerFullscreen } from "../assets/js/platform.js";
 test("legacy frequency ramps are integrated correctly, never replaced with a different frequency", () => {
   const s = makeSession("overdrive");
   assert.equal(visualFrequency(s.phases[0], 30), 27.5);
@@ -53,22 +53,90 @@ test("rendered 8-bit light stays below 0.1 relative-luminance swing, including i
 });
 test("inhale grows visibly, exhale contracts, and reduced motion stays static", () => {
   const props = {};
+  const lung = { style: { setProperty: (k, v) => (props[k] = v) } };
   const e = {
     dataset: { goal: "breath" },
-    style: { setProperty: (k, v) => (props[k] = v) },
+    style: { setProperty() {} },
+    querySelector: () => lung,
   };
+  const scale = () => Number(props.transform.match(/scale\(([^)]+)\)/)[1]);
   updateOrb(e, { breath: breathAt(0) });
-  const small = Number(props["--breath-scale"]);
+  const small = scale();
   updateOrb(e, { breath: breathAt(4) });
-  const large = Number(props["--breath-scale"]);
+  const large = scale();
   assert.ok(large / small > 2);
   assert.equal(e.dataset.phase, "exhale");
   updateOrb(e, { breath: breathAt(7) });
-  assert.ok(Number(props["--breath-scale"]) < large);
+  assert.ok(scale() < large);
+  const beforePause = props.transform;
+  updateOrb(e, { breath: breathAt(7), paused: true });
+  assert.equal(props.transform, beforePause);
   updateOrb(e, { breath: breathAt(1), reduced: true });
-  const fixed = props["--breath-scale"];
+  const fixed = props.transform;
   updateOrb(e, { breath: breathAt(4), reduced: true });
-  assert.equal(props["--breath-scale"], fixed);
+  assert.equal(props.transform, fixed);
+});
+test("breathing fits the actual stage after mobile viewport and orientation changes", () => {
+  const element = { classList: { contains: () => true }, style: {} };
+  for (const [width, height] of [
+    [346, 280],
+    [500, 180],
+    [276, 410],
+    [800, 900],
+  ]) {
+    fitBreathingForm(
+      { getBoundingClientRect: () => ({ width, height }) },
+      element,
+    );
+    assert.equal(element.style.width, element.style.height);
+    assert.ok(parseFloat(element.style.width) <= Math.min(width, height, 400));
+  }
+});
+test("decorative movement is visible within seconds and pause does not reset its pose", () => {
+  const props = {};
+  const element = {
+    dataset: { goal: "calm" },
+    style: { setProperty: (k, v) => (props[k] = v) },
+    querySelector: () => null,
+  };
+  updateOrb(element, { elapsed: 3 });
+  const large = props.transform;
+  updateOrb(element, { elapsed: 3, paused: true });
+  assert.equal(props.transform, large);
+  updateOrb(element, { elapsed: 9 });
+  assert.notEqual(props.transform, large);
+  updateOrb(element, { elapsed: 9, reduced: true });
+  assert.equal(props.transform, "scale(1) rotate(0deg)");
+});
+test("missing or rejected fullscreen falls back without throwing; native support is retained", async () => {
+  assert.equal(
+    await requestPlayerFullscreen({}, { fullscreenEnabled: false }),
+    false,
+  );
+  assert.equal(
+    await requestPlayerFullscreen(
+      {
+        requestFullscreen: async () => {
+          throw Error("Denied");
+        },
+      },
+      { fullscreenEnabled: true },
+    ),
+    false,
+  );
+  let called = false;
+  assert.equal(
+    await requestPlayerFullscreen(
+      {
+        requestFullscreen: async () => {
+          called = true;
+        },
+      },
+      { fullscreenEnabled: true },
+    ),
+    true,
+  );
+  assert.equal(called, true);
 });
 test("LAN history IDs work without secure-context randomUUID", () => {
   const values = new Set(Array.from({ length: 1000 }, () => sessionId({})));

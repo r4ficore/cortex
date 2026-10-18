@@ -2,6 +2,8 @@
 
 18 października 2026. Zmiany po wersji Porcelana `78e2d73`. Odbiór lokalnego podglądu przed publikacją.
 
+Późniejsze zgłoszenie z fizycznego iPhone’a i poprawkę renderowania opisuje [odbiór mobilnego odtwarzacza](mobile-player-qa.md). Poniższe wyniki dotyczą wcześniejszej wersji `f9fbac9`.
+
 ## Automatyczna weryfikacja
 
 - `npm test`: 27 testów. Zegar, pauza, oddech, migracja danych, programy, eksport, oryginalne definicje wszystkich 14 sesji i 5 programów.

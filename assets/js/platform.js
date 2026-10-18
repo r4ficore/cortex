@@ -26,3 +26,16 @@ export function stopHaptics() {
     } catch {}
   }
 }
+
+// iPhone and embedded browsers may expose no element fullscreen API, or reject
+// it. The caller then expands inside the page without losing session controls.
+export async function requestPlayerFullscreen(player, doc = document) {
+  if (!doc.fullscreenEnabled || typeof player?.requestFullscreen !== "function")
+    return false;
+  try {
+    await player.requestFullscreen();
+    return true;
+  } catch {
+    return false;
+  }
+}

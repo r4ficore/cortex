@@ -959,7 +959,6 @@ body.player-page .page {
   border-color: var(--line);
 }
 .player-stage {
-  container-type: size;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2090,9 +2089,22 @@ dialog::backdrop {
   opacity: 0.5;
 }
 .breath-orb .breath-lung {
-  transform: scale(var(--breath-scale, 0.46));
+  position: absolute;
+  display: block;
+  inset: 3.333%;
+  border-radius: 50%;
+  border: 1.8px solid #53785c;
+  background: radial-gradient(circle at 35% 28%, #edf3e9, #b7ceaf 56%, #779d82);
+  transform: scale(0.46);
   transform-origin: 50% 50%;
   will-change: transform;
+}
+.breath-lung::after {
+  content: "";
+  position: absolute;
+  inset: 4.6%;
+  border: 1px solid #ffffff52;
+  border-radius: 50%;
 }
 .breath-direction {
   position: absolute;
@@ -2260,9 +2272,31 @@ body.night-mode {
 }
 
 .player-stage.breathing > .breath-orb {
-  width: min(100cqw, 100cqh, 400px);
-  height: auto;
+  /* Explicit dimensions are fitted to the stage by ResizeObserver. The
+     fallback also works without container-query units. */
+  width: min(70vw, 35svh, 400px);
+  height: min(70vw, 35svh, 400px);
   max-height: none;
+}
+
+.player-top .motion-note {
+  margin-top: 6px;
+  max-width: 38ch;
+  font-size: 12px;
+  color: var(--ink);
+}
+body.player-expanded .site-header {
+  display: none;
+}
+body.player-expanded .page {
+  max-width: none;
+  padding: 0 22px;
+}
+body.player-expanded .player,
+.player:fullscreen {
+  height: 100dvh;
+  min-height: 100dvh;
+  padding-top: max(12px, env(safe-area-inset-top));
 }
 
 .reduce-motion #wakeScreen span {

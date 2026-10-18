@@ -10,7 +10,12 @@ import { createStore } from "./store.js";
 import { SessionController, phaseAt } from "./session.js";
 import { breathAt } from "./breath.js";
 import { AudioEngine } from "./audio.js";
-import { sessionId, breathHaptic, stopHaptics } from "./platform.js";
+import {
+  sessionId,
+  breathHaptic,
+  stopHaptics,
+  requestPlayerFullscreen,
+} from "./platform.js";
 import {
   FrameMonitor,
   supportsStimulation,
@@ -19,7 +24,7 @@ import {
   visualCycles,
   lightSample,
 } from "./stimulation.js";
-import { updateOrb } from "./visual.js";
+import { updateOrb, fitBreathingForm } from "./visual.js";
 import { t, local, language, setLanguage, esc, icon, time } from "./i18n.js";
 import * as views from "./views.js";
 import {
@@ -44,6 +49,7 @@ const state = {
   token: 0,
   selected: "",
   nightResult: false,
+  expanded: false,
   visual: "calm",
   pendingProgram: null,
   route: "home",
@@ -61,7 +67,9 @@ function openBlackScreen() {
 }
 blackScreen.addEventListener("click", () => blackScreen.close());
 blackScreen.addEventListener("close", () => {
-  (document.getElementById("playerVisual") || main).focus({ preventScroll: true });
+  (document.getElementById("playerVisual") || main).focus({
+    preventScroll: true,
+  });
 });
 let restoreFocus = null,
   refs = {},
@@ -72,6 +80,7 @@ const prefs = () => store.prefs;
 const reduced = () => mediaMotion.matches || prefs().reduceMotion === true;
 function applyPreferences() {
   document.body.classList.toggle("reduce-motion", reduced());
+  updateMotionNote();
 }
 setLanguage(prefs().lang);
 applyPreferences();
@@ -97,7 +106,9 @@ function render() {
   state.route = page;
   const playerPage =
     page === "session" && state.flow && state.flow.stage !== "between";
+  if (!playerPage) state.expanded = false;
   document.body.classList.toggle("player-page", Boolean(playerPage));
+  document.body.classList.toggle("player-expanded", state.expanded);
   const night =
     (page === "session" &&
       state.flow &&
@@ -162,11 +173,90 @@ function render() {
     tip: document.getElementById("playerTip"),
     light: document.getElementById("lightDisc"),
     lightStatus: document.getElementById("lightStatus"),
+    motionNote: document.getElementById("motionNote"),
   };
+  visualResize?.disconnect();
+  const stage = main.querySelector(".player-stage");
+  if (stage) visualResize?.observe(stage);
+  fitPlayer();
+  syncExpandedView();
+  updateMotionNote();
   lastSecond = "";
   updateMini();
   updatePlayer();
 }
+function fitPlayer() {
+  fitBreathingForm(main.querySelector(".player-stage"), refs.orb);
+}
+const visualResize =
+  typeof ResizeObserver === "function" ? new ResizeObserver(fitPlayer) : null;
+window.addEventListener("resize", fitPlayer);
+window.visualViewport?.addEventListener("resize", fitPlayer);
+function updateMotionNote() {
+  if (!refs.motionNote) return;
+  const message =
+    state.flow?.visual === "none"
+      ? t(
+          "Animacja wyłączona: wybrano sam dźwięk.",
+          "Animation off: audio-only mode is selected.",
+        )
+      : mediaMotion.matches
+        ? t(
+            "Animacja wyłączona przez ustawienie systemowe Ogranicz ruch.",
+            "Animation off: your system requests reduced motion.",
+          )
+        : prefs().reduceMotion
+          ? t(
+              "Animacja wyłączona w ustawieniach Cortex: Ogranicz ruch.",
+              "Animation off in Cortex settings: Reduce motion.",
+            )
+          : "";
+  refs.motionNote.hidden = !message;
+  if (refs.motionNote.textContent !== message)
+    refs.motionNote.textContent = message;
+  if (
+    refs.tip &&
+    (state.flow?.session.id === "breath" || state.flow?.stage === "prelude")
+  )
+    refs.tip.textContent = message
+      ? t(
+          "Podążaj za fazą i odliczaniem. Nie wymuszaj oddechu.",
+          "Follow the phase and countdown. Do not force your breath.",
+        )
+      : t(
+          "Forma rośnie — wdech. Maleje — wydech.",
+          "Growing — breathe in. Shrinking — breathe out.",
+        );
+}
+function syncExpandedView() {
+  const expanded = state.expanded || Boolean(document.fullscreenElement);
+  const button = document.querySelector('[data-action="fullscreen"]');
+  if (button) {
+    button.setAttribute(
+      "aria-label",
+      expanded
+        ? t("Zwiń widok", "Collapse view")
+        : t("Rozwiń widok", "Expand view"),
+    );
+    button.setAttribute("aria-pressed", String(expanded));
+    button.innerHTML = icon(expanded ? "close" : "expand");
+  }
+  fitPlayer();
+}
+document.addEventListener("fullscreenchange", syncExpandedView);
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    state.expanded &&
+    !dialog.open &&
+    !blackScreen.open
+  ) {
+    state.expanded = false;
+    document.body.classList.remove("player-expanded");
+    syncExpandedView();
+    document.querySelector('[data-action="fullscreen"]')?.focus();
+  }
+});
 function updateMini() {
   const mini = document.getElementById("miniPlayer"),
     f = state.flow;
@@ -185,7 +275,7 @@ function updatePlayer() {
   updateOrb(refs.orb, {
     elapsed,
     breath: b,
-    reduced: reduced(),
+    reduced: reduced() || (f.visual === "advanced" && !breath),
     paused,
   });
   if (refs.light) updateLight(f, elapsed, paused);
@@ -719,11 +809,12 @@ function updatePreference(key, value, rerender = true) {
     state.visual = value ? "none" : "calm";
     if (state.flow) {
       state.flow.visual = state.visual;
-      main
-        .querySelector(".player-stage")
-        ?.classList.toggle("audio-only", value);
+      // Rebuild the renderer too: a light disc must not survive switching
+      // to audio-only while Settings is open.
+      render();
     }
   }
+  updateMotionNote();
   if (rerender) {
     if (dialog.open && dialog.dataset.type === "settings")
       dialog.innerHTML = views.settings(prefs(), store.available, active());
@@ -837,24 +928,14 @@ document.addEventListener("click", async (e) => {
   else if (a === "disableLight") setPlayerVisual("calm");
   else if (a === "fullscreen") {
     const player = document.getElementById("player");
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else if (player?.requestFullscreen) await player.requestFullscreen();
-      else
-        toast(
-          t(
-            "Ten ekran nie obsługuje pełnego ekranu.",
-            "Fullscreen is not available on this device.",
-          ),
-        );
-    } catch {
-      toast(
-        t(
-          "Pełny ekran jest niedostępny w tej przeglądarce.",
-          "Fullscreen is unavailable in this browser.",
-        ),
-      );
-    }
+    if (!player) return;
+    if (document.fullscreenElement)
+      await document.exitFullscreen().catch(() => {});
+    else if (state.expanded) state.expanded = false;
+    else if (!(await requestPlayerFullscreen(player))) state.expanded = true;
+    if (!player.isConnected) state.expanded = false;
+    document.body.classList.toggle("player-expanded", state.expanded);
+    syncExpandedView();
   } else if (a === "testLeft" || a === "testRight") {
     el.disabled = true;
     try {

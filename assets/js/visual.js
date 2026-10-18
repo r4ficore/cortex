@@ -13,30 +13,41 @@ export function updateOrb(
   { elapsed = 0, breath = null, reduced = false, paused = false } = {},
 ) {
   if (!element) return;
-  const moving = !reduced && !paused;
+  // The session clock already freezes on pause. Do not snap the artwork back.
   const rhythm =
-    { focus: 0.12, calm: 0.2, sleep: 0.09, energy: 0.42 }[
-      element.dataset.goal
-    ] || 0.28;
+    (2 * Math.PI) /
+    ({ focus: 16, calm: 12, sleep: 24, energy: 9 }[element.dataset.goal] || 12);
   const level = breath ? breath.level : (Math.sin(elapsed * rhythm) + 1) / 2;
-  element.style.setProperty(
-    "--orb-scale",
-    reduced ? "1" : breath ? "1" : String(0.82 + level * 0.18),
-  );
-  element.style.setProperty(
-    "--orb-turn",
-    `${moving && !breath ? Math.sin(elapsed * 0.08) * 13 : 0}deg`,
-  );
+  const scale = reduced || breath ? 1 : 0.76 + level * 0.24;
+  const turn = reduced || breath ? 0 : Math.sin(elapsed * rhythm * 0.5) * 13;
+  // Write the animated transform directly to the HTML element. This avoids
+  // inherited custom-property invalidation across an SVG/compositor boundary.
+  element.style.setProperty("transform", `scale(${scale}) rotate(${turn}deg)`);
   element.style.opacity = "1";
   if (breath) {
-    element.style.setProperty(
-      "--breath-scale",
-      reduced ? "0.82" : String(0.46 + level * 0.54),
+    const lung = element.querySelector(".breath-lung");
+    lung?.style.setProperty(
+      "transform",
+      `scale(${reduced ? 0.82 : 0.46 + level * 0.54})`,
     );
     element.dataset.phase = paused ? "paused" : breath.phase;
+  } else {
+    const layer = element.querySelector(".orb-inner");
+    const drift = reduced ? 0 : Math.sin(elapsed * rhythm) * 0.08;
+    layer?.setAttribute(
+      "transform",
+      `translate(150 150) rotate(${55 - turn * 2}) scale(${1 + drift} ${1 - drift}) translate(-150 -150)`,
+    );
   }
 }
 export function breathingForm() {
-  const id = `breath${++serial}`;
-  return `<div class="orb breath-orb" data-goal="breath" aria-hidden="true"><span class="breath-boundary"></span><svg class="breath-lung" viewBox="0 0 300 300"><defs><radialGradient id="${id}" cx="35%" cy="28%" r="80%"><stop stop-color="#edf3e9"/><stop offset=".56" stop-color="#b7ceaf"/><stop offset="1" stop-color="#779d82"/></radialGradient></defs><circle cx="150" cy="150" r="140" fill="url(#${id})" stroke="#53785c" stroke-width="1.8"/><circle cx="150" cy="150" r="127" fill="none" stroke="#fff" stroke-opacity=".32"/></svg><span class="breath-direction"><svg viewBox="0 0 24 24"><path d="m8 12 4-4 4 4m-8 5 4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>`;
+  return `<div class="orb breath-orb" data-goal="breath" aria-hidden="true"><span class="breath-boundary"></span><span class="breath-lung"></span><span class="breath-direction"><svg viewBox="0 0 24 24"><path d="m8 12 4-4 4 4m-8 5 4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>`;
+}
+
+export function fitBreathingForm(stage, element) {
+  if (!stage || !element?.classList.contains("breath-orb")) return;
+  const { width, height } = stage.getBoundingClientRect();
+  const size = Math.max(0, Math.min(width, height, 400));
+  element.style.width = `${size}px`;
+  element.style.height = `${size}px`;
 }
