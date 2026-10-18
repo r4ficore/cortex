@@ -2596,3 +2596,8 @@ body.player-expanded .player,
     font-size: 12px;
   }
 }
+
+.recovery-notice { margin-block: 0 28px; }
+.recovery-notice h2 { font-size: 1.25rem; margin-bottom: 8px; }
+.recovery-notice .button-row { align-items: center; margin-top: 12px; flex-wrap: wrap; }
+#wakeStatus { margin-top: 8px; font-size: .75rem; }

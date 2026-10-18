@@ -188,7 +188,8 @@ export const programs = originalPrograms.map((p) => ({
   description: { pl: programCopy[p.id][0], en: programCopy[p.id][1] },
 }));
 export const pathFor = (id) => paths.find((p) => p.id === id) || paths[0];
-export const sessionFor = (id) => sessions[id] || sessions.deepFocus;
+export const sessionFor = (id) =>
+  Object.hasOwn(sessions, id) ? sessions[id] : sessions.deepFocus;
 export function makeSession(id, duration) {
   const original = sessionFor(id);
   const length = duration ?? (id === "hypnos" ? 1800 : original.duration);

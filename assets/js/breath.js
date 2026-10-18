@@ -53,3 +53,9 @@ export function boxPosition({ index, progress }) {
     [252 - 204 * p, 252],
   ][index % 4];
 }
+
+// Display the exact duration before starting, and finish on a cycle boundary.
+export function practiceDuration(seconds, pattern = "4-6") {
+  const cycle = cycleDuration(pattern);
+  return Math.ceil(seconds / cycle) * cycle;
+}

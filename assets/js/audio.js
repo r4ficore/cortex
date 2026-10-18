@@ -1,9 +1,10 @@
 import {
-  fadeTimes,
-  OUTPUT_HEADROOM,
-  NOISE_GAIN,
-  gainForIntensity,
-} from "./signal.js";
+  envelopePlan,
+  envelopeAt,
+  scheduleEnvelope,
+  holdEnvelope,
+} from "./envelope.js";
+import { OUTPUT_HEADROOM, NOISE_GAIN, gainForIntensity } from "./signal.js";
 import { audioTimeline, timelineAt } from "./audio-timeline.js";
 import { profileFor } from "./audio-profiles.js";
 import { backgroundSamples } from "./background.js";
@@ -61,9 +62,8 @@ export class AudioEngine {
     master.gain.value = prefs.masterVolume;
     balance.gain.value = prefs.beatVolume * gainForIntensity(prefs.intensity);
     const remaining = session.duration - offset;
-    const fade = fadeTimes(remaining, profileFor(session));
-    envelope.gain.setValueAtTime(0, now);
-    envelope.gain.linearRampToValueAtTime(1, now + fade.in);
+    const plan = envelopePlan(session.duration, offset, profileFor(session));
+    scheduleEnvelope(envelope.gain, plan, now);
     volume.connect(balance);
     balance.connect(pulse);
     pulse.connect(envelope);
@@ -113,8 +113,6 @@ export class AudioEngine {
     }
     if (Number.isFinite(session.duration)) {
       const end = now + remaining;
-      envelope.gain.setValueAtTime(1, Math.max(now + fade.in, end - fade.out));
-      envelope.gain.linearRampToValueAtTime(0, end);
       sources.forEach((source) => source.stop(end));
     }
     this.graph = {
@@ -125,6 +123,7 @@ export class AudioEngine {
       noiseGain,
       envelope,
       startedAt: now,
+      plan,
       kind: "session",
     };
   }
@@ -164,11 +163,11 @@ export class AudioEngine {
     envelope.connect(master);
     master.connect(c.destination);
     const remaining = Math.max(0, duration - offset);
-    const fade = Math.min(0.08, remaining / 2);
-    envelope.gain.setValueAtTime(0, now);
-    envelope.gain.linearRampToValueAtTime(1, now + fade);
-    envelope.gain.setValueAtTime(1, now + remaining - fade);
-    envelope.gain.linearRampToValueAtTime(0, now + remaining);
+    const plan = envelopePlan(duration, offset, {
+      fadeIn: 0.08,
+      fadeOut: 0.08,
+    });
+    scheduleEnvelope(envelope.gain, plan, now);
     source.start(now, offset % source.buffer.duration);
     source.stop(now + remaining);
     this.graph = {
@@ -177,6 +176,7 @@ export class AudioEngine {
       master,
       envelope,
       startedAt: now,
+      plan,
       kind: "breath",
     };
   }
@@ -203,7 +203,7 @@ export class AudioEngine {
     if (!g) return;
     this.graph = null;
     const now = this.ctx.currentTime;
-    g.envelope.gain.cancelScheduledValues(now);
+    holdEnvelope(g.envelope.gain, now, envelopeAt(g.plan, now - g.startedAt));
     g.envelope.gain.setTargetAtTime(0, now, 0.025);
     for (const s of g.sources) {
       try {

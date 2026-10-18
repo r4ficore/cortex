@@ -5,21 +5,37 @@ import { profileFor } from "./audio-profiles.js";
 import { backgroundSamples } from "./background.js";
 import { fadeAt, OUTPUT_HEADROOM, NOISE_GAIN } from "./signal.js";
 import { defaults, migratePreferences } from "./store.js";
-self.onmessage = ({ data: { session, options } }) => {
+let acknowledge;
+const send = async (message, transfer = []) => {
+  const wait = new Promise((resolve) => {
+    acknowledge = resolve;
+  });
+  self.postMessage(message, transfer);
+  await wait;
+};
+self.onmessage = (event) => {
+  if (event.data.ack) {
+    acknowledge?.();
+    return;
+  }
+  return render(event.data);
+};
+async function render({ session, options }) {
   try {
-    const rate = 48000,
+    const rate = options.sampleRate === 24000 ? 24000 : 48000,
       total = Math.round(session.duration * rate),
       chunkFrames = rate * 4;
     if (!Number.isFinite(total) || total <= 0 || total > rate * 60 * 45)
       throw new Error("Invalid duration");
     const header = wavHeader(total, rate);
-    self.postMessage({ chunk: header }, [header]);
+    if (options.backpressure) await send({ chunk: header }, [header]);
+    else self.postMessage({ chunk: header }, [header]);
     const prefs = migratePreferences({ ...defaults, ...options.prefs });
     const noise =
       options.noise === "none"
         ? null
         : backgroundSamples(options.noise || prefs.noiseType, session, rate);
-    if (options.loop === "stable") {
+    if (options.loop === "stable" && !options.prepared) {
       const stable = session.phases[1] || session.phases[0];
       session = {
         ...session,
@@ -72,13 +88,15 @@ self.onmessage = ({ data: { session, options } }) => {
         angleR = (angleR + (2 * Math.PI * p.r) / rate) % (2 * Math.PI);
         modAngle = (modAngle + (2 * Math.PI * p.rate) / rate) % (2 * Math.PI);
       }
-      self.postMessage(
-        { chunk: buffer, progress: ((base + count) / total) * 100 },
-        [buffer],
-      );
+      const message = {
+        chunk: buffer,
+        progress: ((base + count) / total) * 100,
+      };
+      if (options.backpressure) await send(message, [buffer]);
+      else self.postMessage(message, [buffer]);
     }
     self.postMessage({ done: true });
   } catch {
     self.postMessage({ error: true });
   }
-};
+}

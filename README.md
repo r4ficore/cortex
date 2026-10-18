@@ -54,3 +54,19 @@ node scripts/audit-audio.mjs /tmp/cortex-audio-audit.json
 ```
 
 Badanie PCM nie mierzy fizycznej głośności słuchawek. Diagnostyka klatek nie mierzy matrycy fotodiodą.
+
+### Verified static releases
+
+Run `npm ci`, `npm test`, `npm run check`, then `npm run build`.
+`dist/` contains only product pages and versioned assets. Serve `dist/` for the
+release preview. GitHub Actions checks generated PL/EN documents, runs tests,
+builds and publishes this artifact. Configure GitHub Pages to use GitHub Actions.
+`release.json` identifies the published commit. Previous git tags allow a rollback
+by reverting the change and rerunning the same pipeline; browser history remains
+in its existing origin-local storage.
+
+The post-release reliability revision adds paused-session recovery, validated
+history import, complete breathing cycles, screen wake lock, and bounded-memory
+WAV export. Recovery checkpoints remain local and are written every five seconds
+and at lifecycle boundaries. Interrupted light never auto-starts after recovery.
+See `docs/reliability-release-2026-10-18.md` for validation and device limits.

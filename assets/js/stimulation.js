@@ -111,3 +111,21 @@ export class FrameMonitor {
     return assessFrames(this.intervals, hz);
   }
 }
+
+// Pause modulation immediately on bad cadence, then remeasure automatically.
+// Only an interruption of visibility requires an explicit restart.
+export function lightRecovery(flow, reason) {
+  if (reason === "hidden") flow.lightStopped = true;
+  const retry =
+    !flow.lightRecovering &&
+    flow.lightStarted &&
+    (reason === "unstable" ||
+      (reason === "slow" && flow.lightMode !== "protocol"));
+  if (retry) {
+    flow.lightRecovering = true;
+    flow.lightLimit = null;
+    flow.lightStartedAt = null;
+  }
+  if (reason === "ready") flow.lightRecovering = false;
+  return retry;
+}

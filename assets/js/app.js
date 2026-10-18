@@ -1,4 +1,12 @@
 import {
+  snapshotFlow,
+  restoreFlow,
+  validSnapshot,
+  audioSettings,
+} from "./recovery.js";
+import { parseBackup } from "./data-transfer.js";
+import { ScreenAwake } from "./wake-lock.js";
+import {
   paths,
   sessions,
   programs,
@@ -8,7 +16,7 @@ import {
 } from "./catalog.js";
 import { createStore } from "./store.js";
 import { SessionController, phaseAt } from "./session.js";
-import { breathAt, cycleDuration } from "./breath.js";
+import { breathAt, cycleDuration, practiceDuration } from "./breath.js";
 import { AudioEngine } from "./audio.js";
 import {
   sessionId,
@@ -18,6 +26,7 @@ import {
 } from "./platform.js";
 import {
   FrameMonitor,
+  lightRecovery,
   availableLightHz,
   visualFrequency,
   visualCycles,
@@ -28,6 +37,8 @@ import { t, local, language, setLanguage, esc, icon, time } from "./i18n.js";
 import * as views from "./views.js";
 import {
   exportPanel,
+  exportMetadata,
+  updateExportSize,
   startExport,
   downloadBlob,
   cancelExport,
@@ -40,6 +51,10 @@ try {
 const store = createStore(storage),
   audio = new AudioEngine();
 const frameMonitor = new FrameMonitor();
+const ownerId = sessionId();
+const wake = new ScreenAwake(navigator.wakeLock, showWakeStatus);
+let importPreview = null;
+let frameHandle = null;
 const mediaMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const state = {
   flow: null,
@@ -63,10 +78,12 @@ document.body.append(blackScreen);
 function openBlackScreen() {
   blackScreen.innerHTML = `<button id="wakeScreen" aria-label="${t("Pokaż sterowanie sesją", "Show session controls")}"><span>${t("Dotknij ekranu, aby wrócić", "Tap to return")}</span></button>`;
   if (!blackScreen.open) blackScreen.showModal();
+  syncRuntime();
   blackScreen.querySelector("button").focus({ preventScroll: true });
 }
 blackScreen.addEventListener("click", () => blackScreen.close());
 blackScreen.addEventListener("close", () => {
+  syncRuntime();
   (document.getElementById("playerVisual") || main).focus({
     preventScroll: true,
   });
@@ -134,7 +151,7 @@ function render() {
   if (page === "path") main.innerHTML = views.pathView(id);
   else if (page === "library") main.innerHTML = views.library(state.filters);
   else if (page === "prepare") {
-    const selected = sessions[id] ? id : "deepFocus";
+    const selected = Object.hasOwn(sessions, id) ? id : "deepFocus";
     if (state.selected !== selected) {
       state.selected = selected;
       state.visual = prefs().audioOnly
@@ -168,6 +185,15 @@ function render() {
   else if (page === "complete" && state.result)
     main.innerHTML = views.completed(state.result);
   else main.innerHTML = views.home(prefs());
+  if (!state.flow) {
+    const recoverable = availableRecoveries();
+    state.recoveryIds = recoverable.map((s) => s.id).join();
+    if (recoverable.length)
+      main.insertAdjacentHTML(
+        "afterbegin",
+        `<section class="notice recovery-notice" aria-label="${t("Przerwane sesje", "Interrupted sessions")}"><h2>${t("Twoja sesja czeka", "Your session is waiting")}</h2><p>${t("Wróć do zapisanego miejsca lub zachowaj ten czas w historii. Dźwięk ruszy dopiero po naciśnięciu Wznów. Światło pozostanie wyłączone.", "Return to your saved position or keep this time in history. Sound starts only when you press Resume. Light stays off.")}</p>${recoverable.map((s) => `<div class="button-row"><span>${s.sessionId === "breath" ? local(sessions.breath.title) : esc(sessionFor(s.sessionId).name)} · ${time(s.position)}</span>${views.button("recover", t("Wróć do sesji", "Return to session"), "", "btn", `data-id="${esc(s.id)}"`)}${views.button("closeRecovery", t("Zapisz i zakończ", "Save and finish"), "", "btn btn-quiet", `data-id="${esc(s.id)}"`)}</div>`).join("")}</section>`,
+      );
+  }
   refs = {
     orb: main.querySelector(".player-stage>.orb"),
     label: document.getElementById("breathLabel"),
@@ -190,6 +216,7 @@ function render() {
   lastSecond = "";
   updateMini();
   updatePlayer();
+  syncRuntime();
 }
 function fitPlayer() {
   fitBreathingForm(main.querySelector(".player-stage"), refs.orb);
@@ -330,13 +357,14 @@ function updatePlayer() {
     breath = f.session.id === "breath" || f.stage === "prelude";
   const pattern = f.stage === "prelude" ? "4-6" : f.pattern;
   const b = breath ? breathAt(elapsed, pattern) : null;
-  updateOrb(refs.orb, {
-    elapsed,
-    breath: b,
-    reduced: reduced() || (f.visual === "advanced" && !breath),
-    paused,
-  });
-  if (refs.light) updateLight(f, elapsed, paused);
+  if (!blackScreen.open && !document.hidden)
+    updateOrb(refs.orb, {
+      elapsed,
+      breath: b,
+      reduced: reduced() || (f.visual === "advanced" && !breath),
+      paused,
+    });
+  if (refs.light && !blackScreen.open) updateLight(f, elapsed, paused);
   const key = `${Math.ceil(elapsed)}-${paused}-${language}-${f.stage}`;
   if (key !== lastSecond) {
     lastSecond = key;
@@ -418,10 +446,17 @@ function updateLight(f, elapsed, paused) {
               ? "slow"
               : assessment.reason;
   const ready = reason === "ready";
-  if (f.lightStarted && ["unstable", "hidden"].includes(reason))
-    f.lightStopped = true;
-  if (f.lightStarted && reason === "slow" && f.lightMode !== "protocol")
-    f.lightStopped = true;
+  if (lightRecovery(f, reason)) {
+    frameMonitor.reset();
+    f.lightInterruptedAt = elapsed;
+  }
+  if (ready) {
+    f.appliedLightHz = applied;
+    f.lightFrequencyRange = {
+      min: Math.min(f.lightFrequencyRange?.min ?? applied, applied),
+      max: Math.max(f.lightFrequencyRange?.max ?? applied, applied),
+    };
+  }
   if (ready) {
     if (f.lightStartedAt == null) f.lightStartedAt = elapsed;
     f.lightStarted = true;
@@ -441,8 +476,8 @@ function updateLight(f, elapsed, paused) {
     ready: `${t("Światło", "Light")} ${applied.toFixed(1)} Hz${adapted ? ` · ${t("protokół", "protocol")} ${requested.toFixed(1)} Hz` : ""} · ${Math.round(assessment.fps)} ${t("klatek/s", "frames/s")}`,
     slow: `${t("Protokół", "Protocol")}: ${requested.toFixed(1)} Hz. ${t("Ten ekran: do", "This display: up to")} ${availableLightHz(baseline.fps)} Hz.`,
     unstable: t(
-      "Tempo klatek jest nierówne. Sprawdź ponownie, aby wznowić światło.",
-      "Frame cadence is uneven. Check again to resume light.",
+      "Chwilowa nierówność klatek. Światło wróci po ponownym pomiarze stabilności.",
+      "Temporary uneven frames. Light resumes after stability is measured again.",
     ),
     stopped: t(
       "Światło wstrzymane po przerwie w wyświetlaniu. Sprawdź ponownie, aby wznowić.",
@@ -479,6 +514,7 @@ function retryLight(adapt = false) {
   if (adapt) f.lightMode = "adaptive";
   frameMonitor.reset();
   f.lightLimit = null;
+  f.lightRecovering = false;
   f.lightStopped = false;
   f.lightStarted = false;
   f.lightStartedAt = null;
@@ -537,7 +573,7 @@ async function start(id) {
     const duration = p
       ? p.program.steps[p.index].durationMinutes * 60
       : standalone
-        ? prefs().breathDuration
+        ? practiceDuration(prefs().breathDuration, prefs().breathPattern)
         : id === "hypnos"
           ? prefs().hypnosDuration === "infinity"
             ? Infinity
@@ -557,7 +593,9 @@ async function start(id) {
       clock,
       pattern: prefs().breathPattern,
       breathSound: prefs().breathCues,
-      audioPrefs: { noiseType: prefs().noiseType },
+      audioPrefs: audioSettings(prefs()),
+      recoveryId: sessionId(),
+      logId: sessionId(),
       visual: state.visual,
       program: p?.program || null,
       stepIndex: p?.index || 0,
@@ -587,6 +625,7 @@ async function start(id) {
     store.save({ lastSessionId: id, goal: session.goal });
     state.pendingProgram = null;
     lastCue = "";
+    checkpoint();
     setMedia();
     go("session");
     if (!prelude && state.visual === "black") {
@@ -687,6 +726,8 @@ function pause() {
   const f = state.flow;
   if (!f || f.stage === "between" || f.clock.status !== "running") return;
   f.clock.pause();
+  checkpoint();
+  syncRuntime();
   stopHaptics();
   audio.stop();
   if ("mediaSession" in navigator)
@@ -734,6 +775,8 @@ async function resume() {
     );
   } finally {
     state.starting = false;
+    checkpoint();
+    syncRuntime();
     updateMini();
     updatePlayer();
   }
@@ -756,6 +799,7 @@ function enterSound() {
   const opening = saveLog(f, f.clock.complete);
   f.total += opening?.durationSeconds || 0;
   f.logged = false;
+  f.logId = sessionId();
   f.stage = "session";
   frameMonitor.reset();
   if (f.visual === "black") {
@@ -766,6 +810,7 @@ function enterSound() {
   if (audio.graph) f.clock.anchor = audio.graph.startedAt;
   f.startedAt = Date.now();
   lastCue = "";
+  checkpoint();
   render();
 }
 function saveLog(f, complete) {
@@ -773,13 +818,20 @@ function saveLog(f, complete) {
   f.logged = true;
   const prelude = f.stage === "prelude";
   const entry = {
-    id: sessionId(),
+    id: f.logId,
+    visitId: f.recoveryId,
     sessionId: prelude ? "breath" : f.session.id,
     goal: prelude ? "breath" : f.session.goal,
     startedAt: f.startedAt,
     endedAt: Date.now(),
     durationSeconds: Math.round(f.clock.position()),
     audioVersion: 2,
+    audioPrefs: f.audioPrefs,
+    pattern: prelude ? "4-6" : f.pattern,
+    visual: f.visual,
+    appliedLightHz: f.appliedLightHz ?? null,
+    lightContrast: f.lightContrast,
+    lightFrequencyRange: f.lightFrequencyRange,
     soundBackground:
       prelude || f.session.id === "breath" ? null : f.audioPrefs.noiseType,
     completed: complete,
@@ -799,6 +851,8 @@ function finish(complete) {
   f.total += entry?.durationSeconds || 0;
   if (complete && f.program && f.stepIndex < f.program.steps.length - 1) {
     f.stage = "between";
+    if (blackScreen.open) blackScreen.close();
+    checkpoint();
     setMedia();
     go("session");
     render();
@@ -814,6 +868,8 @@ function finish(complete) {
         : f.program?.name || f.session.title,
     durationSeconds: f.total,
   };
+  store.clearCheckpoint(f.recoveryId);
+  if (blackScreen.open) blackScreen.close();
   state.nightResult = ["night", "black"].includes(f.visual);
   stopHaptics();
   state.flow = null;
@@ -836,11 +892,12 @@ async function nextStep() {
     const step = f.program.steps[f.stepIndex + 1];
     const session = makeSession(step.sessionId, step.durationMinutes * 60);
     audio.play(session, 0, prefs());
-    f.audioPrefs = { noiseType: prefs().noiseType };
+    f.audioPrefs = audioSettings(prefs());
     f.stepIndex++;
     f.session = session;
     f.stage = "session";
     f.logged = false;
+    f.logId = sessionId();
     f.startedAt = Date.now();
     f.visual = prefs().audioOnly
       ? "none"
@@ -849,6 +906,7 @@ async function nextStep() {
         : "calm";
     f.clock.start(f.session.duration);
     if (audio.graph) f.clock.anchor = audio.graph.startedAt;
+    checkpoint();
     setMedia();
     render();
   } catch {
@@ -871,6 +929,8 @@ function finishProgram() {
     name: f.program.name,
     durationSeconds: f.total,
   };
+  store.clearCheckpoint(f.recoveryId);
+  if (blackScreen.open) blackScreen.close();
   state.nightResult = ["night", "black"].includes(state.flow?.visual);
   stopHaptics();
   state.flow = null;
@@ -891,17 +951,162 @@ function tick() {
   }
   updatePlayer();
 }
+function showWakeStatus() {
+  const node = document.getElementById("wakeStatus");
+  if (!node) return;
+  const messages = {
+    active: t("Ekran pozostaje włączony", "Screen stays on"),
+    pending: t("Utrzymuję ekran…", "Keeping the screen on…"),
+    unavailable: t(
+      "System może wygasić ekran. Utrzymywanie ekranu jest niedostępne.",
+      "The system may turn the screen off. Screen wake lock is unavailable.",
+    ),
+    released: t(
+      "System zwolnił utrzymywanie ekranu.",
+      "The system released the screen wake lock.",
+    ),
+  };
+  node.hidden = !messages[wake.status];
+  const text = messages[wake.status] || "";
+  if (node.textContent !== text) node.textContent = text;
+}
+function syncRuntime() {
+  const f = state.flow;
+  const visible =
+    !document.hidden &&
+    !blackScreen.open &&
+    state.route === "session" &&
+    !dialog.open;
+  const running = f?.clock.status === "running" && f.stage !== "between";
+  const breath = f?.session.id === "breath" || f?.stage === "prelude";
+  wake.setWanted(
+    Boolean(
+      visible &&
+        running &&
+        prefs().keepScreenAwake &&
+        (breath || (f.visual === "advanced" && !f.lightStopped)),
+    ),
+  );
+  showWakeStatus();
+  const animate =
+    visible &&
+    running &&
+    !reduced() &&
+    ((breath && f.visual !== "none") ||
+      (f?.visual === "advanced" && !f.lightStopped) ||
+      (refs.orb && f?.visual !== "none"));
+  if (animate && frameHandle === null)
+    frameHandle = requestAnimationFrame(frame);
+  else if (!animate && frameHandle !== null) {
+    cancelAnimationFrame(frameHandle);
+    frameHandle = null;
+  }
+}
 function frame(timestamp) {
+  frameHandle = null;
   if (!document.hidden) {
-    frameMonitor.add(timestamp);
+    if (state.flow?.visual === "advanced") frameMonitor.add(timestamp);
     tick();
   }
-  requestAnimationFrame(frame);
+  syncRuntime();
 }
-requestAnimationFrame(frame);
 setInterval(() => {
-  if (document.hidden) tick();
+  tick();
+  syncRuntime();
 }, 300);
+function availableRecoveries() {
+  return store
+    .checkpoints()
+    .filter(
+      (s) =>
+        validSnapshot(s) &&
+        (s.released || Date.now() - s.updatedAt > 15000) &&
+        (s.stage === "between" || !store.history.some((h) => h.id === s.logId)),
+    );
+}
+setInterval(() => {
+  if (state.flow) checkpoint();
+  else if (
+    ["home", "session", "history"].includes(state.route) &&
+    availableRecoveries()
+      .map((s) => s.id)
+      .join() !== state.recoveryIds
+  )
+    render();
+}, 5000);
+function checkpoint(released = false) {
+  const f = state.flow;
+  if (!f) return;
+  const saved = store.getCheckpoint(f.recoveryId);
+  if (saved && saved.owner !== ownerId) {
+    relinquish();
+    return;
+  }
+  store.checkpoint({
+    ...snapshotFlow(f, ownerId),
+    released: released || f.clock.status !== "running",
+  });
+}
+function relinquish() {
+  if (!state.flow) return;
+  state.flow.clock.pause();
+  audio.stop();
+  stopHaptics();
+  state.flow = null;
+  state.token++;
+  toast(
+    t(
+      "Ta sesja została przejęta w innej karcie.",
+      "This session was taken over in another tab.",
+    ),
+  );
+  render();
+}
+function recover(id, finishSaved = false) {
+  const s = store.getCheckpoint(id);
+  if (state.flow || !validSnapshot(s)) return;
+  if (!s.released && Date.now() - s.updatedAt < 15000) {
+    toast(
+      t(
+        "Sesja jest aktywna w innej karcie.",
+        "The session is active in another tab.",
+      ),
+    );
+    return;
+  }
+  if (s.stage !== "between" && store.history.some((h) => h.id === s.logId)) {
+    store.clearCheckpoint(id);
+    render();
+    return;
+  }
+  const f = restoreFlow(s, () => audio.now());
+  store.save(f.audioPrefs);
+  state.flow = f;
+  store.checkpoint({
+    ...s,
+    owner: ownerId,
+    updatedAt: Date.now(),
+    released: true,
+  });
+  if (finishSaved) {
+    if (f.stage === "between") finishProgram();
+    else finish(false);
+  } else {
+    setMedia();
+    go("session");
+  }
+}
+window.addEventListener("storage", (event) => {
+  if (state.flow && event.key === "cortex.active.v1." + state.flow.recoveryId) {
+    const saved = store.getCheckpoint(state.flow.recoveryId);
+    if (!saved || saved.owner !== ownerId) relinquish();
+  } else if (
+    !state.flow &&
+    ["home", "session", "history"].includes(state.route) &&
+    event.key?.startsWith("cortex.active.v1.")
+  )
+    render();
+});
 audio.onInterrupted = () => {
   stopBreathPreview();
   if (state.flow?.clock.status === "running") {
@@ -924,7 +1129,9 @@ document.addEventListener("visibilitychange", () => {
     (state.flow?.session.id === "breath" || state.flow?.stage === "prelude")
   )
     pause();
+  checkpoint();
   if (!document.hidden) tick();
+  syncRuntime();
 });
 
 function openDialog(type) {
@@ -935,8 +1142,10 @@ function openDialog(type) {
     type === "settings"
       ? views.settings(prefs(), store.available, active())
       : exportPanel(state.selected, prefs());
+  if (type === "export") updateExportSize(dialog);
   if (!dialog.open) dialog.showModal();
-  else dialog.querySelector("button")?.focus();
+  syncRuntime();
+  if (dialog.open) dialog.querySelector("button")?.focus();
 }
 function closeDialog() {
   cancelExport();
@@ -946,7 +1155,10 @@ function closeDialog() {
 dialog.addEventListener("cancel", () => {
   cancelExport();
 });
-dialog.addEventListener("close", () => restoreFocus?.focus?.());
+dialog.addEventListener("close", () => {
+  restoreFocus?.focus?.();
+  syncRuntime();
+});
 dialog.addEventListener("click", (e) => {
   if (e.target === dialog) {
     const r = dialog.getBoundingClientRect();
@@ -971,6 +1183,20 @@ function updatePreference(key, value, rerender = true) {
   store.save({ [key]: value });
   applyPreferences();
   audio.volumes(prefs());
+  if (
+    state.flow &&
+    [
+      "masterVolume",
+      "beatVolume",
+      "noiseVolume",
+      "intensity",
+      "breathVolume",
+    ].includes(key)
+  ) {
+    state.flow.audioPrefs[key] = prefs()[key];
+    checkpoint();
+  }
+  syncRuntime();
   if (key === "audioOnly") {
     state.visual = value ? "none" : "calm";
     if (state.flow) {
@@ -1007,8 +1233,32 @@ document.addEventListener("input", (e) => {
       .forEach((o) => (o.textContent = el.value + "%"));
   }
 });
-document.addEventListener("change", (e) => {
+document.addEventListener("change", async (e) => {
   const el = e.target;
+  if (el.id === "exportRate" || el.id === "exportDuration")
+    updateExportSize(dialog);
+  if (el.id === "importFile") {
+    const file = el.files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > 8 * 1024 * 1024) throw Error("Too large");
+      importPreview = parseBackup(await file.text());
+      const count = importPreview.history.filter(
+        (h) => !store.history.some((old) => old.id === h.id),
+      ).length;
+      dialog.dataset.type = "import";
+      dialog.innerHTML = `<div class="dialog-head"><h2 id="dialogTitle">${t("Przenieś historię", "Import history")}</h2>${views.button("closeDialog", "", "close", "icon-btn", `aria-label="${t("Zamknij", "Close")}"`)}</div><div class="dialog-body"><p>${t("Nowe wpisy", "New entries")}: ${count}. ${t("Istniejące wpisy pozostaną bez zmian.", "Existing entries will be kept.")}</p>${importPreview.preferences ? `<label class="toggle"><input id="importPreferences" type="checkbox" ${active() ? "disabled" : ""}>${t("Przenieś także ustawienia", "Also import preferences")}</label>` : ""}${views.button("confirmImport", t("Dodaj do historii", "Add to history"), "", "btn btn-primary")}</div>`;
+      dialog.querySelector("button")?.focus();
+    } catch {
+      toast(
+        t(
+          "Nieprawidłowy plik kopii Cortex. Żadne dane nie zostały zmienione.",
+          "Invalid Cortex backup. No data was changed.",
+        ),
+      );
+    }
+    return;
+  }
   if (el.dataset.pref) {
     updatePreference(
       el.dataset.pref,
@@ -1073,7 +1323,25 @@ document.addEventListener("click", async (e) => {
     setMedia();
   } else if (a === "settings") openDialog("settings");
   else if (a === "closeDialog") closeDialog();
-  else if (a === "filterGoal") {
+  else if (a === "recover") recover(el.dataset.id);
+  else if (a === "closeRecovery") recover(el.dataset.id, true);
+  else if (a === "importData") dialog.querySelector("#importFile").click();
+  else if (a === "confirmImport" && importPreview) {
+    const count = store.importHistory(importPreview.history);
+    if (
+      !active() &&
+      dialog.querySelector("#importPreferences")?.checked &&
+      importPreview.preferences
+    ) {
+      store.save(importPreview.preferences);
+      setLanguage(prefs().lang);
+      applyPreferences();
+    }
+    importPreview = null;
+    closeDialog();
+    render();
+    toast(t("Dodano wpisy: ", "Entries added: ") + count);
+  } else if (a === "filterGoal") {
     state.filters.goal = el.dataset.value;
     render();
   } else if (a === "clearFilters") {
@@ -1164,29 +1432,7 @@ document.addEventListener("click", async (e) => {
   else if (a === "renderExport") startExport(dialog, prefs());
   else if (a === "cancelExport") cancelExport(dialog);
   else if (a === "exportMetadata") {
-    const id = dialog.querySelector("#exportSession").value;
-    const s = sessionFor(id);
-    downloadBlob(
-      new Blob(
-        [
-          JSON.stringify(
-            {
-              sessionId: s.id,
-              goal: s.goal,
-              name: s.name,
-              title: local(s.title),
-              description: local(s.description),
-              duration: s.duration,
-              phases: s.phases,
-            },
-            (_, value) => (value === Infinity ? "Infinity" : value),
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      ),
-      `cortex-${id}.json`,
-    );
+    exportMetadata(dialog, prefs());
   } else if (a === "exportArt") {
     const s = sessionFor(dialog.querySelector("#exportSession").value);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#f7f8f5"/><g fill="none" stroke="#77957d" stroke-width="2">${Array.from({ length: 22 }, (_, i) => `<ellipse cx="1180" cy="440" rx="${70 + i * 9}" ry="${100 + i * 7}" transform="rotate(${i * 3} 1180 440)"/>`).join("")}</g><text x="120" y="150" fill="#386b55" font-family="sans-serif" font-size="38">cortex</text><text x="120" y="430" fill="#243a32" font-family="sans-serif" font-size="68">${esc(s.name)}</text><text x="120" y="510" fill="#627168" font-family="sans-serif" font-size="34">${esc(local(s.title))}</text></svg>`;
@@ -1226,6 +1472,8 @@ window.addEventListener("pagehide", () => {
   state.token++;
   state.starting = false;
   pause();
+  checkpoint(true);
+  wake.setWanted(false);
   audio.stop();
   cancelExport();
 });

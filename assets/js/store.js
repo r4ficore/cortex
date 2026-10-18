@@ -1,3 +1,4 @@
+import { backgroundIds } from "./background-catalog.js";
 const KEY = "cortex.preferences.v4";
 const HISTORY = "cortex.history.v3";
 export const defaults = {
@@ -19,6 +20,7 @@ export const defaults = {
   prelude: false,
   reduceMotion: null,
   audioOnly: false,
+  keepScreenAwake: true,
 };
 const num = (value, fallback, min, max) =>
   Number.isFinite(Number(value))
@@ -32,9 +34,7 @@ export function migratePreferences(raw = {}, legacyLang) {
   p.goal = ["breath", "focus", "calm", "sleep", "energy"].includes(raw.goal)
     ? raw.goal
     : "focus";
-  p.noiseType = ["soundscape", "brown", "pink", "white", "none"].includes(
-    raw.noiseType || raw.preferredNoiseType,
-  )
+  p.noiseType = backgroundIds.includes(raw.noiseType || raw.preferredNoiseType)
     ? raw.noiseType || raw.preferredNoiseType
     : "soundscape";
   p.breathPattern = ["4-6", "4-7-8", "box"].includes(raw.breathPattern)
@@ -69,13 +69,19 @@ export function migratePreferences(raw = {}, legacyLang) {
     : 180;
   for (const key of ["breathCues", "breathHaptics", "prelude", "audioOnly"])
     p[key] = raw[key] === true;
+  p.keepScreenAwake = raw.keepScreenAwake !== false;
   p.reduceMotion =
     typeof raw.reduceMotion === "boolean" ? raw.reduceMotion : null;
   // Advanced stimulation is deliberately never persisted or inherited.
   delete p.visualMode;
   delete p.safeVisuals;
   p.version = 4;
-  return p;
+  if (
+    typeof p.lastSessionId !== "string" ||
+    !/^[a-zA-Z0-9]{1,64}$/.test(p.lastSessionId)
+  )
+    p.lastSessionId = defaults.lastSessionId;
+  return Object.fromEntries(Object.keys(defaults).map((key) => [key, p[key]]));
 }
 export function createStore(storage) {
   let available = Boolean(storage);
@@ -129,11 +135,53 @@ export function createStore(storage) {
         ).values(),
       ];
   }
+  const checkpoints = new Map();
+  const prefix = "cortex.active.v1.";
   return {
+    checkpoints() {
+      try {
+        if (typeof storage?.length === "number") checkpoints.clear();
+        for (let i = 0; i < (storage?.length || 0); i++) {
+          const key = storage.key(i);
+          if (key?.startsWith(prefix)) {
+            const saved = read(key);
+            if (saved) checkpoints.set(key.slice(prefix.length), saved);
+          }
+        }
+      } catch {
+        available = false;
+      }
+      return [...checkpoints.values()];
+    },
+    checkpoint(value) {
+      checkpoints.set(value.id, value);
+      write(prefix + value.id, value);
+    },
+    getCheckpoint(id) {
+      const value = read(prefix + id);
+      return value || (available ? null : checkpoints.get(id));
+    },
+    clearCheckpoint(id) {
+      checkpoints.delete(id);
+      try {
+        storage?.removeItem(prefix + id);
+      } catch {
+        available = false;
+      }
+    },
+    importHistory(entries) {
+      syncHistory();
+      const ids = new Set(history.map((h) => h.id));
+      const additions = entries.filter((h) => !ids.has(h.id));
+      history.push(...additions);
+      write(HISTORY, history);
+      return additions.length;
+    },
     get prefs() {
       return prefs;
     },
     get history() {
+      syncHistory();
       return history;
     },
     get available() {
@@ -150,7 +198,9 @@ export function createStore(storage) {
     },
     add(entry) {
       syncHistory();
-      history = [...history, entry];
+      history = [
+        ...new Map([...history, entry].map((h) => [h.id, h])).values(),
+      ];
       write(HISTORY, history);
     },
     rate(id, rating) {
