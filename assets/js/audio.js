@@ -7,10 +7,13 @@ import {
   TRANSITION_SECONDS,
 } from "./signal.js";
 import { intensityProfiles, frequencies, phaseVolume } from "./session.js";
+import { breathSound } from "./breath-sound.js";
+import { cycleDuration } from "./breath.js";
 export class AudioEngine {
   constructor() {
     this.ctx = null;
     this.graph = null;
+    this.breathBuffers = new Map();
     this.onInterrupted = () => {};
   }
   async unlock() {
@@ -167,15 +170,52 @@ export class AudioEngine {
     if (b.copyToChannel) b.copyToChannel(d, 0);
     return b;
   }
+  playBreath(pattern, duration, offset, prefs) {
+    this.stop();
+    const c = this.ctx;
+    const key = `${c.sampleRate}:${pattern}`;
+    if (!this.breathBuffers.has(key)) {
+      const data = breathSound(pattern, c.sampleRate);
+      const buffer = c.createBuffer(1, data.length, c.sampleRate);
+      buffer.copyToChannel(data, 0);
+      this.breathBuffers.set(key, buffer);
+    }
+    const now = c.currentTime + 0.04;
+    const source = c.createBufferSource(),
+      master = c.createGain(),
+      envelope = c.createGain();
+    source.buffer = this.breathBuffers.get(key);
+    source.loop = true;
+    master.gain.value = prefs.masterVolume;
+    source.connect(envelope);
+    envelope.connect(master);
+    master.connect(c.destination);
+    const remaining = Math.max(0, duration - offset);
+    const fade = Math.min(0.08, remaining / 2);
+    envelope.gain.setValueAtTime(0, now);
+    envelope.gain.linearRampToValueAtTime(1, now + fade);
+    envelope.gain.setValueAtTime(1, now + remaining - fade);
+    envelope.gain.linearRampToValueAtTime(0, now + remaining);
+    source.start(now, offset % cycleDuration(pattern));
+    source.stop(now + remaining);
+    this.graph = {
+      nodes: [source, master, envelope],
+      sources: [source],
+      master,
+      envelope,
+      startedAt: now,
+      kind: "breath",
+    };
+  }
   volumes(prefs) {
     if (!this.graph) return;
     const now = this.ctx.currentTime;
     for (const [p, v] of [
       [this.graph.master.gain, prefs.masterVolume],
-      [this.graph.balance.gain, prefs.beatVolume],
-      [this.graph.noiseGain.gain, prefs.noiseVolume * NOISE_GAIN],
+      [this.graph.balance?.gain, prefs.beatVolume],
+      [this.graph.noiseGain?.gain, prefs.noiseVolume * NOISE_GAIN],
     ])
-      p.setTargetAtTime(v, now, 0.06);
+      p?.setTargetAtTime(v, now, 0.06);
   }
   stop() {
     const g = this.graph;
@@ -212,25 +252,6 @@ export class AudioEngine {
       o.disconnect();
       g.disconnect();
       p.disconnect();
-    };
-  }
-  cue(phase, volume = 0.5) {
-    if (!this.ctx || this.ctx.state !== "running") return;
-    const c = this.ctx,
-      o = c.createOscillator(),
-      g = c.createGain(),
-      now = c.currentTime;
-    o.frequency.value = phase === "inhale" ? 440 : 330;
-    g.gain.value = 0;
-    o.connect(g);
-    g.connect(c.destination);
-    g.gain.setTargetAtTime(0.04 * volume, now, 0.02);
-    g.gain.setTargetAtTime(0, now + 0.12, 0.04);
-    o.start();
-    o.stop(now + 0.4);
-    o.onended = () => {
-      o.disconnect();
-      g.disconnect();
     };
   }
 }

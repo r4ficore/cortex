@@ -112,7 +112,9 @@ Losowy szum nie daje identycznych próbek między odtworzeniem i eksportem; zgod
 
 ## Oddech, noc i iPhone
 
-Forma oddechu ma teraz średnicę od 46% do 100%, czyli ponad dwukrotną zmianę rozmiaru. Stały obrys pozwala ocenić ruch bez zapamiętywania poprzedniej klatki. Delikatna strzałka pokazuje kierunek. Napis ma 15 px, odliczanie 12 px; tekst pozostaje ciemny i czytelny. Ograniczony ruch zatrzymuje kształt, zachowując fazę i czas. Rytmy nie zostały zmienione. Instrukcja nadal wymaga komfortowego, niewymuszonego oddechu zgodnie z [NHS](https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/).
+W rytmach 4–6 i 4–7–8 forma oddechu ma średnicę od 46% do 100%, czyli ponad dwukrotną zmianę rozmiaru. Stały obrys pozwala ocenić ruch bez zapamiętywania poprzedniej klatki. Delikatna strzałka pokazuje kierunek. Napis ma 15 px, odliczanie 12 px; tekst pozostaje ciemny i czytelny. Ograniczony ruch zatrzymuje kształt, zachowując fazę i czas. Rytmy nie zostały zmienione. Instrukcja nadal wymaga komfortowego, niewymuszonego oddechu zgodnie z [NHS](https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/).
+
+Box ma osobną wizualizację: punkt obiega kwadrat, a cztery boki odpowiadają wdechowi, zatrzymaniu, wydechowi i zatrzymaniu. Dźwięk prowadzenia nie korzysta już z krótkich tonów 440/330 Hz. To syntetyczny szum przepływu powietrza, jaśniejszy na wdechu i cieplejszy na wydechu, z ciszą podczas zatrzymań. Działa przez pełne fazy, na zegarze audio wspólnym z animacją; nie jest zapisem czyjegoś oddechu ani dowodem biologicznej skuteczności. Szczegóły odbioru: `breathing-qa.md`.
 
 Tryb nocny przyciemnia **cały interfejs**, nie tylko ilustrację. Czarny ekran używa #000 i po 4 sekundach usuwa podpowiedź. Dotknięcie, Enter/Spacja lub Escape przywraca sterowanie. Dźwięk trwa nadal. Przeglądarka nie blokuje w ten sposób urządzenia i nie ma kontroli nad wszystkimi paskami Safari ani nad fizycznym podświetleniem LCD. Na OLED czerń i podświetlenie LCD mają różne właściwości. Po naturalnym końcu czarna zasłona nie odsłania automatycznie jasnego ekranu.
 

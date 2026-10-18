@@ -1,3 +1,4 @@
+import { boxPosition } from "./breath.js";
 let serial = 0;
 export function orb(goal = "calm", className = "") {
   const id = `orb${++serial}`;
@@ -25,6 +26,22 @@ export function updateOrb(
   element.style.setProperty("transform", `scale(${scale}) rotate(${turn}deg)`);
   element.style.opacity = "1";
   if (breath) {
+    if (element.dataset.pattern === "box") {
+      const [x, y] = boxPosition(breath);
+      element
+        .querySelector(".box-dot")
+        ?.setAttribute("transform", `translate(${x} ${y})`);
+      element
+        .querySelector(".box-trace")
+        ?.setAttribute(
+          "stroke-dasharray",
+          `${reduced ? 0 : (breath.index + breath.progress) * 25} 100`,
+        );
+      element.dataset.step = String(breath.index);
+      element.dataset.reduced = String(reduced);
+      element.dataset.phase = paused ? "paused" : breath.phase;
+      return;
+    }
     const lung = element.querySelector(".breath-lung");
     lung?.style.setProperty(
       "transform",
@@ -40,7 +57,9 @@ export function updateOrb(
     );
   }
 }
-export function breathingForm() {
+export function breathingForm(pattern = "4-6", labels = {}) {
+  if (pattern === "box")
+    return `<div class="orb breath-orb breath-box" data-goal="breath" data-pattern="box" data-step="0" aria-hidden="true"><svg viewBox="0 0 300 300" fill="none"><rect x="48" y="48" width="204" height="204" rx="0" class="box-wash"/><path class="box-track" d="M48 252V48H252V252H48"/><path class="box-trace" d="M48 252V48H252V252H48" pathLength="100" stroke-dasharray="0 100"/><path class="box-edge" data-edge="0" d="M48 252V48"/><path class="box-edge" data-edge="1" d="M48 48H252"/><path class="box-edge" data-edge="2" d="M252 48V252"/><path class="box-edge" data-edge="3" d="M252 252H48"/><g class="box-dot" transform="translate(48 252)"><circle r="11" class="box-halo"/><circle r="5"/></g></svg><span class="box-label box-inhale" data-edge="0">${labels.inhale || "Wdech"}<small>4 s</small></span><span class="box-label box-hold-full" data-edge="1">${labels.hold || "Zatrzymaj"}<small>4 s</small></span><span class="box-label box-exhale" data-edge="2">${labels.exhale || "Wydech"}<small>4 s</small></span><span class="box-label box-hold-empty" data-edge="3">${labels.hold || "Zatrzymaj"}<small>4 s</small></span></div>`;
   return `<div class="orb breath-orb" data-goal="breath" aria-hidden="true"><span class="breath-boundary"></span><span class="breath-lung"></span><span class="breath-direction"><svg viewBox="0 0 24 24"><path d="m8 12 4-4 4 4m-8 5 4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>`;
 }
 
@@ -50,4 +69,5 @@ export function fitBreathingForm(stage, element) {
   const size = Math.max(0, Math.min(width, height, 400));
   element.style.width = `${size}px`;
   element.style.height = `${size}px`;
+  if (element.dataset) element.dataset.compact = String(size < 245);
 }

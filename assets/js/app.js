@@ -8,7 +8,7 @@ import {
 } from "./catalog.js";
 import { createStore } from "./store.js";
 import { SessionController, phaseAt } from "./session.js";
-import { breathAt } from "./breath.js";
+import { breathAt, cycleDuration } from "./breath.js";
 import { AudioEngine } from "./audio.js";
 import {
   sessionId,
@@ -75,7 +75,10 @@ let restoreFocus = null,
   refs = {},
   lastCue = "",
   lastSecond = "",
-  toastTimer;
+  toastTimer,
+  breathPreviewTimer,
+  breathPreviewToken = 0,
+  breathPreviewPlaying = false;
 const prefs = () => store.prefs;
 const reduced = () => mediaMotion.matches || prefs().reduceMotion === true;
 function applyPreferences() {
@@ -101,6 +104,7 @@ function active() {
   return Boolean(state.flow);
 }
 function render() {
+  stopBreathPreview();
   const route = location.hash.slice(1) || "home";
   const [page, id] = route.split("/");
   state.route = page;
@@ -225,9 +229,8 @@ function updateMotionNote() {
           "Podążaj za fazą i odliczaniem. Nie wymuszaj oddechu.",
           "Follow the phase and countdown. Do not force your breath.",
         )
-      : t(
-          "Forma rośnie — wdech. Maleje — wydech.",
-          "Growing — breathe in. Shrinking — breathe out.",
+      : views.breathTip(
+          state.flow.stage === "prelude" ? "4-6" : state.flow.pattern,
         );
 }
 function syncExpandedView() {
@@ -390,7 +393,6 @@ function updatePlayer() {
   }
   if (b && !paused && !document.hidden && b.key !== lastCue) {
     lastCue = b.key;
-    if (prefs().breathCues) audio.cue(b.phase, prefs().masterVolume);
     if (prefs().breathHaptics) breathHaptic(b.phase);
   }
 }
@@ -512,6 +514,7 @@ function setMedia() {
 }
 async function start(id) {
   if (state.starting || state.flow) return;
+  stopBreathPreview();
   const lightContrast = state.lightSettings.contrast;
   const lightMode = state.lightSettings.mode;
   state.starting = true;
@@ -553,6 +556,7 @@ async function start(id) {
       stage: prelude ? "prelude" : "session",
       clock,
       pattern: prefs().breathPattern,
+      breathSound: prefs().breathCues,
       visual: state.visual,
       program: p?.program || null,
       stepIndex: p?.index || 0,
@@ -569,6 +573,14 @@ async function start(id) {
     clock.start(prelude ? 60 : session.duration);
     if (!prelude && !standalone) {
       audio.play(session, 0, prefs());
+      clock.anchor = audio.graph.startedAt;
+    } else if (prefs().breathCues) {
+      audio.playBreath(
+        prelude ? "4-6" : state.flow.pattern,
+        clock.duration,
+        0,
+        prefs(),
+      );
       clock.anchor = audio.graph.startedAt;
     }
     store.save({ lastSessionId: id, goal: session.goal });
@@ -599,6 +611,48 @@ async function start(id) {
     }
   }
 }
+function stopBreathPreview() {
+  ++breathPreviewToken;
+  clearTimeout(breathPreviewTimer);
+  if (breathPreviewPlaying && !state.flow) audio.stop();
+  breathPreviewPlaying = false;
+  const button = document.querySelector('[data-action="previewBreath"]');
+  if (button) {
+    button.innerHTML =
+      icon("volume") + t("Posłuchaj jednego cyklu", "Listen to one cycle");
+    button.setAttribute("aria-pressed", "false");
+  }
+}
+async function previewBreath() {
+  if (state.flow || state.starting) return;
+  if (breathPreviewPlaying) {
+    stopBreathPreview();
+    return;
+  }
+  const token = ++breathPreviewToken;
+  breathPreviewPlaying = true;
+  try {
+    await audio.unlock();
+    if (token !== breathPreviewToken || state.flow) return;
+    const duration = cycleDuration(prefs().breathPattern);
+    audio.playBreath(prefs().breathPattern, duration, 0, prefs());
+    const button = document.querySelector('[data-action="previewBreath"]');
+    if (button) {
+      button.innerHTML = icon("stop") + t("Zatrzymaj odsłuch", "Stop preview");
+      button.setAttribute("aria-pressed", "true");
+    }
+    breathPreviewTimer = setTimeout(stopBreathPreview, duration * 1000 + 100);
+  } catch {
+    if (token !== breathPreviewToken) return;
+    stopBreathPreview();
+    showStartError(
+      t(
+        "Nie udało się odtworzyć oddechu. Spróbuj ponownie.",
+        "Could not play the breathing sound. Please try again.",
+      ),
+    );
+  }
+}
 function showStartError(message) {
   const e = document.getElementById("startError");
   if (e) {
@@ -624,18 +678,24 @@ async function resume() {
   state.starting = true;
   const token = ++state.token;
   try {
-    if (f.session.id !== "breath" || prefs().breathCues) await audio.unlock();
+    if (f.session.id !== "breath" || f.breathSound) await audio.unlock();
     if (state.flow !== f || token !== state.token) return;
     if (f.stage === "session" && f.session.id !== "breath")
       audio.play(f.session, f.clock.position(), prefs());
+    else if (f.breathSound)
+      audio.playBreath(
+        f.stage === "prelude" ? "4-6" : f.pattern,
+        f.clock.duration,
+        f.clock.position(),
+        prefs(),
+      );
     frameMonitor.reset();
     f.lightLimit = null;
     f.lightStopped = false;
     f.lightStarted = false;
     f.lightStartedAt = null;
     f.clock.resume();
-    if (audio.graph && f.stage === "session")
-      f.clock.anchor = audio.graph.startedAt;
+    if (audio.graph) f.clock.anchor = audio.graph.startedAt;
     lastCue = "";
     if ("mediaSession" in navigator)
       navigator.mediaSession.playbackState = "playing";
@@ -813,6 +873,7 @@ setInterval(() => {
   if (document.hidden) tick();
 }, 300);
 audio.onInterrupted = () => {
+  stopBreathPreview();
   if (state.flow?.clock.status === "running") {
     pause();
     toast(
@@ -824,6 +885,7 @@ audio.onInterrupted = () => {
   }
 };
 document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopBreathPreview();
   stopHaptics();
   frameMonitor.reset();
   if (state.flow?.visual === "advanced") state.flow.lightStopped = true;
@@ -836,6 +898,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 function openDialog(type) {
+  stopBreathPreview();
   if (!dialog.open) restoreFocus = document.activeElement;
   dialog.dataset.type = type;
   dialog.innerHTML =
@@ -993,7 +1056,8 @@ document.addEventListener("click", async (e) => {
         ? Number(el.dataset.value)
         : el.dataset.value,
     );
-  } else if (a === "start") await start(el.dataset.session);
+  } else if (a === "previewBreath") await previewBreath();
+  else if (a === "start") await start(el.dataset.session);
   else if (a === "pause") {
     if (state.flow?.clock.status === "paused") await resume();
     else pause();

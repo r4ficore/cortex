@@ -27,6 +27,7 @@ export function breathAt(seconds, pattern = "4-6") {
       const eased = (1 - Math.cos(progress * Math.PI)) / 2;
       return {
         ...step,
+        index: i,
         progress,
         level: step.from + (step.to - step.from) * eased,
         remaining: Math.ceil(step.seconds - t),
@@ -35,4 +36,20 @@ export function breathAt(seconds, pattern = "4-6") {
     }
     t -= step.seconds;
   }
+}
+export function cycleDuration(pattern = "4-6") {
+  return (patterns[pattern] || patterns["4-6"]).reduce(
+    (sum, p) => sum + p.seconds,
+    0,
+  );
+}
+// Inhale up, hold across the top, exhale down, rest across the bottom.
+export function boxPosition({ index, progress }) {
+  const p = Math.max(0, Math.min(1, progress));
+  return [
+    [48, 252 - 204 * p],
+    [48 + 204 * p, 48],
+    [252, 48 + 204 * p],
+    [252 - 204 * p, 252],
+  ][index % 4];
 }

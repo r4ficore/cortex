@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cortex — breathing QA</title>
+  <style>
+    body {
+      margin: 0;
+      background: #dde2de;
+      font: 14px system-ui;
+    }
+    label {
+      display: block;
+      padding: 8px;
+    }
+    select {
+      min-height: 36px;
+    }
+    iframe {
+      display: block;
+      border: 0;
+      width: 390px;
+      height: 660px;
+    }
+  </style>
+  <label
+    >Test viewport
+    <select id="viewport">
+      <option value="390,660">390 × 660</option>
+      <option value="320,568">320 × 568</option>
+      <option value="568,320">568 × 320</option>
+      <option value="1024,600">1024 × 600</option>
+    </select>
+  </label>
+  <!-- Same app, element fullscreen explicitly unavailable; iframe dimensions
+       exercise actual layout/viewport units without pretending to be an iPhone. -->
+  <iframe
+    title="Cortex without native fullscreen"
+    src="../../index.html#prepare/breath"
+    allow="fullscreen 'none'"
+  ></iframe>
+  <script>
+    document.getElementById("viewport").addEventListener("change", (event) => {
+      const [width, height] = event.target.value.split(",");
+      const frame = document.querySelector("iframe");
+      frame.style.width = `${width}px`;
+      frame.style.height = `${height}px`;
+    });
+  </script>
+</html>

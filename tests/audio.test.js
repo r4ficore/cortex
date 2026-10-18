@@ -142,7 +142,7 @@ test("infinite sleep schedules no infinite AudioParam events and system interrup
   assert.equal(interrupted, 1);
   audio.graph = null;
   ctx.onstatechange();
-  assert.equal(interrupted, 2); // Prelude / guided cues also use this clock.
+  assert.equal(interrupted, 2); // Prelude / breathing guide also use this clock.
   delete globalThis.Tone;
 });
 test("blocked audio startup reports an error before a graph is created", async () => {
