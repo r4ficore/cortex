@@ -2185,12 +2185,12 @@ dialog::backdrop {
   margin-top: 2px;
 }
 .box-inhale {
-  left: -8px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
 }
 .box-exhale {
-  right: -8px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
 }
