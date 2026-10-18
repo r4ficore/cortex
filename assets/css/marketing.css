@@ -1037,6 +1037,21 @@ h2 {
     font-size: 14px;
   }
 }
+@media (max-width: 599px) {
+  .m-devices {
+    grid-template-columns: 1fr;
+    width: min(320px, 100%);
+    gap: 78px;
+    padding: 0 8px;
+  }
+  .m-device-setup,
+  .m-device-player {
+    transform: none;
+  }
+  .m-device figcaption {
+    font-size: 12px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
