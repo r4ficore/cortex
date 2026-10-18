@@ -1,3 +1,4 @@
+import { ritualPlan, ritualAt, ritualFor, ritualVisual } from "./rituals.js";
 import { sessions, programs, makeSession } from "./catalog.js";
 import { SessionController } from "./session.js";
 import { migratePreferences } from "./store.js";
@@ -11,11 +12,17 @@ export const audioSettings = (prefs) =>
       "noiseType",
       "intensity",
       "breathVolume",
+      "breathCues",
+      "breathVisual",
+      "breathBackground",
+      "breathBackgroundVolume",
     ].map((k) => [k, prefs[k]]),
   );
 export function snapshotFlow(f, owner) {
   return {
     version: 1,
+    ritualId: f.ritual?.id || null,
+    ritualPrefs: f.ritualPrefs || null,
     id: f.recoveryId,
     owner,
     logId: f.logId,
@@ -36,6 +43,7 @@ export function snapshotFlow(f, owner) {
     programId: f.program?.id || null,
     stepIndex: f.stepIndex,
     total: f.total,
+    skipped: f.skipped || 0,
     logged: f.logged,
     lastLogId: f.lastLogId,
     startedAt: f.startedAt,
@@ -52,6 +60,7 @@ export function validSnapshot(s) {
     typeof s.logId === "string" &&
     /^[\w-]{1,128}$/.test(s.logId) &&
     Object.hasOwn(sessions, s.sessionId) &&
+    (!s.ritualId || (ritualFor(s.ritualId) && s.stage === "session")) &&
     ["session", "prelude", "between"].includes(s.stage) &&
     duration(s.duration) &&
     duration(s.clockDuration) &&
@@ -81,24 +90,46 @@ export function restoreFlow(s, now) {
   clock.duration = s.clockDuration === "Infinity" ? Infinity : s.clockDuration;
   clock.elapsed = Math.min(s.position, clock.duration);
   clock.status = "paused";
+  const ritual = ritualFor(s.ritualId);
+  const ritualPrefs = ritual ? migratePreferences(s.ritualPrefs || {}) : null;
+  const steps = ritual ? ritualPlan(ritual.id, ritualPrefs) : null;
+  if (steps) {
+    clock.duration = steps.at(-1).end;
+    clock.elapsed = Math.min(clock.elapsed, clock.duration);
+  }
+  const current = steps ? ritualAt(steps, clock.elapsed) : null;
   return {
+    ritual,
+    ritualPrefs,
+    steps,
+    skipped: Number.isFinite(s.skipped)
+      ? Math.max(0, Math.min(s.skipped, clock.elapsed))
+      : 0,
     recoveryId: s.id,
     logId: s.logId,
-    session: makeSession(
-      s.sessionId,
-      s.duration === "Infinity" ? Infinity : s.duration,
-    ),
+    session:
+      current?.session ||
+      makeSession(
+        s.sessionId,
+        s.duration === "Infinity" ? Infinity : s.duration,
+      ),
     stage: s.stage,
     clock,
-    pattern: p.breathPattern,
+    pattern: current?.pattern || p.breathPattern,
     breathSound: s.breathSound === true,
-    audioPrefs: audioSettings(p),
-    visual: ["none", "night"].includes(s.visual) ? s.visual : "calm",
+    audioPrefs: ritualPrefs || audioSettings(p),
+    visual: current
+      ? ritualVisual(current, ritualPrefs) === "black"
+        ? "night"
+        : ritualVisual(current, ritualPrefs)
+      : ["none", "night"].includes(s.visual)
+        ? s.visual
+        : "calm",
     restoredLight: s.visual === "advanced",
     appliedLightHz: Number.isFinite(s.appliedLightHz) ? s.appliedLightHz : null,
     lightFrequencyRange: s.lightFrequencyRange,
     program: programs.find((p) => p.id === s.programId) || null,
-    stepIndex: s.stepIndex || 0,
+    stepIndex: current?.index ?? (s.stepIndex || 0),
     total: Number.isFinite(s.total) ? Math.max(0, s.total) : 0,
     logged: s.logged === true,
     lastLogId: s.lastLogId,

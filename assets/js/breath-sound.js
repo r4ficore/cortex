@@ -26,16 +26,16 @@ export function breathSound(pattern = "4-6", rate = 48000, cycles = 1) {
           inhale = step.phase === "inhale";
         // Inhale opens softly and brightens; exhale is warmer and falls away.
         // Broad filtering avoids the pitched whistle of a resonant band-pass.
-        const cutoff = inhale ? 1500 + 1700 * p : 1800 - 950 * p;
+        const cutoff = inhale ? 800 + 1500 * p : 1300 - 650 * p;
         const lowAlpha = 1 - Math.exp((-2 * Math.PI * cutoff) / rate);
         const highAlpha =
-          1 - Math.exp((-2 * Math.PI * (inhale ? 380 : 180)) / rate);
+          1 - Math.exp((-2 * Math.PI * (inhale ? 240 : 130)) / rate);
         const air = random();
         low += lowAlpha * (air - low);
         high += highAlpha * (low - high);
         texture +=
           (1 - Math.exp((-2 * Math.PI * 7) / rate)) * (random() - texture);
-        const attack = inhale ? 0.38 : 0.2;
+        const attack = inhale ? 0.68 : 0.22;
         const envelope =
           Math.pow(Math.sin((Math.PI * Math.min(p / attack, 1)) / 2), 1.3) *
           Math.pow(

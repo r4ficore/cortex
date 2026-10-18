@@ -20,7 +20,7 @@ async function files(dir) {
 }
 const assets = await files("assets");
 const hash = createHash("sha256");
-for (const file of [...pages, ...assets]) {
+for (const file of [...pages, "manifest.webmanifest", "sw.js", ...assets]) {
   hash.update(file);
   hash.update(await readFile(file));
 }
@@ -42,6 +42,20 @@ for (const page of pages) {
   );
   await writeFile(`dist/${page}`, html);
 }
+const manifest = (await readFile("manifest.webmanifest", "utf8")).replaceAll(
+  '"assets/',
+  `"releases/${version}/assets/`,
+);
+await writeFile("dist/manifest.webmanifest", manifest);
+const precache = [
+  ...pages,
+  "manifest.webmanifest",
+  ...assets.map((p) => `releases/${version}/${p}`),
+];
+const worker = (await readFile("sw.js", "utf8"))
+  .replace("__RELEASE__", version)
+  .replace("__PRECACHE__", JSON.stringify(precache));
+await writeFile("dist/sw.js", worker);
 await writeFile("dist/.nojekyll", "");
 await writeFile(
   "dist/release.json",

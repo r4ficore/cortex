@@ -2597,7 +2597,201 @@ body.player-expanded .player,
   }
 }
 
-.recovery-notice { margin-block: 0 28px; }
-.recovery-notice h2 { font-size: 1.25rem; margin-bottom: 8px; }
-.recovery-notice .button-row { align-items: center; margin-top: 12px; flex-wrap: wrap; }
-#wakeStatus { margin-top: 8px; font-size: .75rem; }
+.recovery-notice {
+  margin-block: 0 28px;
+}
+.recovery-notice h2 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+.recovery-notice .button-row {
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+#wakeStatus {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+
+/* Daily rituals share the Porcelain components; compact cards stack on phones. */
+.ritual-section {
+  margin: 18px 0 36px;
+}
+.ritual-section .section-title {
+  margin-top: 0;
+}
+.ritual-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.ritual-card {
+  padding: 25px;
+  background: var(--surface, #fff);
+  border-radius: 24px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.ritual-card h3 {
+  font-size: 22px;
+  margin: 8px 0;
+  letter-spacing: -0.03em;
+}
+.ritual-card > p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.ritual-card .button-row {
+  margin-top: auto;
+  padding-top: 18px;
+  flex-wrap: wrap;
+}
+.ritual-card .small {
+  margin: 16px 0 0;
+}
+.ritual-total {
+  font-size: 22px;
+  margin: 12px 0 24px;
+  font-variant-numeric: tabular-nums;
+}
+.ritual-progress-copy {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-top: 7px;
+}
+.history-ritual {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+.history-ritual summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.usefulness {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.usefulness .chip {
+  min-height: 44px;
+}
+.player-mix {
+  width: min(100%, 360px);
+  font-size: 14px;
+}
+.player-mix summary {
+  min-height: 44px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+.player:has(.player-mix[open]) {
+  height: auto;
+  min-height: calc(100svh - 100px);
+  grid-template-rows: auto minmax(160px, 35svh) auto;
+}
+.breath-box[data-step="0"] .box-edge[data-edge="0"],
+.breath-box[data-step="1"] .box-edge[data-edge="1"],
+.breath-box[data-step="2"] .box-edge[data-edge="2"],
+.breath-box[data-step="3"] .box-edge[data-edge="3"] {
+  opacity: 0.5;
+  stroke-width: 4;
+}
+.breath-box[data-reduced="true"] .box-edge {
+  stroke-width: 4;
+}
+.breath-orb[data-phase="exhale"] .breath-lung {
+  background: radial-gradient(circle at 35% 28%, #f0f4ed, #c4d4bc 56%, #84a18a);
+}
+.breath-direction {
+  width: 30px;
+  height: 30px;
+  left: calc(50% - 15px);
+  display: grid;
+  place-items: center;
+  border: 1px solid #a1b4a3;
+}
+.offline-note {
+  padding: 12px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.offline-note .button-row {
+  margin-top: 12px;
+}
+@media (max-width: 700px) {
+  .ritual-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .ritual-card {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 3px 14px;
+  }
+  .ritual-card .path-symbol {
+    grid-row: 1 / 3;
+  }
+  .ritual-card > .small {
+    margin: 0;
+  }
+  .ritual-card h3 {
+    font-size: 21px;
+    margin: 0;
+  }
+  .ritual-card > p:not(.small),
+  .ritual-card > .button-row {
+    grid-column: 2;
+  }
+  .ritual-card .button-row {
+    padding-top: 5px;
+  }
+  .ritual-card .btn {
+    padding: 10px 14px;
+  }
+  .ritual-section .section-title {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-ritual {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+}
+
+.history-settings {
+  font-size: 14px;
+  color: var(--muted);
+  margin-block: 6px 12px;
+}
+.history-settings p {
+  margin: 4px 0;
+}
+
+/* The quiet ending must cover the full viewport, including mobile navigation. */
+body.night-mode {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.night-mode .mobile-nav {
+  background: var(--canvas);
+  border-color: var(--line);
+}
+.night-mode .nav-item {
+  color: var(--muted);
+}
+.night-mode .nav-item[aria-current="page"] {
+  background: var(--soft);
+  color: var(--ink);
+}

@@ -34,7 +34,7 @@ export class AudioEngine {
     await this.unlock();
     this.play(session, offset, prefs);
   }
-  play(session, offset, prefs) {
+  play(session, offset, prefs, at = null) {
     this.stop();
     const c = this.ctx;
     // Build before taking the start timestamp: buffer generation must not put
@@ -44,7 +44,7 @@ export class AudioEngine {
         ? null
         : this.background(prefs.noiseType, session);
     const timeline = audioTimeline(session);
-    const now = c.currentTime + 0.04;
+    const now = at ?? c.currentTime + 0.04;
     const nodes = [],
       sources = [];
     const node = (n) => (nodes.push(n), n);
@@ -142,7 +142,7 @@ export class AudioEngine {
     }
     return this.backgroundBuffers.get(key);
   }
-  playBreath(pattern, duration, offset, prefs) {
+  playBreath(pattern, duration, offset, prefs, at = null) {
     this.stop();
     const c = this.ctx;
     const key = `${c.sampleRate}:${pattern}`;
@@ -152,14 +152,29 @@ export class AudioEngine {
       buffer.copyToChannel(data, 0);
       this.breathBuffers.set(key, buffer);
     }
-    const now = c.currentTime + 0.04;
+    const background =
+      prefs.breathBackground && prefs.breathBackground !== "none"
+        ? this.background(prefs.breathBackground, { goal: "calm" })
+        : null;
+    const now = at ?? c.currentTime + 0.04;
     const source = c.createBufferSource(),
       master = c.createGain(),
+      guide = c.createGain(),
+      noiseGain = c.createGain(),
       envelope = c.createGain();
+    const nodes = [source, master, guide, noiseGain, envelope],
+      sources = [source];
     source.buffer = this.breathBuffers.get(key);
     source.loop = true;
-    master.gain.value = prefs.breathVolume ?? prefs.masterVolume;
-    source.connect(envelope);
+    master.gain.value = 1;
+    guide.gain.value =
+      prefs.breathCues === false
+        ? 0
+        : (prefs.breathVolume ?? prefs.masterVolume);
+    noiseGain.gain.value = (prefs.breathBackgroundVolume ?? 0.3) * NOISE_GAIN;
+    source.connect(guide);
+    guide.connect(envelope);
+    noiseGain.connect(envelope);
     envelope.connect(master);
     master.connect(c.destination);
     const remaining = Math.max(0, duration - offset);
@@ -170,40 +185,124 @@ export class AudioEngine {
     scheduleEnvelope(envelope.gain, plan, now);
     source.start(now, offset % source.buffer.duration);
     source.stop(now + remaining);
+    if (background) {
+      const ambient = c.createBufferSource();
+      ambient.buffer = background;
+      ambient.loop = true;
+      ambient.connect(noiseGain);
+      ambient.start(now, offset % background.duration);
+      ambient.stop(now + remaining);
+      nodes.push(ambient);
+      sources.push(ambient);
+    }
     this.graph = {
-      nodes: [source, master, envelope],
-      sources: [source],
+      nodes,
+      sources,
       master,
+      guide,
+      noiseGain,
       envelope,
       startedAt: now,
       plan,
       kind: "breath",
     };
   }
+  // Schedule every stage on the audio clock up front. A hidden/throttled tab
+  // cannot insert a silent gap or keep a breathing guide playing over focus.
+  playRitual(steps, offset, prefs) {
+    this.stop();
+    const children = [];
+    const pending = steps.filter((s) => s.end > offset);
+    // Generate buffers before choosing one shared start timestamp.
+    for (const step of pending) {
+      if (step.kind === "sound" && prefs.noiseType !== "none")
+        this.background(prefs.noiseType, step.session);
+      if (step.kind === "breath") {
+        const key = `${this.ctx.sampleRate}:${step.pattern}`;
+        if (!this.breathBuffers.has(key)) {
+          const data = breathSound(step.pattern, this.ctx.sampleRate, 4);
+          const b = this.ctx.createBuffer(1, data.length, this.ctx.sampleRate);
+          b.copyToChannel(data, 0);
+          this.breathBuffers.set(key, b);
+        }
+        if (prefs.breathBackground !== "none")
+          this.background(prefs.breathBackground, { goal: "calm" });
+      }
+    }
+    const startedAt = this.ctx.currentTime + 0.08;
+    try {
+      for (const step of pending) {
+        const child = new AudioEngine();
+        child.ctx = this.ctx;
+        child.breathBuffers = this.breathBuffers;
+        child.backgroundBuffers = this.backgroundBuffers;
+        children.push(child);
+        const local = Math.max(0, offset - step.start);
+        const when = startedAt + Math.max(0, step.start - offset);
+        if (step.kind === "breath")
+          child.playBreath(
+            step.pattern,
+            step.session.duration,
+            local,
+            prefs,
+            when,
+          );
+        else child.play(step.session, local, prefs, when);
+      }
+    } catch (error) {
+      children.forEach((c) => c.stop());
+      throw error;
+    }
+    this.sequence = children;
+    this.graph = { kind: "ritual", startedAt };
+  }
   volumes(prefs) {
+    if (this.sequence) {
+      this.sequence.forEach((c) => c.volumes(prefs));
+      return;
+    }
     if (!this.graph) return;
     const now = this.ctx.currentTime;
     for (const [p, v] of [
       [
-        this.graph.master.gain,
         this.graph.kind === "breath"
-          ? (prefs.breathVolume ?? prefs.masterVolume)
+          ? this.graph.guide.gain
+          : this.graph.master.gain,
+        this.graph.kind === "breath"
+          ? prefs.breathCues === false
+            ? 0
+            : (prefs.breathVolume ?? prefs.masterVolume)
           : prefs.masterVolume,
       ],
       [
         this.graph.balance?.gain,
         prefs.beatVolume * gainForIntensity(prefs.intensity),
       ],
-      [this.graph.noiseGain?.gain, prefs.noiseVolume * NOISE_GAIN],
+      [
+        this.graph.noiseGain?.gain,
+        (this.graph.kind === "breath"
+          ? (prefs.breathBackgroundVolume ?? 0.3)
+          : prefs.noiseVolume) * NOISE_GAIN,
+      ],
     ])
       p?.setTargetAtTime(v, now, 0.06);
   }
   stop() {
+    if (this.sequence) {
+      this.sequence.forEach((c) => c.stop());
+      this.sequence = null;
+      this.graph = null;
+      return;
+    }
     const g = this.graph;
     if (!g) return;
     this.graph = null;
     const now = this.ctx.currentTime;
-    holdEnvelope(g.envelope.gain, now, envelopeAt(g.plan, now - g.startedAt));
+    holdEnvelope(
+      g.envelope.gain,
+      now,
+      now < g.startedAt ? 0 : envelopeAt(g.plan, now - g.startedAt),
+    );
     g.envelope.gain.setTargetAtTime(0, now, 0.025);
     for (const s of g.sources) {
       try {

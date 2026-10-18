@@ -1,3 +1,13 @@
+import { prepareOffline, installApp } from "./offline.js";
+import {
+  ritualFor,
+  ritualPlan,
+  ritualAt,
+  ritualPreferences,
+  ritualVisual,
+  ritualFields,
+  ritualAudio,
+} from "./rituals.js";
 import {
   snapshotFlow,
   restoreFlow,
@@ -14,7 +24,7 @@ import {
   makeSession,
   pathFor,
 } from "./catalog.js";
-import { createStore } from "./store.js";
+import { createStore, migratePreferences } from "./store.js";
 import { SessionController, phaseAt } from "./session.js";
 import { breathAt, cycleDuration, practiceDuration } from "./breath.js";
 import { AudioEngine } from "./audio.js";
@@ -67,6 +77,8 @@ const state = {
   lightSettings: { mode: "adaptive", contrast: 0.06 },
   visual: "calm",
   pendingProgram: null,
+  ritualDraft: null,
+  ritualDraftId: null,
   route: "home",
   filters: { goal: "all", duration: "all", query: "" },
 };
@@ -97,6 +109,14 @@ let restoreFocus = null,
   breathPreviewToken = 0,
   breathPreviewPlaying = false;
 const prefs = () => store.prefs;
+const breathAudio = (p) =>
+  p.breathCues || (p.breathBackground && p.breathBackground !== "none");
+const currentPrefs = () =>
+  state.route === "ritual" && !dialog.open
+    ? state.ritualDraft || prefs()
+    : state.flow?.ritual
+      ? state.flow.audioPrefs
+      : prefs();
 const reduced = () => mediaMotion.matches || prefs().reduceMotion === true;
 function applyPreferences() {
   document.body.classList.toggle("reduce-motion", reduced());
@@ -141,7 +161,12 @@ function render() {
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", night ? "#000000" : "#f7f8f5");
   document.getElementById("header").innerHTML = views.header(
-    page === "path" || page === "prepare" || page === "program" ? "home" : page,
+    page === "path" ||
+      page === "prepare" ||
+      page === "program" ||
+      page === "ritual"
+      ? "home"
+      : page,
   );
   document.getElementById("mobileNav").innerHTML = views.nav(page, true);
   document
@@ -150,7 +175,18 @@ function render() {
   document.title = `${t("Cortex — chwila dla Ciebie", "Cortex — a moment for you")}`;
   if (page === "path") main.innerHTML = views.pathView(id);
   else if (page === "library") main.innerHTML = views.library(state.filters);
-  else if (page === "prepare") {
+  else if (page === "ritual" && ritualFor(id)) {
+    if (state.ritualDraftId !== id) {
+      state.ritualDraftId = id;
+      state.ritualDraft = migratePreferences(ritualPreferences(id, prefs()));
+    }
+    main.innerHTML = views.ritualPrepare(
+      id,
+      state.ritualDraft,
+      active(),
+      Boolean(prefs().ritualProfiles[id]),
+    );
+  } else if (page === "prepare") {
     const selected = Object.hasOwn(sessions, id) ? id : "deepFocus";
     if (state.selected !== selected) {
       state.selected = selected;
@@ -160,6 +196,9 @@ function render() {
           ? "night"
           : "calm";
     }
+    if (selected === "breath")
+      state.visual =
+        prefs().breathVisual && !prefs().audioOnly ? "calm" : "none";
     main.innerHTML = views.prepare(
       selected,
       prefs(),
@@ -178,7 +217,7 @@ function render() {
     main.innerHTML = state.flow
       ? state.flow.stage === "between"
         ? views.between(state.flow)
-        : views.player(state.flow, prefs())
+        : views.player(playerFlow(state.flow), currentPrefs())
       : state.result
         ? views.completed(state.result)
         : views.home(prefs());
@@ -191,7 +230,7 @@ function render() {
     if (recoverable.length)
       main.insertAdjacentHTML(
         "afterbegin",
-        `<section class="notice recovery-notice" aria-label="${t("Przerwane sesje", "Interrupted sessions")}"><h2>${t("Twoja sesja czeka", "Your session is waiting")}</h2><p>${t("Wróć do zapisanego miejsca lub zachowaj ten czas w historii. Dźwięk ruszy dopiero po naciśnięciu Wznów. Światło pozostanie wyłączone.", "Return to your saved position or keep this time in history. Sound starts only when you press Resume. Light stays off.")}</p>${recoverable.map((s) => `<div class="button-row"><span>${s.sessionId === "breath" ? local(sessions.breath.title) : esc(sessionFor(s.sessionId).name)} · ${time(s.position)}</span>${views.button("recover", t("Wróć do sesji", "Return to session"), "", "btn", `data-id="${esc(s.id)}"`)}${views.button("closeRecovery", t("Zapisz i zakończ", "Save and finish"), "", "btn btn-quiet", `data-id="${esc(s.id)}"`)}</div>`).join("")}</section>`,
+        `<section class="notice recovery-notice" aria-label="${t("Przerwane sesje", "Interrupted sessions")}"><h2>${t("Twoja sesja czeka", "Your session is waiting")}</h2><p>${t("Wróć do zapisanego miejsca lub zachowaj ten czas w historii. Dźwięk ruszy dopiero po naciśnięciu Wznów. Światło pozostanie wyłączone.", "Return to your saved position or keep this time in history. Sound starts only when you press Resume. Light stays off.")}</p>${recoverable.map((s) => `<div class="button-row"><span>${ritualFor(s.ritualId) ? local(ritualFor(s.ritualId).name) : s.sessionId === "breath" ? local(sessions.breath.title) : esc(sessionFor(s.sessionId).name)} · ${time(s.position)}</span>${views.button("recover", t("Wróć do sesji", "Return to session"), "", "btn", `data-id="${esc(s.id)}"`)}${views.button("closeRecovery", t("Zapisz i zakończ", "Save and finish"), "", "btn btn-quiet", `data-id="${esc(s.id)}"`)}</div>`).join("")}</section>`,
       );
   }
   refs = {
@@ -228,7 +267,7 @@ window.visualViewport?.addEventListener("resize", fitPlayer);
 function updateMotionNote() {
   if (!refs.motionNote) return;
   const message =
-    state.flow?.visual === "none"
+    state.flow && playerFlow(state.flow).visual === "none"
       ? t(
           "Animacja wyłączona: wybrano sam dźwięk.",
           "Animation off: audio-only mode is selected.",
@@ -347,12 +386,13 @@ function updateMini() {
     f = state.flow;
   mini.hidden = !f || state.route === "session";
   if (!f) return;
-  mini.innerHTML = `<a href="#session">${icon(pathFor(f.session.goal).icon)}<span><strong>${local(f.session.title)}</strong><small id="miniTime">${f.stage === "between" ? t("Gotowy na kolejny etap", "Ready for the next step") : time(f.clock.duration - f.clock.position())}</small></span></a>${f.stage !== "between" ? views.button("pause", "", f.clock.status === "paused" ? "play" : "pause", "icon-btn", `aria-label="${f.clock.status === "paused" ? t("Wznów", "Resume") : t("Pauza", "Pause")}"`) : ""}`;
+  mini.innerHTML = `<a href="#session">${icon(pathFor(f.session.goal).icon)}<span><strong>${local(f.ritual?.name || f.session.title)}</strong><small id="miniTime">${f.stage === "between" ? t("Gotowy na kolejny etap", "Ready for the next step") : time(f.clock.duration - f.clock.position())}</small></span></a>${f.stage !== "between" ? views.button("pause", "", f.clock.status === "paused" ? "play" : "pause", "icon-btn", `aria-label="${f.clock.status === "paused" ? t("Wznów", "Resume") : t("Pauza", "Pause")}"`) : ""}`;
 }
 function updatePlayer() {
   const f = state.flow;
   if (!f || f.stage === "between") return;
-  const elapsed = f.clock.position(),
+  const shown = playerFlow(f);
+  const elapsed = shown.clock.position(),
     paused = f.clock.status === "paused",
     breath = f.session.id === "breath" || f.stage === "prelude";
   const pattern = f.stage === "prelude" ? "4-6" : f.pattern;
@@ -368,15 +408,15 @@ function updatePlayer() {
   const key = `${Math.ceil(elapsed)}-${paused}-${language}-${f.stage}`;
   if (key !== lastSecond) {
     lastSecond = key;
-    const remaining = Number.isFinite(f.clock.duration)
-      ? f.clock.duration - elapsed
+    const remaining = Number.isFinite(shown.clock.duration)
+      ? shown.clock.duration - elapsed
       : elapsed;
     if (refs.clock)
       refs.clock.textContent =
-        time(remaining) + (Number.isFinite(f.clock.duration) ? "" : " · ∞");
+        time(remaining) + (Number.isFinite(shown.clock.duration) ? "" : " · ∞");
     if (refs.progress) {
-      const p = Number.isFinite(f.clock.duration)
-        ? Math.min(100, (elapsed / f.clock.duration) * 100)
+      const p = Number.isFinite(shown.clock.duration)
+        ? Math.min(100, (elapsed / shown.clock.duration) * 100)
         : 0;
       refs.progress.style.width = p + "%";
       refs.progress.parentElement.setAttribute(
@@ -414,6 +454,11 @@ function updatePlayer() {
         : breath
           ? `${b.remaining} ${t("sek", "sec")}`
           : "";
+    const total = document.getElementById("ritualRemaining");
+    if (total && f.ritual)
+      total.textContent =
+        t("Cały rytuał: ", "Whole ritual: ") +
+        time(f.clock.duration - f.clock.position());
     const mini = document.getElementById("miniTime");
     if (mini)
       mini.textContent =
@@ -526,6 +571,10 @@ function setPlayerVisual(value) {
   if (!f) return;
   f.visual = value === "black" ? "night" : value;
   f.lightStopped = true;
+  if (f.ritual) {
+    f.ritualPrefs.ritualVisual = value;
+    checkpoint();
+  }
   render();
   if (value === "black") openBlackScreen();
   else document.getElementById("playerVisual")?.focus({ preventScroll: true });
@@ -534,7 +583,7 @@ function setMedia() {
   if (!("mediaSession" in navigator) || !state.flow) return;
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: local(state.flow.session.title),
+      title: local(state.flow.ritual?.name || state.flow.session.title),
       artist: "Cortex",
       album:
         state.flow.program?.name || local(pathFor(state.flow.session.goal)),
@@ -563,7 +612,7 @@ async function start(id) {
   }
   try {
     const standalone = id === "breath";
-    if (!standalone || prefs().breathCues) await audio.unlock();
+    if (!standalone || breathAudio(prefs())) await audio.unlock();
     if (token !== state.token) return;
     const p =
       state.pendingProgram?.program.steps[state.pendingProgram.index]
@@ -581,7 +630,7 @@ async function start(id) {
           : undefined;
     const session = makeSession(id, duration),
       prelude = !standalone && prefs().prelude && (!p || p.index === 0);
-    const usesAudio = !standalone || prefs().breathCues;
+    const usesAudio = !standalone || breathAudio(prefs());
     const clock = new SessionController(
       usesAudio ? () => audio.now() : () => performance.now() / 1000,
     );
@@ -592,7 +641,7 @@ async function start(id) {
       stage: prelude ? "prelude" : "session",
       clock,
       pattern: prefs().breathPattern,
-      breathSound: prefs().breathCues,
+      breathSound: breathAudio(prefs()),
       audioPrefs: audioSettings(prefs()),
       recoveryId: sessionId(),
       logId: sessionId(),
@@ -613,7 +662,7 @@ async function start(id) {
     if (!prelude && !standalone) {
       audio.play(session, 0, prefs());
       clock.anchor = audio.graph.startedAt;
-    } else if (prefs().breathCues) {
+    } else if (breathAudio(prefs())) {
       audio.playBreath(
         prelude ? "4-6" : state.flow.pattern,
         clock.duration,
@@ -656,10 +705,9 @@ function stopBreathPreview() {
   clearTimeout(breathPreviewTimer);
   if (breathPreviewPlaying && !state.flow) audio.stop();
   breathPreviewPlaying = false;
-  const button = document.querySelector(
+  for (const button of document.querySelectorAll(
     '[data-action="previewBreath"], [data-action="previewSession"]',
-  );
-  if (button) {
+  )) {
     button.innerHTML =
       icon("volume") +
       (button.dataset.action === "previewSession"
@@ -679,10 +727,16 @@ async function previewBreath(kind = "breath") {
   try {
     await audio.unlock();
     if (token !== breathPreviewToken || state.flow) return;
-    const duration =
-      kind === "breath" ? cycleDuration(prefs().breathPattern) : 12;
+    const pattern =
+      state.route === "prepare" && state.selected !== "breath"
+        ? "4-6"
+        : currentPrefs().breathPattern;
+    const duration = kind === "breath" ? cycleDuration(pattern) : 12;
     if (kind === "breath")
-      audio.playBreath(prefs().breathPattern, duration, 0, prefs());
+      audio.playBreath(pattern, duration, 0, {
+        ...currentPrefs(),
+        breathCues: true,
+      });
     else {
       const session = makeSession(state.selected);
       const stage = session.phases[1] || session.phases[0];
@@ -697,7 +751,7 @@ async function previewBreath(kind = "breath") {
       );
     }
     const button = document.querySelector(
-      '[data-action="previewBreath"], [data-action="previewSession"]',
+      `[data-action="${kind === "breath" ? "previewBreath" : "previewSession"}"]`,
     );
     if (button) {
       button.innerHTML = icon("stop") + t("Zatrzymaj odsłuch", "Stop preview");
@@ -742,19 +796,27 @@ async function resume() {
   state.starting = true;
   const token = ++state.token;
   try {
-    if (f.session.id !== "breath" || f.breathSound) await audio.unlock();
+    if (
+      f.ritual
+        ? ritualAudio(f.steps, f.audioPrefs)
+        : f.session.id !== "breath" || breathAudio(f.audioPrefs)
+    )
+      await audio.unlock();
     if (state.flow !== f || token !== state.token) return;
-    if (f.stage === "session" && f.session.id !== "breath")
+    if (f.ritual) {
+      if (ritualAudio(f.steps, f.audioPrefs))
+        audio.playRitual(f.steps, f.clock.position(), f.audioPrefs);
+    } else if (f.stage === "session" && f.session.id !== "breath")
       audio.play(f.session, f.clock.position(), {
         ...prefs(),
         ...f.audioPrefs,
       });
-    else if (f.breathSound)
+    else if (breathAudio(f.audioPrefs))
       audio.playBreath(
         f.stage === "prelude" ? "4-6" : f.pattern,
         f.clock.duration,
         f.clock.position(),
-        prefs(),
+        { ...prefs(), ...f.audioPrefs },
       );
     frameMonitor.reset();
     f.lightLimit = null;
@@ -763,6 +825,12 @@ async function resume() {
     f.lightStartedAt = null;
     f.clock.resume();
     if (audio.graph) f.clock.anchor = audio.graph.startedAt;
+    if (
+      f.ritual &&
+      ritualVisual(ritualAt(f.steps, f.clock.position()), f.ritualPrefs) ===
+        "black"
+    )
+      openBlackScreen();
     lastCue = "";
     if ("mediaSession" in navigator)
       navigator.mediaSession.playbackState = "playing";
@@ -844,6 +912,7 @@ function saveLog(f, complete) {
 }
 function finish(complete) {
   const f = state.flow;
+  if (f?.ritual) return finishRitual(complete);
   if (!f) return;
   audio.stop();
   f.clock.finish();
@@ -941,6 +1010,7 @@ function finishProgram() {
 }
 function tick() {
   const f = state.flow;
+  if (f?.ritual) syncRitualStage();
   if (
     f?.clock.status === "running" &&
     f.stage !== "between" &&
@@ -988,13 +1058,14 @@ function syncRuntime() {
     ),
   );
   showWakeStatus();
+  const visual = f ? playerFlow(f).visual : "none";
   const animate =
     visible &&
     running &&
     !reduced() &&
-    ((breath && f.visual !== "none") ||
+    ((breath && visual !== "none") ||
       (f?.visual === "advanced" && !f.lightStopped) ||
-      (refs.orb && f?.visual !== "none"));
+      (refs.orb && visual !== "none"));
   if (animate && frameHandle === null)
     frameHandle = requestAnimationFrame(frame);
   else if (!animate && frameHandle !== null) {
@@ -1080,7 +1151,7 @@ function recover(id, finishSaved = false) {
     return;
   }
   const f = restoreFlow(s, () => audio.now());
-  store.save(f.audioPrefs);
+  if (!f.ritual) store.save(f.audioPrefs);
   state.flow = f;
   store.checkpoint({
     ...s,
@@ -1126,6 +1197,7 @@ document.addEventListener("visibilitychange", () => {
   if (state.flow?.visual === "advanced") state.flow.lightStopped = true;
   if (
     document.hidden &&
+    !state.flow?.breathSound &&
     (state.flow?.session.id === "breath" || state.flow?.stage === "prelude")
   )
     pause();
@@ -1180,10 +1252,25 @@ function updatePreference(key, value, rerender = true) {
     : focused?.dataset.key
       ? `[data-key="${focused.dataset.key}"][data-value="${focused.dataset.value}"]`
       : null;
-  store.save({ [key]: value });
+  const draft = state.route === "ritual" && state.ritualDraft && !dialog.open;
+  const liveRitual =
+    state.flow?.ritual && state.route === "session" && !dialog.open;
+  if (draft)
+    state.ritualDraft = migratePreferences({
+      ...state.ritualDraft,
+      [key]: value,
+    });
+  else if (liveRitual) {
+    state.flow.audioPrefs = migratePreferences({
+      ...state.flow.audioPrefs,
+      [key]: value,
+    });
+    state.flow.ritualPrefs = state.flow.audioPrefs;
+    checkpoint();
+  } else store.save({ [key]: value });
   applyPreferences();
-  audio.volumes(prefs());
   if (
+    !draft &&
     state.flow &&
     [
       "masterVolume",
@@ -1191,11 +1278,20 @@ function updatePreference(key, value, rerender = true) {
       "noiseVolume",
       "intensity",
       "breathVolume",
+      "breathBackgroundVolume",
     ].includes(key)
   ) {
-    state.flow.audioPrefs[key] = prefs()[key];
+    state.flow.audioPrefs[key] = liveRitual
+      ? state.flow.audioPrefs[key]
+      : prefs()[key];
+    if (state.flow.ritual)
+      state.flow.ritualPrefs[key] = state.flow.audioPrefs[key];
     checkpoint();
   }
+  if (!draft)
+    audio.volumes(
+      state.flow ? { ...prefs(), ...state.flow.audioPrefs } : currentPrefs(),
+    );
   syncRuntime();
   if (key === "audioOnly") {
     state.visual = value ? "none" : "calm";
@@ -1322,6 +1418,7 @@ document.addEventListener("click", async (e) => {
     if (dialog.open) openDialog(dialog.dataset.type);
     setMedia();
   } else if (a === "settings") openDialog("settings");
+  else if (a === "installApp") await installApp();
   else if (a === "closeDialog") closeDialog();
   else if (a === "recover") recover(el.dataset.id);
   else if (a === "closeRecovery") recover(el.dataset.id, true);
@@ -1347,6 +1444,47 @@ document.addEventListener("click", async (e) => {
   } else if (a === "clearFilters") {
     state.filters = { goal: "all", duration: "all", query: "" };
     render();
+  } else if (a === "guidance") {
+    updatePreference("breathCues", el.dataset.value !== "visual", false);
+    updatePreference("breathVisual", el.dataset.value !== "sound");
+  } else if (a === "playRitual") await startRitual(el.dataset.id);
+  else if (a === "skipRitual") skipRitual();
+  else if (a === "saveRitual") {
+    store.saveRitual(el.dataset.id, state.ritualDraft);
+    render();
+    toast(
+      store.available
+        ? t(
+            "Rytuał zapisany. Czeka na ekranie startowym.",
+            "Ritual saved. Find it on Home.",
+          )
+        : t(
+            "Pamięć jest niedostępna. Zapis działa tylko do zamknięcia strony.",
+            "Storage is unavailable. Saved until this page closes only.",
+          ),
+    );
+  } else if (a === "replayRitual") {
+    const entry = store.history.find((h) => h.id === el.dataset.id);
+    if (entry && ritualFor(entry.ritualId)) {
+      state.ritualDraftId = entry.ritualId;
+      state.ritualDraft = migratePreferences({
+        ...prefs(),
+        ...entry.ritualPrefs,
+      });
+      go("ritual/" + entry.ritualId);
+    }
+  } else if (a === "usefulness") {
+    store.feedback(el.dataset.id, el.dataset.value);
+    if (state.result?.id === el.dataset.id)
+      state.result.usefulness = el.dataset.value;
+    const details = el.closest("details");
+    render();
+    const selected = main.querySelector(
+      `[data-action="usefulness"][data-id="${el.dataset.id}"][data-value="${el.dataset.value}"]`,
+    );
+    if (details && selected?.closest("details"))
+      selected.closest("details").open = true;
+    selected?.focus({ preventScroll: true });
   } else if (a === "preference") {
     updatePreference(
       el.dataset.key,
@@ -1464,6 +1602,10 @@ window.addEventListener("hashchange", () => {
     state.token++;
     state.starting = false;
   }
+  if (!location.hash.startsWith("#ritual/")) {
+    state.ritualDraftId = null;
+    state.ritualDraft = null;
+  }
   render();
   window.scrollTo(0, 0);
   main.focus({ preventScroll: true });
@@ -1481,3 +1623,186 @@ window.addEventListener("pageshow", (event) => {
   if (event.persisted) render();
 });
 render();
+prepareOffline();
+
+function playerFlow(f) {
+  if (!f.ritual)
+    return f.stage === "prelude"
+      ? {
+          ...f,
+          visual:
+            f.audioPrefs.breathVisual !== false && !prefs().audioOnly
+              ? "calm"
+              : "none",
+        }
+      : f;
+  const step = ritualAt(f.steps, f.clock.position());
+  return {
+    ...f,
+    ritualRemaining: f.clock.duration - f.clock.position(),
+    clock: {
+      duration: step.session.duration,
+      position: () => step.position,
+      status: f.clock.status,
+    },
+  };
+}
+async function startRitual(id) {
+  if (state.flow) {
+    go("session");
+    return;
+  }
+  if (state.starting || !ritualFor(id)) return;
+  stopBreathPreview();
+  const settings = migratePreferences(
+    state.route === "ritual" && state.ritualDraftId === id
+      ? state.ritualDraft
+      : ritualPreferences(id, prefs()),
+  );
+  state.starting = true;
+  const token = ++state.token;
+  document
+    .querySelectorAll('[data-action="playRitual"]')
+    .forEach((b) => (b.disabled = true));
+  try {
+    const steps = ritualPlan(id, settings);
+    const usesAudio = ritualAudio(steps, settings);
+    if (usesAudio) await audio.unlock();
+    if (token !== state.token) return;
+    if (usesAudio) audio.playRitual(steps, 0, settings);
+    const clock = new SessionController(
+      usesAudio ? () => audio.now() : () => performance.now() / 1000,
+    );
+    clock.start(steps.at(-1).end);
+    if (audio.graph) clock.anchor = audio.graph.startedAt;
+    state.flow = {
+      ritual: ritualFor(id),
+      ritualPrefs: settings,
+      steps,
+      skipped: 0,
+      session: steps[0].session,
+      stage: "session",
+      clock,
+      pattern: settings.breathPattern,
+      breathSound: breathAudio(settings),
+      audioPrefs: settings,
+      recoveryId: sessionId(),
+      logId: sessionId(),
+      visual: "calm",
+      stepIndex: -1,
+      total: 0,
+      logged: false,
+      startedAt: Date.now(),
+      lightStopped: true,
+      lightStarted: false,
+    };
+    state.nightResult = false;
+    syncRitualStage(false);
+    checkpoint();
+    setMedia();
+    go("session");
+  } catch (error) {
+    audio.stop();
+    state.flow = null;
+    showStartError(
+      t(
+        "Nie udało się uruchomić rytuału. Spróbuj ponownie.",
+        "The ritual could not start. Try again.",
+      ),
+    );
+    console.error(error);
+  } finally {
+    state.starting = false;
+    document
+      .querySelectorAll('[data-action="playRitual"]')
+      .forEach((b) => (b.disabled = false));
+  }
+}
+function syncRitualStage(redraw = true) {
+  const f = state.flow;
+  if (!f?.ritual) return;
+  const step = ritualAt(f.steps, f.clock.position());
+  if (step.index === f.stepIndex) return;
+  f.stepIndex = step.index;
+  f.session = step.session;
+  f.pattern = step.pattern || f.ritualPrefs.breathPattern;
+  const mode = ritualVisual(step, f.ritualPrefs);
+  f.visual = mode === "black" ? "night" : mode;
+  lastCue = "";
+  lastSecond = "";
+  setMedia();
+  if (redraw && state.route === "session") render();
+  if (mode === "black" && f.clock.status === "running") openBlackScreen();
+}
+function skipRitual() {
+  const f = state.flow;
+  if (!f?.ritual || state.starting) return;
+  const current = ritualAt(f.steps, f.clock.position()),
+    next = f.steps[current.index + 1];
+  if (!next) return;
+  const wasRunning = f.clock.status === "running";
+  f.clock.pause();
+  audio.stop();
+  f.skipped = (f.skipped || 0) + next.start - f.clock.position();
+  f.clock.elapsed = next.start;
+  if (wasRunning) {
+    try {
+      audio.playRitual(f.steps, next.start, f.audioPrefs);
+      f.clock.resume();
+      f.clock.anchor = audio.graph.startedAt;
+    } catch {
+      toast(t("Etap gotowy. Naciśnij Wznów.", "Step ready. Press Resume."));
+    }
+  }
+  syncRitualStage();
+  checkpoint();
+  syncRuntime();
+  updatePlayer();
+}
+function finishRitual(complete) {
+  const f = state.flow;
+  if (!f?.ritual) return;
+  f.clock.finish();
+  audio.stop();
+  stopHaptics();
+  const durationSeconds = Math.max(
+    0,
+    Math.round(f.clock.position() - (f.skipped || 0)),
+  );
+  const entry = {
+    id: f.logId,
+    visitId: f.recoveryId,
+    sessionId: f.steps.at(-1).session.id,
+    goal: f.ritual.goal,
+    ritualId: f.ritual.id,
+    ritualPrefs: Object.fromEntries(
+      ritualFields.map((k) => [k, f.ritualPrefs[k]]),
+    ),
+    skippedSeconds: f.skipped || 0,
+    audioPrefs: audioSettings(f.audioPrefs),
+    audioVersion: 2,
+    startedAt: f.startedAt,
+    endedAt: Date.now(),
+    durationSeconds,
+    completed: complete,
+    pattern: f.ritualPrefs.breathPattern,
+    visual: f.visual,
+    soundBackground: f.audioPrefs.noiseType,
+  };
+  if (durationSeconds > 0) store.add(entry);
+  const night = f.ritual.id === "evening";
+  state.result = { ...entry, name: f.ritual.name, night };
+  state.nightResult = night;
+  store.clearCheckpoint(f.recoveryId);
+  state.flow = null;
+  state.token++;
+  state.expanded = false;
+  state.selected = "";
+  if ("mediaSession" in navigator)
+    navigator.mediaSession.playbackState = "none";
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  go("complete");
+  if (night && complete) openBlackScreen();
+  else if (blackScreen.open) blackScreen.close();
+  syncRuntime();
+}

@@ -1,3 +1,4 @@
+import { ritualFields, ritualFor } from "./rituals.js";
 import { backgroundIds } from "./background-catalog.js";
 const KEY = "cortex.preferences.v4";
 const HISTORY = "cortex.history.v3";
@@ -17,6 +18,11 @@ export const defaults = {
   breathPattern: "4-6",
   breathCues: false,
   breathHaptics: false,
+  breathVisual: true,
+  breathBackground: "none",
+  breathBackgroundVolume: 0.3,
+  ritualVisual: "calm",
+  ritualProfiles: {},
   prelude: false,
   reduceMotion: null,
   audioOnly: false,
@@ -50,6 +56,7 @@ export function migratePreferences(raw = {}, legacyLang) {
     ["beatVolume", 1.2],
     ["noiseVolume", 1.2],
     ["breathVolume", 1],
+    ["breathBackgroundVolume", 1],
   ])
     p[k] = num(raw[k] ?? defaults[k], defaults[k], 0, max);
   if (raw.breathVolume === undefined)
@@ -69,6 +76,25 @@ export function migratePreferences(raw = {}, legacyLang) {
     : 180;
   for (const key of ["breathCues", "breathHaptics", "prelude", "audioOnly"])
     p[key] = raw[key] === true;
+  p.breathVisual = raw.breathVisual !== false;
+  p.breathBackground = ["none", "soundscape", "brown", "pink"].includes(
+    raw.breathBackground,
+  )
+    ? raw.breathBackground
+    : "none";
+  p.ritualVisual = ["calm", "none", "night", "black"].includes(raw.ritualVisual)
+    ? raw.ritualVisual
+    : "calm";
+  p.ritualProfiles = {};
+  for (const [id, profile] of Object.entries(raw.ritualProfiles || {})) {
+    if (!ritualFor(id) || !profile || typeof profile !== "object") continue;
+    const clean = migratePreferences(
+      Object.fromEntries(ritualFields.map((k) => [k, profile[k]])),
+    );
+    p.ritualProfiles[id] = Object.fromEntries(
+      ritualFields.map((k) => [k, clean[k]]),
+    );
+  }
   p.keepScreenAwake = raw.keepScreenAwake !== false;
   p.reduceMotion =
     typeof raw.reduceMotion === "boolean" ? raw.reduceMotion : null;
@@ -202,6 +228,23 @@ export function createStore(storage) {
         ...new Map([...history, entry].map((h) => [h.id, h])).values(),
       ];
       write(HISTORY, history);
+    },
+    feedback(id, usefulness) {
+      if (!["helpful", "neutral", "unsuitable"].includes(usefulness)) return;
+      syncHistory();
+      history = history.map((x) => (x.id === id ? { ...x, usefulness } : x));
+      write(HISTORY, history);
+    },
+    saveRitual(id, settings) {
+      if (!ritualFor(id)) return;
+      const existing = read(KEY)?.ritualProfiles || prefs.ritualProfiles;
+      prefs = migratePreferences({
+        ...prefs,
+        ...(read(KEY) || {}),
+        ritualProfiles: { ...existing, [id]: settings },
+      });
+      write(KEY, prefs);
+      return prefs.ritualProfiles[id];
     },
     rate(id, rating) {
       syncHistory();

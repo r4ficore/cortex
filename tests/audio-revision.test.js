@@ -141,7 +141,7 @@ test("breathing volume is independent of the sound-session master", async () => 
   const render = async (masterVolume, breathVolume) => {
     const a = new AudioEngine();
     a.ctx = new OfflineAudioContext(2, 5 * rate, rate);
-    a.playBreath("box", 16, 0, { ...defaults, masterVolume, breathVolume });
+    a.playBreath("box", 16, 0, { ...defaults, breathCues: true, masterVolume, breathVolume });
     const b = await a.ctx.startRendering();
     return rms(b.getChannelData(0), 0, 4);
   };

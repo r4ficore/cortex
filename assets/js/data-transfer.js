@@ -1,3 +1,4 @@
+import { ritualFor, ritualFields } from "./rituals.js";
 import { sessions, paths } from "./catalog.js";
 import { migratePreferences } from "./store.js";
 export function parseBackup(text) {
@@ -38,8 +39,16 @@ export function parseBackup(text) {
       "audioVersion",
       "appliedLightHz",
       "lightContrast",
+      "skippedSeconds",
     ])
       if (Number.isFinite(h[k]) && h[k] >= 0) item[k] = h[k];
+    if (ritualFor(h.ritualId)) {
+      item.ritualId = h.ritualId;
+      const p = migratePreferences(h.ritualPrefs || {});
+      item.ritualPrefs = Object.fromEntries(ritualFields.map((k) => [k, p[k]]));
+    }
+    if (["helpful", "neutral", "unsuitable"].includes(h.usefulness))
+      item.usefulness = h.usefulness;
     if ([1, 2, 3, 4, 5].includes(h.rating)) item.rating = h.rating;
     for (const k of [
       "programId",
@@ -60,6 +69,10 @@ export function parseBackup(text) {
           "noiseType",
           "intensity",
           "breathVolume",
+          "breathCues",
+          "breathVisual",
+          "breathBackground",
+          "breathBackgroundVolume",
         ].map((k) => [k, p[k]]),
       );
     }
