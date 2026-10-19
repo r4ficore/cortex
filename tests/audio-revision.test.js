@@ -34,7 +34,7 @@ test("comfort settings never retune any of the 39 stages or change AM depth", ()
     }
   assert.equal(
     modulationSpec(sessions.overdrive.phases[1].audio, "high").rate,
-    40,
+    0,
   );
 });
 test("every stage transition has continuous levels and finite shared timeline knots", () => {
@@ -53,12 +53,12 @@ test("every stage transition has continuous levels and finite shared timeline kn
     }
   }
 });
-test("rendered Overdrive and Clarity no longer jump 9–10 dB at stage boundaries", async () => {
+test("legacy Overdrive and Clarity do not jump 9–10 dB at stage boundaries", async () => {
   for (const [id, boundaries] of [
     ["overdrive", [60, 240]],
     ["clarity", [180, 600]],
   ]) {
-    const s = makeSession(id),
+    const s = makeSession(id, undefined, 2),
       transition = profileFor(s).transition;
     for (const boundary of boundaries) {
       const a = new AudioEngine();
@@ -76,7 +76,7 @@ test("rendered Overdrive and Clarity no longer jump 9–10 dB at stage boundarie
   }
 });
 test("a pause inside a glide resumes its intermediate frequency rather than the stage target", async () => {
-  const s = makeSession("overdrive"),
+  const s = makeSession("overdrive", undefined, 2),
     offset = 62;
   const expected = timelineAt(audioTimeline(s), offset);
   assert.ok(expected.r > 470 && expected.r < 480);

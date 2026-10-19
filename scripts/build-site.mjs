@@ -62,6 +62,8 @@ const manifest = (await readFile("manifest.webmanifest", "utf8")).replaceAll(
   '"assets/',
   `"releases/${version}/assets/`,
 );
+// A stable fresh-entry address bypasses index.html cached by legacy workers.
+await writeFile("dist/latest.html", await readFile("dist/index.html", "utf8"));
 await writeFile("dist/manifest.webmanifest", manifest);
 await cp("social", "dist/social", { recursive: true });
 await cp("sitemap.xml", "dist/sitemap.xml");

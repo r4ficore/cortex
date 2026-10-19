@@ -1,3 +1,5 @@
+> Archiwalne, niezweryfikowane propozycje. Nie są specyfikacją ani dowodem skuteczności. Aktualny audyt: `protocol-audit-v3-2026-10-19.txt`; aktualne sygnały: `assets/js/protocols.js`.
+
 # Propozycje nowych protokołów (do wdrożenia później)
 
 Poniższe protokoły są koncepcyjne – opisują cele, przebieg i wymagane sygnały, ale **nie są jeszcze zaimplementowane w aplikacji**. Mają być „pełnym doświadczeniem”, a nie jedynie nazwą.

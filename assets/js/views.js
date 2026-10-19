@@ -22,6 +22,7 @@ import {
   programs,
   pathFor,
   sessionFor,
+  makeSession,
   filterSessions,
 } from "./catalog.js";
 import { t, local, language, esc, icon, minutes, time } from "./i18n.js";
@@ -117,7 +118,7 @@ export function home(prefs, history = [], flow = null) {
   return `<section class="start-heading"><div class="eyebrow">${t("Chwila dla Ciebie", "A moment for you")}</div><h1>${t("Czego dziś potrzebujesz?", "What do you need today?")}</h1><p>${t("Wybierz potrzebę. Twoja sesja jest gotowa.", "Choose a need. Your session is ready.")}</p></section>${flow ? resume : ""}<div class="need-grid">${paths.map((path) => `<a class="need-card" data-goal="${path.id}" href="#${recommendations[path.id]}"><span class="path-symbol">${icon(path.icon)}</span><span><strong>${local(path)}</strong><span class="need-description">${path.intro[language === "pl" ? 0 : 1]}</span></span>${icon("arrow", 18)}</a>`).join("")}</div>${!flow ? resume : ""}<div class="start-footer">${link("#knowledge", t("Jak korzystać z Cortex", "Getting started with Cortex"), "book", "text-link small")}<span>${t("W swoim rytmie.", "At your own pace.")}</span></div>`;
 }
 export function sessionCard(s, recommended = false) {
-  return `<a class="session-card" href="#prepare/${s.id}" data-goal="${s.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(s.goal).icon)}</span><span class="pill">${s.id === "hypnos" ? t("30–90 min lub bez limitu", "30–90 min or unlimited") : minutes(s.duration)}</span></div><div><p class="protocol">${s.id === "breath" ? t("Prowadzony oddech", "Guided breathing") : s.name}${recommended ? " · " + t("Na początek", "Start here") : ""}</p><h3>${local(s.title)}</h3></div><p>${local(s.description)}</p><span class="card-link">${t("Zobacz sesję", "View session")}${icon("arrow", 18)}</span></a>`;
+  return `<a class="session-card" href="#prepare/${s.id}" data-goal="${s.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(s.goal).icon)}</span><span class="pill">${s.id === "hypnos" ? t("30–90 min lub bez limitu", "30–90 min or unlimited") : minutes(s.duration)}</span></div><div><p class="protocol">${s.id === "breath" ? t("Prowadzony oddech", "Guided breathing") : s.name}${recommended ? " · " + t("Na początek", "Start here") : ""}</p><h3>${local(s.title)}</h3></div><p>${local(s.description)}</p><span class="card-link">${t("Opis i badania", "Details & research")}${icon("arrow", 18)}</span></a>`;
 }
 export function libraryCards(filters, prefs = defaults) {
   return (
@@ -139,7 +140,7 @@ export function libraryCards(filters, prefs = defaults) {
       })
       .map(
         (r) =>
-          `<a class="session-card" href="#ritual/${r.id}" data-goal="${r.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(r.goal).icon)}</span><span class="pill">${minutes(ritualPlan(r.id, ritualPreferences(r.id, prefs)).at(-1).end)}</span></div><h3>${local(r.name)}</h3><p>${local(r.description)}</p><span class="card-link">${t("Zobacz sesję", "View session")}${icon("arrow", 18)}</span></a>`,
+          `<a class="session-card" href="#ritual/${r.id}" data-goal="${r.goal}"><div class="session-card-top"><span class="path-symbol">${icon(pathFor(r.goal).icon)}</span><span class="pill">${minutes(ritualPlan(r.id, ritualPreferences(r.id, prefs)).at(-1).end)}</span></div><h3>${local(r.name)}</h3><p>${local(r.description)}</p><span class="card-link">${t("Opis i badania", "Details & research")}${icon("arrow", 18)}</span></a>`,
       )
       .join("") +
       filterSessions(filters.goal, filters.duration, filters.query, language)
@@ -239,6 +240,8 @@ export function prepare(
     ? programStep.durationMinutes * 60 +
       (prefs.prelude && pendingProgram.index === 0 ? 60 : 0)
     : sessionDuration(id, prefs);
+  const audioDuration = programStep ? programStep.durationMinutes * 60 : sessionDuration(id, { ...prefs, prelude: false });
+  const playbackSession = makeSession(id, audioDuration);
   const controls = `${
     breath
       ? `<div class="field"><span>${t("Czas ćwiczenia", "Practice length")}</span>${choose(
@@ -275,7 +278,7 @@ export function prepare(
           )
           .join(
             "",
-          )}</select></label><div><span class="small">${t("Test słuchawek", "Headphone check")}</span><div class="button-row">${button("testLeft", t("Lewy kanał", "Left channel"), "headphones")}${button("testRight", t("Prawy kanał", "Right channel"), "headphones")}</div></div><details class="details"><summary>${t("Parametry protokołu", "Protocol details")}</summary>${protocolTable(s, language)}<p class="help">${t("Sekwencja autorska · audio v2. Parametry opisują sygnał, nie stan mózgu.", "Original sequence · audio v2. Parameters describe the signal, not brain activity.")}</p>${evidenceHTML(s.goal, language)}</details></div></details>`
+          )}</select></label><div><span class="small">${t("Test słuchawek", "Headphone check")}</span><div class="button-row">${button("testLeft", t("Lewy kanał", "Left channel"), "headphones")}${button("testRight", t("Prawy kanał", "Right channel"), "headphones")}</div></div><details class="details"><summary>${t("Parametry protokołu", "Protocol details")}</summary>${protocolTable(playbackSession, language)}<p class="help">${t("Sekwencja autorska · audio v3. Parametry opisują sygnał, nie stan mózgu.", "Original sequence · audio v3. Parameters describe the signal, not brain activity.")}</p>${evidenceHTML(s.goal, language)}</details></div></details>`
   }<details class="details"><summary>${t("Obraz i ruch", "Visuals and motion")}</summary><div class="form-stack"><label class="field"><span>${t("Wizualizacja", "Visual style")}</span><select id="visualMode">${visualOptions(visualMode, s, breath)}</select></label>${visualMode === "black" ? `<p class="help">${t("Czarny ekran odsłonisz jednym dotknięciem. To wygaszenie strony, nie blokada telefonu. Paski Safari mogą pozostać widoczne.", "Tap once to reveal the controls. This blacks out the page; it does not lock your phone. Safari bars may remain visible.")}</p>` : ""}${visualMode === "advanced" ? `<div class="light-setup"><p class="help">${t("Rozwiń widok, aby światło wypełniło ekran. Sterowanie schowa się po 3 sekundach; dotknij obrazu, aby je przywrócić.", "Expand the view to fill the screen with light. Controls hide after 3 seconds; tap the image to bring them back.")}</p><label class="field"><span>${t("Częstotliwość światła", "Light frequency")}</span><select id="lightMode"><option value="adaptive" ${lightSettings.mode === "adaptive" ? "selected" : ""}>${t("Dopasuj do ekranu", "Adapt to display")}</option><option value="protocol" ${lightSettings.mode === "protocol" ? "selected" : ""}>${t("Dokładnie według protokołu", "Follow the protocol exactly")}</option></select></label><p class="help">${t("Dopasowanie ogranicza częstotliwość światła do możliwości przeglądarki: około 60 klatek/s → maks. 20 Hz, 120 → maks. 40 Hz. Zobaczysz używaną wartość. To wariant wizualny, nie ten sam bodziec co oryginalny protokół; dźwięk pozostaje bez zmian.", "Adaptation caps light frequency to browser capability: about 60 frames/s → up to 20 Hz, 120 → up to 40 Hz. The applied value is shown. This is a visual variant, not the original protocol stimulus; audio is unchanged.")}</p><label class="field"><span>${t("Kontrast pulsacji", "Pulse contrast")}</span><select id="lightContrast"><option value="0.04" ${lightSettings.contrast === 0.04 ? "selected" : ""}>${t("Delikatny", "Gentle")}</option><option value="0.06" ${lightSettings.contrast === 0.06 ? "selected" : ""}>${t("Standardowy", "Standard")}</option><option value="0.08" ${lightSettings.contrast === 0.08 ? "selected" : ""}>${t("Wyraźniejszy", "More visible")}</option></select></label><p class="help">${t("Protokół tej sesji sięga", "This protocol reaches")} ${maxVisualFrequency(s)} Hz. ${t("Tryb dokładny wstrzyma światło tylko podczas etapu, którego ekran nie potrafi odtworzyć.", "Exact mode suspends light only during a stage the display cannot reproduce.")}</p><p class="light-warning">${t("Migotanie może wywołać napad, ból głowy lub nudności. Nie włączaj przy padaczce lub nadwrażliwości na migotanie. Przerwij przy dyskomforcie. Skuteczność tej wersji Cortex nie została potwierdzona.", "Flicker can trigger seizures, headache or nausea. Do not enable with epilepsy or sensitivity to flicker. Stop if uncomfortable. Effectiveness of this Cortex version has not been established.")}</p></div>` : ""}${toggle("reduceMotion", t("Ogranicz ruch", "Reduce motion"), t("Ustawienie systemowe jest zawsze respektowane.", "The system preference is always respected."), prefs)}</div></details>`;
   const action = active
     ? link(
@@ -301,7 +304,7 @@ export function prepare(
     description: local(content.description),
     explanation: sessionExplanation(content),
     signal: signalHTML(s, prefs.breathPattern, language),
-    research: researchHTML(s, prefs.breathPattern, language),
+    research: researchHTML(playbackSession, prefs.breathPattern, language, audioDuration),
     duration,
     summary: setupSummary(prefs, breath, visualMode),
     controls,
@@ -465,7 +468,7 @@ export function ritualPrepare(id, prefs, active, saved) {
     name: local(r.name),
     description: local(r.description),
     signal: signalHTML(scienceSession, prefs.breathPattern, language),
-    research: researchHTML(scienceSession, prefs.breathPattern, language),
+    research: researchHTML(scienceSession, prefs.breathPattern, language, steps.at(-1).session.duration),
     explanation: sessionExplanation(
       breath
         ? breathingCopy[prefs.breathPattern] || breathingCopy["4-6"]

@@ -1,6 +1,6 @@
 import { sessionProfile, quietVisual } from "./experience.js";
 import { ritualPlan, ritualAt, ritualFor, ritualVisual } from "./rituals.js";
-import { sessions, programs, makeSession } from "./catalog.js";
+import { sessions, programsForVersion, makeSession } from "./catalog.js";
 import { SessionController } from "./session.js";
 import { migratePreferences } from "./store.js";
 
@@ -22,6 +22,7 @@ export const audioSettings = (prefs) =>
 export function snapshotFlow(f, owner) {
   return {
     version: 1,
+    audioVersion: f.session.audioVersion || f.steps?.find(s => s.kind === "sound")?.session.audioVersion || 3,
     ritualId: f.ritual?.id || null,
     ritualPrefs: f.ritualPrefs || null,
     id: f.recoveryId,
@@ -53,10 +54,12 @@ export function snapshotFlow(f, owner) {
   };
 }
 export function validSnapshot(s) {
+  const programs = programsForVersion(s?.audioVersion ?? 2);
   const duration = (v) =>
     v === "Infinity" || (Number.isFinite(v) && v > 0 && v <= 86400);
   return (
     s?.version === 1 &&
+    [2, 3].includes(s.audioVersion ?? 2) &&
     typeof s.id === "string" &&
     /^[\w-]{1,128}$/.test(s.id) &&
     typeof s.logId === "string" &&
@@ -94,7 +97,7 @@ export function restoreFlow(s, now) {
   clock.status = "paused";
   const ritual = ritualFor(s.ritualId);
   const ritualPrefs = ritual ? migratePreferences(s.ritualPrefs || {}) : null;
-  const steps = ritual ? ritualPlan(ritual.id, ritualPrefs) : null;
+  const steps = ritual ? ritualPlan(ritual.id, ritualPrefs, s.audioVersion ?? 2) : null;
   if (steps) {
     clock.duration = steps.at(-1).end;
     clock.elapsed = Math.min(clock.elapsed, clock.duration);
@@ -114,6 +117,7 @@ export function restoreFlow(s, now) {
       makeSession(
         s.sessionId,
         s.duration === "Infinity" ? Infinity : s.duration,
+        s.audioVersion ?? 2,
       ),
     stage: s.stage,
     clock,
@@ -137,7 +141,7 @@ export function restoreFlow(s, now) {
     restoredLight: s.visual === "advanced",
     appliedLightHz: Number.isFinite(s.appliedLightHz) ? s.appliedLightHz : null,
     lightFrequencyRange: s.lightFrequencyRange,
-    program: programs.find((p) => p.id === s.programId) || null,
+    program: programsForVersion(s.audioVersion ?? 2).find((p) => p.id === s.programId) || null,
     stepIndex: current?.index ?? (s.stepIndex || 0),
     total: Number.isFinite(s.total) ? Math.max(0, s.total) : 0,
     logged: s.logged === true,

@@ -1,0 +1,128 @@
+CORTEX — AUDYT CZĘSTOTLIWOŚCI I CZASÓW, 19.10.2026, AUDIO v3
+
+Zakres
+Sprawdzono 14 protokołów dźwiękowych, ćwiczenia oddechowe, programy,
+eksport oraz odtwarzanie zapisanych sesji. Weryfikacja dotyczy parametrów
+implementacji i zgodności opisów z publikacjami; nie jest badaniem Cortex.
+Częstotliwość dudnień oznacza różnicę tonów podawanych osobno do uszu.
+Nie jest to częstotliwość słyszalnego tonu ani pomiar stanu mózgu użytkownika.
+
+Decyzje
+Sesja            Rytm v3              Tony L/R (Hz)       Czas v2 → v3
+Deep Focus       stałe 15 Hz          255/240              15 → 15 min
+Clarity          stałe 15 Hz          255/240              12 → 5 min
+Cortex Forge     stałe 15 Hz          255/240              34 → 30 min
+Prime            stałe 15 Hz          255/240               5 → 5 min
+Genesis          stałe 10 Hz          335/345              10 → 10 min
+Overdrive        stałe 40 Hz          320/360               5 → 5 min
+Gamma Lift       stałe 40 Hz          320/360              16 → 33 min
+Presence         stałe 10 Hz          240/250               7 → 7 min
+Equilibrium      12 → 10 → 8 Hz       200/212 → /210 → /208 7 → 7 min
+Restoration      8 → 3 → 8 Hz         100/108 → /103 → /108 15 → 15 min
+Parasym Pathway  6 → 3 → 8 Hz         170/176,140/143,170/178 24 → 24 min
+Hypnos           8 → 1 Hz             100/108 → 60/61      30/45/90/bez limitu
+Aurora Reset     4 → 8 → 5 Hz         160/164,180/188,170/175 30 → 30 min
+REM Sculpt       6 → 6 → 8 Hz         170/176,160/166,180/188 35 → 35 min
+
+We wszystkich nowych sesjach usunięto dodatkową modulację amplitudy (AM).
+Zachowano łagodne narastanie/wygaszanie głośności i dostępne tła. Badania
+binauralne nie uzasadniają nakładania osobnego bodźca AM na ich częstotliwość.
+Zmiana dotyczy audio. Opcjonalne światło pozostaje oddzielną funkcją.
+
+Uzasadnienie i granice porównania
+1. Beauchene 2016: 28 osób, pięciominutowe warunki podczas zadania pamięci
+wzrokowo-przestrzennej. Warunek 15 Hz używał L255/R240. Poprawa trafności
+nie oznacza poprawy każdego zadania ani czasu reakcji. Clarity i Prime
+przejmują parę tonów i długość ekspozycji; dłuższe sesje są blokami pracy,
+nie większymi dawkami o udowodnionym działaniu. Praktyka, tło i poziom
+odsłuchu w Cortex różnią się od laboratorium.
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166630
+
+Wyniki beta nie są jednolicie pozytywne. Robison 2022 nie wykazał korzyści
+16 Hz dla uwagi, a Klichowski 2023 w dwóch eksperymentach domowych
+odnotował gorsze wyniki rozumowania przy 5/15 Hz. Dlatego 15 Hz nie jest
+przedstawiane jako uniwersalne zwiększenie produktywności.
+https://pubmed.ncbi.nlm.nih.gov/33978805/
+https://www.nature.com/articles/s41598-023-38313-4
+
+2. Melnichuk 2025: 40 Hz, nośna środkowa 340 Hz oznacza L320/R360,
+nie 340/380. Zadanie trwało 33 minuty; drugi wariant zaczynał dźwięk
+10 minut wcześniej. Gamma Lift przyjmuje wariant od początku zadania.
+Overdrive pozostaje krótką próbą, nie potwierdzoną pięciominutową dawką
+energii. Efekty zależały od nośnej i tła; poprawa ogólnego wykrywania
+celów nie dowodzi utrzymania uwagi przez cały czas. Cortex pozwala
+wybrać inne tło i nie odtwarza skalibrowanego poziomu laboratoryjnego.
+Nie przeliczamy dB(A) na procent głośności telefonu. Samo dopasowanie
+33 minut nie dowodzi optymalności czasu ani skuteczności tej aplikacji.
+https://www.nature.com/articles/s41598-025-88517-z
+Przykład przeciwnego wyniku dla 40 Hz: Leistik 2023.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10157589/
+
+3. Reedijk 2013: Genesis przejmuje stałe 10 Hz i L335/R345; usuwa
+nieuzasadniony etap 6 Hz. Badano trzyminutowe wprowadzenie i dalsze
+słuchanie podczas zadań, z białym szumem. Wyniki zależały od uczestnika.
+Dziesięć minut pozostaje praktycznym czasem na notatki, nie dawką
+potwierdzoną dla kreatywności.
+https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2013.00786/full
+
+4. Presence i Equilibrium zachowują kompozycje alfa. EEG lub synchronizacja
+w obrębie układu słuchowego nie ustalają skutecznego siedmiominutowego
+protokołu relaksu ani treningu empatii.
+https://doi.org/10.1016/j.heares.2015.09.011
+
+5. Restoration i Parasym Pathway pozostają kompozycjami do odpoczynku.
+McConnell 2014 badał 20 minut po wysiłku, rytm zmienny 5,5–8,5 Hz,
+akordy i różowy szum. Nie uzasadnia to środka 3 Hz. Nie zamieniono go
+na arbitralne stałe 7 Hz: brak pełnej procedury i porównania takich
+wariantów. Usunięto AM oraz sugestie pewnego wpływu na nerw błędny.
+https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2014.01248/full
+
+6. Hypnos: Lee 2024 to pilotaż 10 osób, dynamiczne 0–3 Hz i bodźce
+uruchamiane według etapów snu ocenianych polisomnografią. Cortex nie ma
+pomiaru snu, więc zmiana etykiety na „protokół Lee” byłaby nieprawdziwa.
+Zachowano kompozycję 8 → 1 Hz, piętnastominutowe wprowadzenie i opcje
+czasu odsłuchu. Nie nazywamy ich dawkami leczenia bezsenności.
+https://academic.oup.com/sleep/article/47/10/zsae097/7647043
+
+7. Aurora Reset i REM Sculpt: Mallik/Russo 2022 badali 24 minuty
+stymulacji theta, muzyki dobranej algorytmicznie i ich połączenia.
+Nie wyznacza to optymalnych 30/35 minut ani konkretnych sekwencji Cortex.
+Zostają kompozycjami wieczornymi bez AM, obietnicy resetu zegara
+biologicznego lub sterowania fazą REM.
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259312
+
+Oddech i programy
+Rytm 4–6 daje 6 cykli/min; pozostawiono go jako punkt wyjścia, bez
+przedstawiania jako indywidualnej częstotliwości rezonansowej HRV.
+Box 4/4/4/4 i 4–7–8 pozostają świadomym wyborem. Nie przenosimy wyniku
+5 minut dziennie przez 28 dni (Balban 2023) na jedną minutę. 1/3/5 minut
+to dostępne długości ćwiczenia, nie jednakowo przebadane dawki.
+https://pubmed.ncbi.nlm.nih.gov/16129818/
+https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947/
+https://pmc.ncbi.nlm.nih.gov/articles/PMC9277512/
+Flow 90: trzy bloki 25 min przeplatane trzema przerwami 5 min zastępują
+m.in. poprzedni nieprzerwany blok 55 min. To decyzja ergonomiczna.
+Pozostałe programy zachowują harmonogramy; w szczegółach pokazujemy
+rzeczywisty czas etapu osobno od ekspozycji w badaniu.
+
+Spójność techniczna i publikacja
+- Audio v3 ma osobne metadane w historii i eksporcie WAV.
+- Zapisane sesje v2 wznawiają oryginalny sygnał, czas i harmonogram;
+  nowy wybór sesji używa v3. Historia i preferencje nie są kasowane.
+- Testy renderują PCM: częstotliwości kanałów, brak sidebandów AM,
+  brak przesterowania, zgodność WAV/live, pauza i odzyskanie sesji.
+- Instalacja aktualizacji najpierw kopiuje pełne zasoby offline,
+  dopiero potem zmienia punkt wejścia. Nie przeładowuje aktywnego audio.
+- latest.html daje wejście do aktualnej wersji mimo starego workera.
+  Przycisk aktualizacji jest niedostępny podczas trwającej sesji.
+- UI zawiera „Opis i badania” oraz widoczny skrót do częstotliwości,
+  czasu i źródeł; opisy i dokumenty są w PL/EN.
+
+Wynik odbioru technicznego
+111 testów automatycznych zakończonych powodzeniem; kontrola składni,
+zasobów i build zakończona powodzeniem. W przeglądarce sprawdzono
+aktualizację otwartej wersji v2 do v3 bez zamykania kart, działanie
+poprzedniej sesji podczas instalacji, opis 40 Hz / 33 min, Clarity
+15 Hz / 5 min oraz skrót rozwijający źródła z przeniesieniem fokusu.
+Szerokości 320, 390, 768 i 1440 px: bez przewijania poziomego;
+przycisk badań 44 px, start 54 px. To emulacja, nie test fizycznego iPhone’a.

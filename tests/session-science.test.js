@@ -27,12 +27,12 @@ test("all audio protocols have bilingual selection reasons, research and a music
 
 test("frequency explanations use audio differences and AM, not visual frequency or carrier pitch", () => {
   assert.deepEqual(signalFacts(sessions.hypnos).beats, [8, 1]);
-  assert.deepEqual(signalFacts(sessions.deepFocus).beats, [14, 18, 14]);
-  assert.deepEqual(signalFacts(sessions.gammaLift).beats, [18, 40, 12]);
-  assert.deepEqual(signalFacts(sessions.gammaLift).modulation[1], { rate: 40, depth: 1 });
+  assert.deepEqual(signalFacts(sessions.deepFocus).beats, [15, 15, 15]);
+  assert.deepEqual(signalFacts(sessions.gammaLift).beats, [40, 40, 40]);
+  assert.deepEqual(signalFacts(sessions.gammaLift).modulation[1], { rate: 0, depth: 0 });
   assert.match(signalHTML(sessions.hypnos, "4-6", "pl"), /8 → 1 Hz/);
-  assert.match(researchHTML(sessions.deepFocus, "4-6", "pl"), /210 Hz.*224 Hz.*Różnica 14 Hz/);
-  assert.match(researchHTML(sessions.gammaLift, "4-6", "en"), /40 Hz \/ 100%/);
+  assert.match(researchHTML(sessions.deepFocus, "4-6", "pl"), /255 Hz.*240 Hz.*Różnica 15 Hz/);
+  assert.doesNotMatch(researchHTML(sessions.gammaLift, "4-6", "en"), /Additional amplitude pulses/);
   assert.doesNotMatch(researchHTML(sessions.deepFocus, "4-6", "en"), /Additional amplitude pulses/);
   assert.match(signalHTML(sessions.presence, "4-6", "pl"), /<strong>10 Hz<\/strong>/);
 });
@@ -60,12 +60,12 @@ test("session and ritual preparation expose the correct research in PL/EN withou
       for (const session of Object.values(sessions)) {
         const html = prepare(session.id, defaults, "calm", false, false);
         assert.ok(html.includes(signalHTML(session, defaults.breathPattern, lang)));
-        assert.ok(html.includes(researchHTML(session, defaults.breathPattern, lang)));
+        assert.ok(html.includes(researchHTML(session, defaults.breathPattern, lang, session.id === "hypnos" ? 1800 : session.duration)));
         assert.ok(html.indexOf('class="start-dock"') < html.indexOf('id="setupResearch"'));
         assert.ok(!html.includes('id="setupResearch" open'));
       }
       for (const [ritual, session] of [["work", "deepFocus"], ["evening", "hypnos"]])
-        assert.ok(ritualPrepare(ritual, defaults, false, false).includes(researchHTML(sessions[session], defaults.breathPattern, lang)));
+        assert.ok(ritualPrepare(ritual, defaults, false, false).includes(researchHTML(sessions[session], defaults.breathPattern, lang, session === "hypnos" ? 1800 : sessions[session].duration)));
       for (const pattern of Object.keys(patterns)) {
         const prefs = { ...defaults, breathPattern: pattern };
         assert.ok(ritualPrepare("reset", prefs, false, false).includes(researchHTML(sessions.breath, pattern, lang)));

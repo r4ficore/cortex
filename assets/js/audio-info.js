@@ -25,11 +25,12 @@ export const audioContext = {
       "Steady tones and a discreet harmonic background for a longer work session.",
     ],
     evidence: [
-      "Lane badał 29 osób przez 30 minut: rytmy 16/24 Hz dawały lepsze wyniki czujności niż 1,5/4 Hz. To kontekst dla eksperymentów z rytmem, nie potwierdzenie naszych częstotliwości, czasów ani wpływu na kreatywność.",
-      "Lane studied 29 people for 30 minutes: 16/24 Hz beats produced better vigilance results than 1.5/4 Hz. This provides context for rhythm experiments, not validation of our frequencies, durations or creativity effects.",
+      "Beauchene badała 15 Hz z tonów 255/240 Hz przez 5 minut podczas zadania pamięciowego. Deep Focus, Clarity i Cortex Forge używają tej pary tonów, z różnymi czasami pracy. Wynik nie przenosi się na każde zadanie: w badaniu domowym Klichowskiego 15 Hz pogarszało wyniki rozumowania.",
+      "Beauchene tested 15 Hz from 255/240 Hz tones for five minutes during a memory task. Deep Focus, Clarity and Cortex Forge use that pair for different work durations. The result does not extend to every task: Klichowski’s home study found worse reasoning scores with 15 Hz.",
     ],
     sources: [
-      ["Lane et al., 1998", "https://pubmed.ncbi.nlm.nih.gov/9423966/"],
+      ["Beauchene et al., 2016", "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166630"],
+      ["Klichowski et al., 2023", "https://www.nature.com/articles/s41598-023-38313-4"],
       [
         "Orozco Perez et al., 2020",
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC7082494/",
@@ -79,12 +80,12 @@ export const audioContext = {
       "A brighter harmonic background and a more distinct rhythm with a smooth opening and ending.",
     ],
     evidence: [
-      "Attokaren badał uwagę podczas godzinnej stymulacji światłem i dźwiękiem 40 Hz u 62 osób. Wu wykazał odpowiedź EEG bez poprawy badanych funkcji po 30 minutach. Nasze 5- i 16-minutowe sekwencje z sinusoidalną AM są inną procedurą; nie są potwierdzoną dawką pobudzenia.",
-      "Attokaren tested attention during an hour of 40 Hz audiovisual stimulation in 62 people. Wu found an EEG response without improvement on the tested functions after 30 minutes. Our five- and sixteen-minute sequences with sinusoidal AM are a different procedure, not a validated activation dose.",
+      "Melnichuk badała stałe dudnienia 40 Hz z nośną 340 Hz podczas około 33-minutowego zadania uwagowego. Gamma Lift używa tej pary tonów i czasu, Overdrive jest krótszym wariantem. Wyniki badań uwagi są mieszane; 40 Hz nie jest ustaloną dawką energii fizycznej.",
+      "Melnichuk tested steady 40 Hz binaural beats with a 340 Hz carrier during an approximately 33-minute attention task. Gamma Lift uses that tone pair and duration; Overdrive is a shorter variant. Attention findings are mixed; 40 Hz is not an established dose of physical energy.",
     ],
     sources: [
-      ["Attokaren et al., 2026", "https://pubmed.ncbi.nlm.nih.gov/42146314/"],
-      ["Wu et al., 2025", "https://pubmed.ncbi.nlm.nih.gov/40034515/"],
+      ["Melnichuk et al., 2025", "https://www.nature.com/articles/s41598-025-88517-z"],
+      ["Leistik et al., 2023", "https://pmc.ncbi.nlm.nih.gov/articles/PMC10157589/"],
     ],
   },
 };

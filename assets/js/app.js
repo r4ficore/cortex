@@ -6,7 +6,7 @@ import {
   sessionProfile,
   quietVisual,
 } from "./experience.js";
-import { prepareOffline, installApp } from "./offline.js";
+import { prepareOffline, installApp, openLatest, updateOfflinePanel, checkForUpdate } from "./offline.js";
 import {
   ritualFor,
   ritualPlan,
@@ -291,6 +291,7 @@ function render() {
   updateMini();
   updatePlayer();
   syncRuntime();
+  updateOfflinePanel();
 }
 function fitPlayer() {
   fitBreathingForm(main.querySelector(".player-stage"), refs.orb);
@@ -930,7 +931,7 @@ function saveLog(f, complete) {
     startedAt: f.startedAt,
     endedAt: Date.now(),
     durationSeconds: Math.round(f.clock.position()),
-    audioVersion: 2,
+    audioVersion: f.session.audioVersion || f.steps?.find(s => s.kind === "sound")?.session.audioVersion || 3,
     audioPrefs: f.audioPrefs,
     sessionPrefs: sessionProfile(
       {
@@ -1007,7 +1008,7 @@ async function nextStep() {
     await audio.unlock();
     if (state.flow !== f || token !== state.token) return;
     const step = f.program.steps[f.stepIndex + 1];
-    const session = makeSession(step.sessionId, step.durationMinutes * 60);
+    const session = makeSession(step.sessionId, step.durationMinutes * 60, f.session.audioVersion || 3);
     audio.play(session, 0, prefs());
     f.audioPrefs = audioSettings(prefs());
     f.stepIndex++;
@@ -1531,6 +1532,13 @@ document.addEventListener("click", async (e) => {
     setMedia();
   } else if (a === "settings") openDialog("settings");
   else if (a === "installApp") await installApp();
+  else if (a === "updateApp") openLatest();
+  else if (a === "showResearch") {
+    const research = document.getElementById("setupResearch");
+    research.open = true;
+    research.querySelector("summary").focus();
+    research.scrollIntoView({ block: "start", behavior: "instant" });
+  }
   else if (a === "closeDialog") closeDialog();
   else if (a === "recover") recover(el.dataset.id);
   else if (a === "closeRecovery") recover(el.dataset.id, true);
@@ -1784,7 +1792,8 @@ if (navigation.current.startsWith("library/")) {
   if (paths.some((p) => p.id === goal)) state.filters.goal = goal;
 }
 render();
-prepareOffline();
+prepareOffline({ busy: () => active() || state.starting });
+window.addEventListener("focus", checkForUpdate);
 
 function playerFlow(f) {
   if (!f.ritual)
@@ -1942,7 +1951,7 @@ function finishRitual(complete) {
     ),
     skippedSeconds: f.skipped || 0,
     audioPrefs: audioSettings(f.audioPrefs),
-    audioVersion: 2,
+    audioVersion: f.session.audioVersion || f.steps?.find(s => s.kind === "sound")?.session.audioVersion || 3,
     startedAt: f.startedAt,
     endedAt: Date.now(),
     durationSeconds,

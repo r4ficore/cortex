@@ -1,4 +1,4 @@
-import { protocols, programs as originalPrograms } from "./protocols.js";
+import { protocols, legacyProtocols, legacyPrograms, programs as originalPrograms } from "./protocols.js";
 import { sessionCopy, programCopy } from "./session-content.js";
 export const paths = [
   {
@@ -60,11 +60,17 @@ export const programs = originalPrograms.map((p) => ({
   ...p,
   description: programCopy[p.id],
 }));
+export const programsForVersion = (version) => version === 2
+  ? legacyPrograms.map(p => ({ ...p, description: programCopy[p.id] }))
+  : programs;
 export const pathFor = (id) => paths.find((p) => p.id === id) || paths[0];
 export const sessionFor = (id) =>
   Object.hasOwn(sessions, id) ? sessions[id] : sessions.deepFocus;
-export function makeSession(id, duration) {
-  const original = sessionFor(id);
+export function makeSession(id, duration, audioVersion = 3) {
+  const current = sessionFor(id);
+  const original = audioVersion === 2 && legacyProtocols[current.id]
+    ? { ...current, ...legacyProtocols[current.id] }
+    : current;
   const length = duration ?? (id === "hypnos" ? 1800 : original.duration);
   const scale =
     Number.isFinite(original.duration) && original.duration > 0

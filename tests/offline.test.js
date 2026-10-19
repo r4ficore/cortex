@@ -4,7 +4,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { clearMarketingPages } from "../assets/js/marketing-cache.js";
 
-async function worker({ failInstall = false } = {}) {
+async function worker({ failInstall = false, failPromotion = false, offline = false } = {}) {
   const listeners = {},
     buckets = new Map(),
     fetched = [],
@@ -21,7 +21,11 @@ async function worker({ failInstall = false } = {}) {
             map.set("partial", "bad");
             throw Error("network");
           }
-          for (const u of urls) map.set(u, { body: u });
+          for (const u of urls) map.set(u, { body: u, clone() { return this; } });
+        },
+        async put(u, response) {
+          if (failPromotion && name.endsWith("-old") && u.includes("/releases/new/")) throw Error("quota");
+          map.set(u, response);
         },
         async match(u) {
           return map.get(u);
@@ -68,6 +72,7 @@ async function worker({ failInstall = false } = {}) {
     caches,
     URL,
     fetch: async (request, options) => {
+      if (offline) throw Error("offline");
       fetched.push(request.url);
       fetchOptions.push(options);
       return { body: "network" };
@@ -135,7 +140,7 @@ test("an incomplete offline install is discarded and the old working release sur
   assert.equal(previous.size, 1);
 });
 
-test("install removes stale marketing HTML without replacing an open player's offline release", async () => {
+test("install promotes the next navigation while retaining the active player’s immutable assets", async () => {
   const w = await worker();
   const root = "https://example.test/cortex/";
   const previous = new Map([
@@ -150,7 +155,8 @@ test("install removes stale marketing HTML without replacing an open player's of
   await w.lifecycle("install");
   assert.equal(previous.has(root + "landing.html"), false);
   assert.equal(previous.has(root + "landing-en.html"), false);
-  assert.equal(previous.get(root + "index.html").body, "open player");
+  assert.equal(previous.get(root + "index.html").body, root + "index.html");
+  assert.equal(previous.get(root + "releases/new/assets/js/app.js").body, root + "releases/new/assets/js/app.js");
   assert.equal(
     previous.get(root + "releases/old/assets/js/audio.js").body,
     "active audio",
@@ -253,6 +259,55 @@ test("offline status survives a network failure and reports a failed first insta
     assert.match(module.offlinePanel(), /Nie potwierdzono gotowości offline/);
   } finally {
     for (const [key, descriptor] of Object.entries(original)) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  }
+});
+
+
+test("failed cache promotion keeps the old entry point and running audio usable", async () => {
+  const w = await worker({ failPromotion: true });
+  const root = "https://example.test/cortex/";
+  const previous = new Map([[root + "index.html", { body: "old entry" }], [root + "releases/old/assets/js/audio.js", { body: "old audio" }]]);
+  w.buckets.set("cortex-/cortex/-old", previous);
+  await assert.rejects(w.lifecycle("install"), /quota/);
+  assert.equal(previous.get(root + "index.html").body, "old entry");
+  assert.equal(previous.get(root + "releases/old/assets/js/audio.js").body, "old audio");
+  assert.equal(w.buckets.has("cortex-/cortex/-new"), false);
+});
+
+test("latest entry revalidates the network and falls back to the complete offline app", async () => {
+  const online = await worker();
+  await online.lifecycle("install");
+  assert.equal((await online.request("/cortex/latest.html?update=1")).body, "network");
+  assert.equal(online.fetchOptions.at(-1).cache, "no-cache");
+  const offline = await worker({ offline: true });
+  await offline.lifecycle("install");
+  assert.equal((await offline.request("/cortex/latest.html")).body, "https://example.test/cortex/index.html");
+});
+
+test("update action cannot interrupt a running session and retains the destination hash", async () => {
+  const keys = ["navigator", "document", "location", "isSecureContext"];
+  const saved = Object.fromEntries(keys.map(k => [k, Object.getOwnPropertyDescriptor(globalThis, k)]));
+  const destinations = [];
+  let busy = true;
+  try {
+    for (const [key, value] of Object.entries({
+      navigator: {}, document: { getElementById: () => null }, isSecureContext: true,
+      location: { href: "https://example.test/cortex/index.html#prepare/prime", hash: "#prepare/prime", replace: u => destinations.push(u) },
+    })) Object.defineProperty(globalThis, key, { configurable: true, value });
+    const module = await import("../assets/js/offline.js");
+    await module.prepareOffline({ busy: () => busy });
+    assert.equal(module.openLatest(), false);
+    assert.equal(destinations.length, 0);
+    assert.match(module.offlinePanel(), /data-action="updateApp" disabled/);
+    busy = false;
+    assert.equal(module.openLatest(), true);
+    assert.equal(new URL(destinations[0]).hash, "#prepare/prime");
+    assert.equal(new URL(destinations[0]).pathname, "/cortex/"); // Source checkout uses its uncached entry.
+  } finally {
+    for (const [key, descriptor] of Object.entries(saved)) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);
       else delete globalThis[key];
     }

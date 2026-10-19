@@ -34,10 +34,7 @@ export const sessionCopy = {
       "Wyraźny początek i koniec bloku pracy pomagają ograniczyć przełączanie się między zadaniami. Dźwięk bez słów daje stałe tło, do którego możesz wracać, gdy uwaga odpływa.",
       "A clear beginning and end give your work a boundary and help you limit task switching. Wordless sound provides a steady backdrop to return to when your attention wanders.",
     ),
-    how: pair(
-      "Po krótkim wprowadzeniu następuje długi, równomierny etap pracy, a potem łagodne zakończenie. W słuchawkach lekko różne tony w obu uszach tworzą rytm binauralny; jego tempo jest wyższe w środkowej części.",
-      "A brief introduction leads into a long, steady work phase and a gentle finish. Through headphones, slightly different tones in each ear create a binaural beat, with a faster rate during the middle phase.",
-    ),
+    how: pair("Przez cały blok słyszysz stałe dudnienia 15 Hz: 255 Hz w lewym uchu i 240 Hz w prawym. Głośność łagodnie narasta i wygasa; częstotliwość nie zmienia się podczas pracy. Badanie pamięci z tym bodźcem trwało 5 minut; dłuższy blok służy organizacji pracy.", "The whole block uses steady 15 Hz beats: 255 Hz in the left ear and 240 Hz in the right. Volume fades in and out; the frequency stays constant while you work. The memory study used five minutes of this stimulus; longer blocks structure your work."),
     practice: pair("Przed startem zapisz jeden konkretny cel i wycisz powiadomienia. Pracuj podczas sesji; nie musisz patrzeć na ekran Cortex.", "Write down one specific goal and silence notifications before starting. Work during the session; you do not need to watch Cortex."),
   },
   clarity: {
@@ -45,7 +42,7 @@ export const sessionCopy = {
     title: pair("Uporządkuj myśli", "A clear starting point"),
     description: pair("Gdy masz wiele spraw w głowie i nie wiesz, od czego zacząć. Zrób plan, wybierz priorytet i określ następny krok.", "When too many things compete for your attention. Make a plan, choose a priority and identify your next step."),
     benefit: pair("To ramy dla krótkiej pracy z notatnikiem: zebrania myśli, porównania opcji i zamiany ogólnego zamiaru w konkretne działanie.", "A bounded session for working with a notebook: gathering thoughts, comparing options and turning a broad intention into a concrete action."),
-    how: pair("Spokojniejsze wejście przechodzi w wyraźnie pulsujący środek, po którym rytm zwalnia. Oprócz różnicy tonów między uszami sesja wykorzystuje regularną zmianę głośności. Daje bardziej wyrazisty punkt skupienia niż Deep Focus.", "A calmer opening leads into a distinctly pulsing middle before the rhythm slows. Alongside the difference between the tones in each ear, the session uses regular changes in amplitude. It offers a more pronounced focus cue than Deep Focus."),
+    how: pair("Pięć minut stałego rytmu binauralnego 15 Hz, bez dodatkowej pulsacji głośności. To ten sam bodziec co w Deep Focus, w krótszym bloku. Czas i para tonów 255/240 Hz odpowiadają warunkowi z badania pamięci roboczej; planowanie jest zastosowaniem praktycznym.", "Five minutes of steady 15 Hz binaural beats without added amplitude pulses. This is the same stimulus as Deep Focus in a shorter block. Its duration and 255/240 Hz tone pair match a working-memory study condition; planning is a practical application."),
     practice: pair("Wypisz to, co zajmuje Ci głowę. Na koniec zaznacz jedną rzecz, którą zrobisz jako następną.", "Write down what is on your mind. Finish by marking the one thing you will do next."),
   },
   genesis: {
@@ -53,7 +50,7 @@ export const sessionCopy = {
     title: pair("Miejsce na pomysły", "Room for ideas"),
     description: pair("Gdy utkniesz przy pomyśle. Zrób miejsce na swobodne skojarzenia, szkice i szukanie innego podejścia.", "When an idea feels stuck. Make room for associations, sketches and a different approach."),
     benefit: pair("Chwila na eksplorowanie możliwości bez konieczności natychmiastowego oceniania wyniku. Przydaje się przed pisaniem, projektowaniem lub burzą mózgów.", "Time to explore possibilities without having to judge the result immediately. Useful before writing, designing or brainstorming."),
-    how: pair("Środkowa część ma wolniejszy rytm binauralny i niższe tony niż wprowadzenie. Zakończenie wraca do rytmu początkowego, wyznaczając moment na zebranie notatek i wybór dalszego kierunku.", "The middle phase uses a slower binaural beat and lower tones than the opening. The ending returns to the initial rhythm, marking a moment to gather your notes and choose a direction."),
+    how: pair("Stałe 10 Hz tworzone przez tony 335 i 345 Hz odpowiada częstotliwości i nośnej z badania myślenia twórczego. Czas sesji przeznacz na własne notatki; badanie obejmowało trzyminutowe wprowadzenie i zadania twórcze.", "Steady 10 Hz from 335 and 345 Hz tones matches the beat and carrier used in creativity research. Use the session for your own notes; the study included a three-minute lead-in followed by creativity tasks."),
     practice: pair("Zapisuj pomysły bez poprawiania ich w trakcie. Dopiero po sesji wybierz jeden, który chcesz rozwinąć.", "Capture ideas without editing them as you go. After the session, choose one to develop."),
   },
   presence: {
@@ -69,7 +66,7 @@ export const sessionCopy = {
     title: pair("Dłuższe skupienie", "A longer focus session"),
     description: pair("Gdy zadanie wymaga dłuższego zanurzenia. Wybierz blok na pisanie, naukę lub analizę bez ciągłego sprawdzania czasu.", "When a task needs a longer stretch of attention. Set aside a block for writing, studying or analysis without checking the time."),
     benefit: pair("Dłuższa przestrzeń na wejście w temat i pozostanie przy nim. Wybierz ją, gdy krótki start już nie wystarcza, a chcesz doprowadzić fragment pracy do końca.", "More room to get into a subject and stay with it. Choose it when a short start is not enough and you want to finish a meaningful piece of work."),
-    how: pair("Wprowadzenie prowadzi do długiego środkowego etapu ze stałym rytmem binauralnym i delikatną pulsacją głośności. Na końcu rytm zwalnia. W porównaniu z Deep Focus masz dłuższy blok oraz dodatkową pulsację dźwięku.", "The introduction leads into a long middle phase with a steady binaural beat and gentle amplitude pulses. The rate slows at the end. Compared with Deep Focus, you get a longer block and an additional pulsing layer."),
+    how: pair("Stałe 15 Hz, takie jak w Deep Focus, przez cały blok pracy. Nie dodajemy szybszych rytmów ani modulacji głośności. Dłuższy czas służy organizacji pracy; nie oznacza większej skuteczności bodźca.", "The same steady 15 Hz as Deep Focus throughout the work block. No faster beats or additional amplitude modulation. The longer duration structures work; it does not imply a stronger stimulus benefit."),
     practice: pair("Przygotuj materiały przed startem. Ustal, jaki fragment pracy zamkniesz, a po sesji zrób krótką przerwę.", "Prepare your materials first. Decide which part of the work you will finish, then take a short break afterwards."),
   },
   equilibrium: {
@@ -93,7 +90,7 @@ export const sessionCopy = {
     title: pair("Dłuższe wyciszenie", "A slower interlude"),
     description: pair("Gdy krótka przerwa to za mało. Daj sobie więcej czasu na odpuszczenie napięcia po wymagającym dniu.", "When a short pause is not enough. Give yourself more time to let go of tension after a demanding day."),
     benefit: pair("Dłuższy odpoczynek bez presji szybkiego powrotu do obowiązków. Możesz poświęcić go na spokojne słuchanie i stopniowe rozluźnianie ciała.", "A longer rest without pressure to rush back to your responsibilities. Use it for quiet listening and gradually relaxing your body."),
-    how: pair("Środek sesji ma niższe tony, wolniejszy rytm binauralny i łagodną pulsację głośności. Ostatni etap wraca do wyraźniejszego rytmu, zostawiając czas na spokojne zakończenie przerwy.", "The middle phase uses lower tones, a slower binaural beat and gentle amplitude pulses. The final stage returns to a more distinct rhythm, leaving time to ease out of the break."),
+    how: pair("Trzy etapy dudnień 6–3–8 Hz, z niższymi tonami pośrodku i łagodnym wygaszeniem. Dodatkowa pulsacja głośności została usunięta. To autorska kompozycja do odpoczynku; badanie HRV stosowało inny, zmienny rytm 5,5–8,5 Hz.", "Three beat stages at 6–3–8 Hz, with lower tones in the middle and a gentle fade. Added amplitude pulses have been removed. This is an original rest composition; the HRV trial used a different, varying 5.5–8.5 Hz rhythm."),
     practice: pair("Znajdź pozycję, w której nie musisz napinać mięśni. Kieruj uwagę kolejno na twarz, barki i dłonie, pozwalając im odpocząć.", "Find a position that does not require you to brace your muscles. Bring your attention to your face, shoulders and hands in turn, letting them rest."),
   },
   hypnos: {
@@ -109,7 +106,7 @@ export const sessionCopy = {
     title: pair("Miękkie przejście", "A gentle transition"),
     description: pair("Gdy dzień się kończy, ale myślami wciąż jesteś w pracy. Stwórz spokojne przejście od obowiązków do wieczoru.", "When the day is ending but your mind is still at work. Create a gentle transition from responsibilities into your evening."),
     benefit: pair("Czas na zamknięcie dnia, zanim położysz się spać. Dobry wybór do odpoczynku w fotelu, kiedy chcesz odłożyć zadania i stopniowo zmienić tempo.", "Time to close the day before going to bed. A good fit for resting in a chair when you want to put tasks aside and gradually change pace."),
-    how: pair("Cichy początek przechodzi w wyraźniejszy środkowy etap z delikatną pulsacją, a końcowa część ponownie zwalnia. Ta sekwencja ma kształt spokojnego przejścia; Hypnos po wprowadzeniu pozostaje przy wolniejszym rytmie.", "A quiet opening gives way to a more present middle with gentle pulses, before the final phase slows again. The sequence provides a gradual transition; Hypnos instead stays at a slower rate after its introduction."),
+    how: pair("Rytm 4–8–5 Hz tworzy trzy części wieczornego odpoczynku. Pozostają same dudnienia binauralne, bez dodatkowej pulsacji głośności. Przebieg i 30 minut są wyborem kompozycyjnym, nie procedurą przestawiania zegara biologicznego.", "A 4–8–5 Hz sequence marks three parts of an evening rest. It uses binaural beats without additional amplitude modulation. The sequence and 30-minute duration are composition choices, not a body-clock-reset procedure."),
     practice: pair("Zamknij laptop i zapisz sprawy, które mogą poczekać do jutra. Słuchaj bez równoczesnego przeglądania wiadomości.", "Close your laptop and note what can wait until tomorrow. Listen without checking messages at the same time."),
   },
   remSculpt: {
@@ -117,32 +114,32 @@ export const sessionCopy = {
     title: pair("Wieczorne wyciszenie", "Evening stillness"),
     description: pair("Gdy przed snem potrzebujesz dłuższej, uporządkowanej chwili spokoju. Zostaw sobie czas na odpoczynek bez ekranu.", "When you need a longer, structured wind-down before bed. Give yourself time to rest away from the screen."),
     benefit: pair("Pomaga zbudować regularną przestrzeń na wieczorne wyciszenie: bez zadań, rozmów i ciągłego wybierania kolejnych treści.", "Helps you make a regular space for winding down in the evening, free from tasks, conversations and choosing what to watch next."),
-    how: pair("Większość sesji utrzymuje równy, wolny rytm binauralny; w środku dochodzi subtelna pulsacja głośności. Końcówka jest nieco szybsza, po czym dźwięk wygasa. Sesja prowadzi wieczorny odpoczynek, a nazwa REM Sculpt nie oznacza sterowania fazą REM.", "Most of the session maintains a steady, slow binaural beat, with subtle amplitude pulses added in the middle. The rate rises slightly at the end before the sound fades. The session accompanies an evening wind-down; the name REM Sculpt does not mean it controls REM sleep."),
+    how: pair("Długi, stały rytm 6 Hz kończy się etapem 8 Hz i wygaszeniem. Usunięto dodatkową pulsację głośności. To dłuższy wariant wieczornego odpoczynku; nazwa nie oznacza sterowania fazą REM.", "A long, steady 6 Hz rhythm ends with an 8 Hz stage and a fade. Added amplitude modulation has been removed. This is a longer evening-rest option; its name does not imply control of REM sleep."),
     practice: pair("Wybierz czarny ekran lub nocną formę i odpoczywaj w wygodnej pozycji. Jeśli wolisz dźwięk bez końcowego przyspieszenia, wybierz Hypnos.", "Choose a black screen or night visual and rest comfortably. If you prefer sound without a faster final phase, choose Hypnos."),
   },
   prime: {
     goal: "energy",
     title: pair("Łagodny start", "A gentle start"),
-    description: pair("Gdy odkładasz rozpoczęcie i brakuje Ci rozpędu. Zrób krótką rozgrzewkę uwagi przed pierwszym działaniem.", "When you keep putting off getting started. Give your attention a short warm-up before taking the first step."),
-    benefit: pair("Mały rytuał startowy zamienia czekanie na odpowiedni moment w konkretny początek. To najłagodniejszy wybór w ścieżce Energia, gdy chcesz wejść w działanie bez intensywnej pulsacji.", "A small starting ritual turns waiting for the right moment into a concrete beginning. This is the gentlest Energy option for getting into action without strong pulses."),
-    how: pair("Rytm binauralny przechodzi od spokojniejszego do szybszego, przy tej samej wysokości tonu bazowego. Sesja nie dodaje pulsacji głośności stosowanej w Overdrive i Gamma Lift.", "The binaural beat moves from a calmer to a faster rate while the base tone stays at the same pitch. It does not add the amplitude pulses used by Overdrive and Gamma Lift."),
-    practice: pair("Przed startem wybierz najmniejszy pierwszy krok. Po sesji od razu go wykonaj — otwórz dokument, napisz pierwsze zdanie lub przygotuj stanowisko.", "Choose the smallest first step before starting. Afterwards, do it immediately: open the document, write the first sentence or prepare your workspace."),
+    description: pair("Gdy odkładasz rozpoczęcie i brakuje Ci rozpędu. Wykonaj pierwszy mały krok podczas pięciominutowej sesji.", "When you keep putting off getting started. Take your first small step during a five-minute session."),
+    benefit: pair("Mały rytuał startowy zamienia czekanie na odpowiedni moment w konkretny początek. Wybierz pięć minut na pierwsze konkretne działanie, z równym dźwiękiem w tle.", "A small starting ritual turns waiting for the right moment into a concrete beginning. Choose five minutes for your first concrete action, with a steady sound in the background."),
+    how: pair("Pięć minut stałych dudnień 15 Hz. Zamiast przyspieszającego wstępu masz od razu rytm, którego użyto podczas zadania pamięciowego. Prime i Clarity mają ten sam sygnał; różnią się proponowanym sposobem użycia.", "Five minutes of steady 15 Hz beats. Instead of an accelerating introduction, the rhythm used during a memory task is present from the start. Prime and Clarity share the same signal and suggest different uses."),
+    practice: pair("Rozpocznij małe zadanie już podczas słuchania: otwórz dokument, zapisz pierwsze zdanie lub uporządkuj materiały. Badanie dotyczyło pracy podczas bodźca, nie zastrzyku energii po nim.", "Start a small task while listening: open a document, write the first sentence or organise your materials. The study tested work during the stimulus, not an energy boost afterwards."),
   },
   overdrive: {
     goal: "energy",
-    title: pair("Mocniejsze pobudzenie", "A stronger lift"),
-    description: pair("Gdy potrzebujesz wyrazistego sygnału do działania. Krótka, intensywniejsza rozgrzewka przed wymagającym zadaniem.", "When you want a more pronounced cue to get moving. A short, more intense warm-up before a demanding task."),
-    benefit: pair("Zaznacza zdecydowane przejście od bezczynności do aktywności. Wybierz ją, jeśli odpowiada Ci mocniejszy bodziec dźwiękowy, a łagodny start Prime jest dla Ciebie zbyt spokojny.", "Marks a deliberate shift from inactivity into action. Choose it if a stronger sound cue suits you and Prime feels too gentle."),
-    how: pair("Środkowy etap łączy szybszą różnicę tonów między uszami z regularną pulsacją głośności. Końcówka obniża tempo. Intensywność wynika z budowy dźwięku; głośność ustawiasz niezależnie.", "The middle phase combines a faster difference between the tones in each ear with regular amplitude pulses. The final phase slows down. Intensity comes from the sound pattern; you control listening volume separately."),
-    practice: pair("Słuchaj na wygodnym poziomie głośności. Po zakończeniu przejdź do zadania; do dłuższej pracy wybierz Deep Focus lub Cortex Forge.", "Listen at a comfortable volume. Move into your task afterwards; for sustained work, choose Deep Focus or Cortex Forge."),
+    title: pair("Krótki rytm gamma", "A short gamma rhythm"),
+    description: pair("Gdy chcesz sprawdzić, czy rytm gamma pomaga Ci pozostać przy zadaniu. Krótka próba 40 Hz przed wyborem dłuższego bloku.", "When you want to find out whether a gamma rhythm helps you stay with a task. A short 40 Hz trial before choosing a longer block."),
+    benefit: pair("Pozwala porównać szybki rytm 40 Hz z 15 Hz w Prime, bez rezerwowania pół godziny. Wybór zależy od komfortu i tego, czy dźwięk pomaga w Twoim zadaniu.", "Compare a fast 40 Hz rhythm with Prime’s 15 Hz without setting aside half an hour. Choose according to comfort and whether the sound helps with your task."),
+    how: pair("Stałe dudnienia 40 Hz powstają z tonów 320 i 360 Hz. Nie nakładamy na nie dodatkowej pulsacji głośności. Pięć minut pozwala poznać ten bodziec; pozytywne badanie uwagi używało około 33 minut podczas zadania.", "Steady 40 Hz beats arise from 320 and 360 Hz tones. No amplitude pulses are layered on top. Five minutes lets you try this stimulus; the positive attention experiment used about 33 minutes during a task."),
+    practice: pair("Wybierz małe zadanie wykonywane podczas słuchania. Jeżeli tony Cię rozpraszają, zmniejsz ich poziom lub pozostaw samo tło.", "Choose a small task to do while listening. If the tones distract you, lower their level or use the background alone."),
   },
   gammaLift: {
     goal: "energy",
-    title: pair("Dłuższa aktywacja", "A longer lift"),
-    description: pair("Gdy chcesz poświęcić więcej czasu na wejście w działanie. Dłuższa rozgrzewka uwagi z wyraźnym etapem aktywacji.", "When you want more time to get into action. A longer attention warm-up with a pronounced activation phase."),
-    benefit: pair("Daje więcej przestrzeni na przygotowanie niż krótki Overdrive: wejście, intensywniejszy środek i spokojniejsze zakończenie. Przydaje się, gdy lubisz wyraźny rytm, ale nie chcesz kończyć na jego szczycie.", "Offers more preparation time than the short Overdrive session: an opening, a stronger middle and a calmer ending. Useful if you enjoy a distinct rhythm but do not want to finish at its peak."),
-    how: pair("Środkowy etap wykorzystuje różnicę tonów 40 Hz i pulsację głośności 40 razy na sekundę. Poprzedza go wolniejszy etap, a kończy łagodniejszy powrót. To parametry sygnału dźwiękowego; światło pozostaje osobnym wyborem.", "The middle phase uses a 40 Hz tone difference and amplitude pulses at 40 cycles per second. A slower opening precedes it and a gentler return follows. These are sound-signal parameters; light remains a separate choice."),
-    practice: pair("Zaplanuj, co zrobisz po sesji. Zacznij od wygodnej głośności i wykorzystaj spokojną końcówkę na zebranie uwagi przed działaniem.", "Decide what you will do afterwards. Start at a comfortable volume and use the calmer ending to gather your attention before acting."),
+    title: pair("Dłuższy rytm gamma", "A longer gamma rhythm"),
+    description: pair("Gdy chcesz wypróbować rytm gamma podczas dłuższego zadania. Stałe 40 Hz przez 33 minuty, z łagodnym początkiem i zakończeniem.", "When you want to try a gamma rhythm during a longer task. Steady 40 Hz for 33 minutes, with a gentle opening and ending."),
+    benefit: pair("Daje czas na pracę przy niezmiennym rytmie gamma, zamiast przełączania utworów. Wybierz ją, jeśli krótka próba Overdrive była komfortowa i chcesz sprawdzić ten sam bodziec podczas dłuższego zadania.", "Gives you time to work with a constant gamma rhythm instead of changing tracks. Choose it if the short Overdrive trial felt comfortable and you want to try the same stimulus during a longer task."),
+    how: pair("Tony 320 i 360 Hz tworzą 40 Hz przez całą sesję, bez dodatkowej modulacji głośności. Para tonów i 33-minutowy czas odpowiadają wariantowi od początku zadania w badaniu uwagi. Poziom dźwięku i tło dobierasz samodzielnie.", "320 and 360 Hz tones produce 40 Hz throughout, without added amplitude modulation. The tone pair and 33-minute duration match the task-onset condition in an attention study. You choose sound level and background yourself."),
+    practice: pair("Zacznij zadanie równocześnie z sesją. Badano uwagę podczas słuchania, nie odległy efekt po zakończeniu. Możesz przerwać wcześniej; nie musisz wytrzymywać dźwięku, który Ci przeszkadza.", "Start your task with the session. Research measured attention while listening, not a delayed effect afterwards. You can stop early; there is no need to tolerate distracting sound."),
   },
 };
 
@@ -168,7 +165,7 @@ export const breathingCopy = {
 };
 
 export const programCopy = {
-  flow90: pair("Gdy potrzebujesz długiego bloku pracy: wejście w skupienie, rozgrzewka uwagi, praca z wyraźnym rytmem i odpoczynek na koniec.", "For a long work block: settle into focus, warm up your attention, work with a distinct rhythm, then take time to unwind."),
+  flow90: pair("Trzy 25-minutowe bloki pracy przeplatane pięciominutowymi przerwami. Czas służy organizacji pracy, nie określa dawki stymulacji.", "Three 25-minute work blocks interleaved with five-minute breaks. The timing structures work rather than defining a stimulation dose."),
   socialUpgrade: pair("Przed ważną rozmową: najpierw skieruj uwagę na spotkanie, potem daj sobie czas na odpuszczenie napięcia.", "Before an important conversation: first bring your attention to the meeting, then give yourself time to let go of tension."),
   sleepReset: pair("Gdy trudno odłożyć sprawy dnia: zacznij od spokojnej przerwy, a potem przejdź do dłuższego wieczornego odpoczynku z Hypnos.", "When it is hard to put the day aside: begin with a quiet break, then move into a longer evening wind-down with Hypnos."),
   powerNap45: pair("Na odpoczynek w środku dnia: wyciszenie, czas na leżenie lub drzemkę i zakończenie, do którego wrócisz, gdy zechcesz.", "For a daytime rest: unwind, take time to lie down or nap, and return to a closing stage when you are ready."),

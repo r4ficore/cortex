@@ -12,11 +12,22 @@ self.addEventListener("install", (event) => {
       const cache = await caches.open(CACHE);
       try {
         await cache.addAll(FILES.map((p) => new URL(p, ROOT).href));
-        // Older workers may still serve an open player. Retire only their
-        // marketing HTML so a normal reload can reach the current website.
+        // Older workers may still serve an open player. Promote the next
+        // navigation without replacing modules already loaded by that player.
         for (const key of await caches.keys()) {
           if (!key.startsWith(`cortex-${ROOT.pathname}-`)) continue;
+          if (key === CACHE) continue;
           const previous = await caches.open(key);
+          // Copy the complete new offline dependency set before replacing HTML.
+          // The active worker can then serve new navigations while an already
+          // running player keeps its immutable old module URLs and audio graph.
+          for (const path of FILES.filter(p => p !== "index.html")) {
+            const url = new URL(path, ROOT).href;
+            const response = await cache.match(url);
+            await previous.put(url, response.clone());
+          }
+          const entry = new URL("index.html", ROOT).href;
+          await previous.put(entry, (await cache.match(entry)).clone());
           for (const url of MARKETING) await previous.delete(url);
         }
       } catch (error) {
@@ -58,6 +69,12 @@ self.addEventListener("fetch", (event) => {
       const canonical = new URL(url.pathname, ROOT.origin);
       if (canonical.pathname === ROOT.pathname)
         canonical.pathname += "index.html";
+      // A stable escape route for clients controlled by a legacy cache-first
+      // worker. Never cache latest.html in old releases.
+      if (url.pathname === ROOT.pathname + "latest.html") {
+        try { return await fetch(event.request, { cache: "no-cache" }); }
+        catch { return await cache.match(new URL("index.html", ROOT).href); }
+      }
       const saved = await cache.match(canonical.href);
       if (saved) return saved;
       return fetch(event.request);

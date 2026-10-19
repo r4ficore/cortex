@@ -29,18 +29,33 @@ function magnitude(d, hz, start = 4, seconds = 1) {
 }
 test("rendered binaural channels contain their own carriers with negligible opposite-channel leakage", async () => {
   const [l, r] = await render(makeSession("prime"));
-  assert.ok(magnitude(l, 220) > 0.03);
-  assert.ok(magnitude(r, 228) > 0.03);
-  assert.ok(magnitude(l, 228) / magnitude(l, 220) < 0.002);
-  assert.ok(magnitude(r, 220) / magnitude(r, 228) < 0.002);
+  assert.ok(magnitude(l, 255) > 0.03);
+  assert.ok(magnitude(r, 240) > 0.03);
+  assert.ok(magnitude(l, 240) / magnitude(l, 255) < 0.002);
+  assert.ok(magnitude(r, 255) / magnitude(r, 240) < 0.002);
 });
-test("actual PCM contains intended AM sidebands: Clarity 16 Hz, Gamma Lift 40 Hz, Overdrive 40 Hz", async () => {
+test("v3 PCM holds the audited beta and gamma tone pairs without added AM sidebands", async () => {
+  for (const [id, tones, beat] of [
+    ["clarity", [255, 240], 15],
+    ["gammaLift", [320, 360], 40],
+    ["overdrive", [320, 360], 40],
+  ]) {
+    const channels = await render(makeSession(id), 190);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = channels[ch], carrier = tones[ch], centre = magnitude(d, carrier);
+      assert.ok(centre > 0.02, `${id} missing carrier`);
+      for (const side of [-1, 1])
+        assert.ok(magnitude(d, carrier + side * beat) / centre < 0.002, `${id} extra AM`);
+    }
+  }
+});
+test("legacy PCM preserves AM sidebands for recovery: Clarity 16 Hz, Gamma Lift 40 Hz, Overdrive 40 Hz", async () => {
   for (const [id, offset, carrier, mod, ratio] of [
     ["clarity", 190, 220, 16, 0.5],
     ["gammaLift", 190, 260, 40, 0.5],
     ["overdrive", 70, 440, 40, 1 / 6],
   ]) {
-    const [l] = await render(makeSession(id), offset);
+    const [l] = await render(makeSession(id, undefined, 2), offset);
     const centre = magnitude(l, carrier),
       upper = magnitude(l, carrier + mod),
       lower = magnitude(l, carrier - mod);
@@ -128,7 +143,7 @@ test("native WAV and live graph have matching carrier and modulation amplitudes"
     { length: 20 * RATE },
     (_, i) => bytes.readInt16LE(44 + i * 4) / 32768,
   );
-  for (const hz of [204, 220, 236])
+  for (const hz of [240, 255, 270])
     assert.ok(
       Math.abs(magnitude(live, hz) - magnitude(wav, hz)) < 0.0001,
       `amplitude mismatch at ${hz} Hz`,
@@ -136,7 +151,7 @@ test("native WAV and live graph have matching carrier and modulation amplitudes"
   assert.ok(Math.abs(wav.at(-1)) < 0.0001);
 });
 test("WAV and live playback agree through real glides and the soundscape loop seam", async () => {
-  const session = makeSession("overdrive", 40);
+  const session = makeSession("restoration", 40);
   const prefs = {
     ...defaults,
     masterVolume: 0.7,

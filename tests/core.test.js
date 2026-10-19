@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { protocols, programs as originals } from "../assets/js/protocols.js";
+import { legacyProtocols as protocols, legacyPrograms as originals } from "../assets/js/protocols.js";
 import {
   sessions,
   paths,
@@ -21,7 +21,7 @@ import { createStore, migratePreferences } from "../assets/js/store.js";
 import { wavHeader, pcm } from "../assets/js/wav.js";
 const normalise = (o) =>
   JSON.parse(JSON.stringify(o, (_, x) => (x === Infinity ? "Infinity" : x)));
-test("audio revision retains 14 IDs, timing, L/R frequencies, visuals and 5 programmes", () => {
+test("legacy revision remains intact for recovering saved v2 sessions", () => {
   const baseline = JSON.parse(
     readFileSync(new URL("./protocols-baseline.json", import.meta.url)),
   );

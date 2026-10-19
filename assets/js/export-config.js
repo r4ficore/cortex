@@ -62,7 +62,7 @@ export function exportConfig(values, preferences = {}) {
 export function exportManifest({ session, options }) {
   return {
     schemaVersion: 1,
-    audioVersion: 2,
+    audioVersion: session.audioVersion,
     sessionId: session.id,
     goal: session.goal,
     name: session.name,

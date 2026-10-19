@@ -59,7 +59,7 @@ export function ritualPreferences(id, preferences) {
     ...preferences.ritualProfiles?.[id],
   };
 }
-export function ritualPlan(id, prefs) {
+export function ritualPlan(id, prefs, audioVersion = 3) {
   if (!ritualFor(id)) throw Error("Unknown ritual");
   const steps = [];
   const breath = (seconds) =>
@@ -82,7 +82,7 @@ export function ritualPlan(id, prefs) {
         : 900;
     steps.push({
       kind: "sound",
-      session: makeSession(id === "evening" ? "hypnos" : "deepFocus", duration),
+      session: makeSession(id === "evening" ? "hypnos" : "deepFocus", duration, audioVersion),
     });
   }
   let start = 0;

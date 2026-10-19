@@ -3054,6 +3054,17 @@ body.night-mode {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+.research-jump { min-height: 44px; margin-top: 8px; text-align: left; }
+.protocol-review { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+.protocol-review p + p { margin-top: 12px; }
+.setup-research { scroll-margin-top: 24px; }
+.update-notice {
+  max-width: 1080px; margin: 12px auto; padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; background: var(--paper); border-radius: 18px;
+}
+.update-notice[hidden] { display: none; }
+.update-notice p { margin: 0; flex: 1 1 260px; }
 .session-explanation .research-context {
   margin-top: 24px;
   padding-top: 16px;

@@ -1,6 +1,6 @@
 // Audio revision 2: explicit AM and continuous levels. See docs/audio-revision-2.md.
 // Original IDs, stage timings, L/R frequencies and visual definitions are retained.
-export const protocols = {
+export const legacyProtocols = {
   hypnos: {
     id: "hypnos",
     name: "Hypnos",
@@ -931,7 +931,7 @@ export const protocols = {
     evidence: "context-only",
   },
 };
-export const programs = [
+export const legacyPrograms = [
   {
     id: "flow90",
     name: "Flow 90",
@@ -1019,3 +1019,53 @@ export const programs = [
     ],
   },
 ];
+
+// Revision 3 aligns selected stimuli with primary-study methods, not presumed
+// therapeutic doses. Keep v2 immutable for interrupted-session recovery.
+export const AUDIO_VERSION = 3;
+export const revisions = {
+  deepFocus: { tones: [255, 240], study: "memory", studiedSeconds: 300 },
+  clarity: { tones: [255, 240], duration: 300, study: "memory", studiedSeconds: 300 },
+  cortexForge: { tones: [255, 240], duration: 1800, study: "memory", studiedSeconds: 300 },
+  prime: { tones: [255, 240], study: "memory", studiedSeconds: 300 },
+  genesis: { tones: [335, 345], study: "creativity" },
+  overdrive: { tones: [320, 360], study: "gamma", studiedSeconds: 1980 },
+  gammaLift: { tones: [320, 360], duration: 1980, study: "gamma", studiedSeconds: 1980 },
+};
+export const protocols = Object.fromEntries(Object.entries(legacyProtocols).map(([id, old]) => {
+  const revision = revisions[id] || {};
+  const duration = revision.duration ?? old.duration;
+  const scale = Number.isFinite(old.duration) ? duration / old.duration : 1;
+  return [id, {
+    ...old,
+    duration,
+    audioVersion: AUDIO_VERSION,
+    evidence: revision.study ? "study-informed-adaptation" : "sound-design",
+    baseHz: revision.tones ? `${Math.abs(revision.tones[1] - revision.tones[0])} Hz (L/R)` : old.baseHz,
+    phases: old.phases.map(p => ({
+      ...p,
+      start: p.start * scale,
+      end: p.end * scale,
+      audio: {
+        ...p.audio,
+        ...(revision.tones ? { l: revision.tones[0], r: revision.tones[1] } : {}),
+        // Binaural-beat trials do not validate stacking a separate AM stimulus.
+        am: { rate: 0, depth: 0 },
+      },
+      visual: { ...p.visual },
+    })),
+  }];
+}));
+// Work/rest blocks replace the former uninterrupted 55-minute Clarity step.
+// These are practical work intervals, not validated exposure doses.
+export const programs = legacyPrograms.map(p => p.id === "flow90" ? {
+  ...p,
+  steps: [
+    { sessionId: "deepFocus", durationMinutes: 25 },
+    { sessionId: "equilibrium", durationMinutes: 5 },
+    { sessionId: "cortexForge", durationMinutes: 25 },
+    { sessionId: "equilibrium", durationMinutes: 5 },
+    { sessionId: "deepFocus", durationMinutes: 25 },
+    { sessionId: "equilibrium", durationMinutes: 5 },
+  ],
+} : { ...p, steps: p.steps.map(s => ({ ...s })) });
