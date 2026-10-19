@@ -15,6 +15,7 @@ import {
 import { backgrounds } from "./background-catalog.js";
 import { practiceDuration } from "./breath.js";
 import { breathingCopy } from "./session-content.js";
+import { signalHTML, researchHTML } from "./session-science.js";
 import {
   paths,
   sessions,
@@ -207,6 +208,8 @@ function setupLayout({
   name,
   description,
   explanation,
+  signal,
+  research,
   duration,
   summary,
   controls,
@@ -215,7 +218,7 @@ function setupLayout({
   sequence,
   alternative = true,
 }) {
-  return `${back()}<div class="setup-layout" data-goal="${goal}"><section class="setup-intro"><div class="overline">${icon(pathFor(goal).icon, 20)}${local(pathFor(goal))}</div><h1>${name}</h1><p>${description}</p><div class="setup-art" aria-hidden="true">${orb(goal)}</div></section><section class="setup-main" aria-label="${t("Twoja sesja", "Your session")}"><div class="setup-duration">${icon("clock", 20)}<strong>${durationLabel(duration)}</strong><span>${goal === "breath" ? t("dla oddechu", "to breathe") : t("dla siebie", "for yourself")}</span></div>${sequence ? `<p class="setup-sequence">${sequence}</p>` : ""}${summary}<div class="start-dock"><div id="startError" class="error" role="alert" hidden></div>${action}</div>${explanation || ""}<details class="setup-adjust" id="setupAdjust"><summary><span>${icon("settings", 18)}${t("Dopasuj", "Adjust")}</span><span class="small muted">${t("Dźwięk i obraz", "Sound & visuals")}</span></summary><div class="form-stack">${controls}${save || ""}</div></details>${alternative ? link("#library/" + goal, t("Inne sesje w tej ścieżce", "Other sessions for this need"), "arrow", "text-link setup-alternatives") : ""}<a class="help text-link setup-help" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></section></div>`;
+  return `${back()}<div class="setup-layout" data-goal="${goal}"><section class="setup-intro"><div class="overline">${icon(pathFor(goal).icon, 20)}${local(pathFor(goal))}</div><h1>${name}</h1><p>${description}</p>${signal || ""}<div class="setup-art" aria-hidden="true">${orb(goal)}</div></section><section class="setup-main" aria-label="${t("Twoja sesja", "Your session")}"><div class="setup-duration">${icon("clock", 20)}<strong>${durationLabel(duration)}</strong><span>${goal === "breath" ? t("dla oddechu", "to breathe") : t("dla siebie", "for yourself")}</span></div>${sequence ? `<p class="setup-sequence">${sequence}</p>` : ""}${summary}<div class="start-dock"><div id="startError" class="error" role="alert" hidden></div>${action}</div>${explanation || ""}${research || ""}<details class="setup-adjust" id="setupAdjust"><summary><span>${icon("settings", 18)}${t("Dopasuj", "Adjust")}</span><span class="small muted">${t("Dźwięk i obraz", "Sound & visuals")}</span></summary><div class="form-stack">${controls}${save || ""}</div></details>${alternative ? link("#library/" + goal, t("Inne sesje w tej ścieżce", "Other sessions for this need"), "arrow", "text-link setup-alternatives") : ""}<a class="help text-link setup-help" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></section></div>`;
 }
 export function prepare(
   id,
@@ -297,6 +300,8 @@ export function prepare(
     name: local(s.title),
     description: local(content.description),
     explanation: sessionExplanation(content),
+    signal: signalHTML(s, prefs.breathPattern, language),
+    research: researchHTML(s, prefs.breathPattern, language),
     duration,
     summary: setupSummary(prefs, breath, visualMode),
     controls,
@@ -426,6 +431,7 @@ export function ritualPrepare(id, prefs, active, saved) {
   if (!r) return home(prefs);
   const steps = ritualPlan(id, prefs),
     breath = id === "reset";
+  const scienceSession = sessionFor(breath ? "breath" : id === "evening" ? "hypnos" : "deepFocus");
   const controls = `${id !== "reset" ? toggle("prelude", t("Oddech na początek", "Begin with breathing"), t("Około minuty, zawsze pełne cykle.", "About a minute, always complete cycles."), prefs) : ""}${
     id === "reset" || prefs.prelude
       ? `<label class="field"><span>${t("Rytm oddechu", "Breathing rhythm")}</span><select data-pref="breathPattern">${[
@@ -458,6 +464,8 @@ export function ritualPrepare(id, prefs, active, saved) {
     goal: r.goal,
     name: local(r.name),
     description: local(r.description),
+    signal: signalHTML(scienceSession, prefs.breathPattern, language),
+    research: researchHTML(scienceSession, prefs.breathPattern, language),
     explanation: sessionExplanation(
       breath
         ? breathingCopy[prefs.breathPattern] || breathingCopy["4-6"]

@@ -1,0 +1,51 @@
+Cortex — research-linked session explanations, 2026-10-19
+
+Scope
+14 audio protocols and all 3 breathing patterns, PL/EN, standalone preparation
+and the 3 daily rituals. Existing purpose/practice descriptions remain available.
+The visible frequency summary is derived from audio L/R differences, not the
+visual stimulation rate. AM and breath cycles are explained separately.
+No signal parameters, session durations, preferences or playback behavior changed.
+
+Presentation
+Selection rationale and actual frequency sequence are visible before starting.
+The optional research disclosure leads with measured findings, gives a comparison
+with ordinary music, explains auditory physiology, and links directly to papers.
+Start is not gated by reading. Research links open separately from the player.
+The breathing disclosure updates when the selected pattern changes.
+
+Evidence selection and limits
+Primary human experiments are indexed with URLs and bilingual findings in
+assets/js/session-science.js. Positive and null attention results are both shown.
+Beta: Beauchene 2016 (working memory, including a classical-music comparison),
+Lane 1998 (vigilance, slower beats as comparator), Robison 2022 (null findings).
+Alpha: Solca 2016 (auditory cortical coherence; not a relaxation-outcome trial).
+Creativity: Reedijk 2013 (10/40 Hz, variable divergent-thinking results; not 6 Hz).
+Calm: McConnell 2014 (post-exercise HRV, 5.5–8.5 Hz) and Mallik/Russo 2022
+(music plus theta beats; anxiety outcomes depend on subgroup and component).
+Sleep: Lee 2024 (ten-person pilot, dynamic 0–3 Hz, staged PSG delivery;
+not the fixed 1 Hz Cortex sequence and not a music-controlled trial).
+Gamma: Melnichuk 2025 and Leistik 2023 (auditory stimulation and attention;
+different carriers, modulation, durations and controls from Cortex).
+Mechanism: Orozco Perez 2020 (auditory response is distinct from mood benefit).
+Breath: Joseph 2005 (6/min and baroreflex sensitivity), Balban 2023 (Box among
+daily practices), Vierra 2022 (4–7–8 physiological observations without a
+non-practice resting control).
+
+Interpretation rules
+Session selection is a design application, not validation of each preset.
+Do not turn EEG band names into guaranteed mental states or infer dopamine,
+direct vagus stimulation, REM control, or physical energy from stimulus Hz.
+Do not transfer light-stimulation outcomes to binaural audio or the converse.
+Do not treat three breathing patterns as sharing the same six-breaths/min data.
+Keep direct comparisons with music distinct from comparisons with silence,
+control tones and slower beats. No universal superiority over music is claimed.
+
+Validation
+101 automated tests passed; focused research tests repeated after final copy edit.
+Syntax/assets check, document generator and static build passed.
+Browser emulation: 320, 390, 430, 768, 1024, 1280 and 1440 px, expanded research;
+no page-wide horizontal overflow and research links at least 44 px high.
+Checked PL/EN, keyboard disclosure, changing Box/4–7–8, correct study replacement,
+and local offline release update after closing/reopening the test tab.
+This is browser emulation, not a test on a physical iPhone.
