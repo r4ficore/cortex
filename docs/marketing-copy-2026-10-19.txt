@@ -1,0 +1,56 @@
+Cortex landing copy revision — 2026-10-19
+
+Purpose
+Replace vague lifestyle copy with clear situations, session benefits, the actual
+product mechanism, and concrete research findings in Polish and English.
+
+Changes
+- New first-screen proposition: less tension and more room for focus.
+- Five expanded paths: need, distinct sound/breathing experience, named session,
+  duration, and preparation link. Unwind now opens Equilibrium rather than the
+  breathing ritual. Campaign presets still preserve saved user preferences.
+- Four explanatory sections: breathing/autonomic regulation, auditory rhythms,
+  sound and unwinding, and evening light. Primary sources link beside each claim.
+- The former generic disclaimer is replaced with useful controls and saved-setup
+  benefits. Existing whitepaper discussion of product evidence, conflicting
+  findings, and protocol limits is retained.
+- No audio parameters, clinical claims, player controls or stimulation settings
+  have been changed. Research sample sizes, durations and comparisons refer to
+  those studies, not measurements of Cortex users.
+
+Primary sources checked
+1. Tharion et al., 2012, PMID 23029969:
+   https://pubmed.ncbi.nlm.nih.gov/23029969/
+   36 healthy adults, one month of daily six-breaths/min practice versus control;
+   changes in selected HRV indices. Does not establish an immediate three-minute
+   Cortex effect or a change in sympathovagal balance.
+2. Lane et al., 1998, PMID 9423966:
+   https://pubmed.ncbi.nlm.nih.gov/9423966/
+   29 participants, 30-minute vigilance task; 16/24 Hz beats versus 1.5/4 Hz.
+   Better detections/fewer false alarms in that comparison, not validation of
+   Cortex's individual frequency sequences or guaranteed productivity.
+3. Orozco Perez et al., 2020:
+   https://www.eneuro.org/content/7/2/ENEURO.0232-19.2020
+   Binaural/monaural signal and auditory-pathway distinction. Used to explain
+   binaural perception, not to claim whole-brain synchronisation.
+4. Mallik & Russo, 2022:
+   https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259312
+   163 participants taking anxiolytics, 24-minute music/ABS/combined/noise arms.
+   The stated cognitive-anxiety advantage is limited to the moderate trait-
+   anxiety subgroup and the tested music-plus-theta intervention.
+5. Chang et al., 2015, PMID 25535358:
+   https://pmc.ncbi.nlm.nih.gov/articles/PMC4313820/
+   12-person crossover study, four hours of evening reading for five evenings.
+   Supports the relevance of evening light, not a quantified sleep improvement
+   from Cortex's black-screen mode.
+
+Validation
+- Full existing suite: 94 tests passed.
+- After the last copy/card-layout edit: 8 marketing tests passed; syntax, local
+  assets, static generation and production build passed.
+- PL viewport checks: 320, 390, 430, 768, 1024, 1280, 1440 px.
+- EN viewport checks: 320, 390, 768, 1440 px.
+- No document-wide horizontal overflow in checked views; new session and source
+  links meet 44 px minimum height. Mobile and desktop screenshots inspected.
+- Equilibrium link verified in browser: English preparation, 7 min, no autoplay.
+- This is browser viewport testing, not a test on a physical iPhone.
