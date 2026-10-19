@@ -2968,6 +2968,78 @@ body.night-mode {
 .start-dock > .btn {
   min-height: 54px;
 }
+.setup-about {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.setup-about > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+  padding-block: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 550;
+  cursor: pointer;
+  list-style: none;
+}
+.setup-about > summary::-webkit-details-marker {
+  display: none;
+}
+.setup-about > summary::after {
+  content: "+";
+  flex-shrink: 0;
+  font-size: 22px;
+  font-weight: 400;
+}
+.setup-about[open] > summary::after {
+  content: "−";
+}
+.session-explanation {
+  padding-bottom: 16px;
+}
+.session-explanation h2 {
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  margin: 18px 0 6px;
+}
+.session-explanation h2:first-child {
+  margin-top: 4px;
+}
+.session-explanation p {
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+}
+.setup-about + .setup-adjust {
+  margin-top: 0;
+}
+.program-steps .program-purpose {
+  margin-top: 10px;
+  font-size: 16px;
+  max-width: 56ch;
+}
+.program-layout > .prepare-panel {
+  grid-column: 2;
+  grid-row: 1;
+}
+.program-layout > .program-outline {
+  grid-column: 1;
+  grid-row: 1;
+}
+.program-layout .program-steps li {
+  align-items: flex-start;
+}
+@media (max-width: 780px) {
+  .program-layout > .prepare-panel,
+  .program-layout > .program-outline {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
 .setup-adjust {
   margin-top: 22px;
   border-block: 1px solid var(--line);

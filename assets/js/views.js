@@ -14,6 +14,7 @@ import {
 } from "./rituals.js";
 import { backgrounds } from "./background-catalog.js";
 import { practiceDuration } from "./breath.js";
+import { breathingCopy } from "./session-content.js";
 import {
   paths,
   sessions,
@@ -198,10 +199,14 @@ const visualName = (mode) =>
 function setupSummary(prefs, breath, visual) {
   return `<dl class="setup-summary">${breath ? `<div><dt>${t("Oddech", "Breathing")}</dt><dd>${prefs.breathPattern === "box" ? "Box · 4–4–4–4" : prefs.breathPattern.replaceAll("-", "–")} · ${prefs.breathCues ? (prefs.breathVisual ? t("obraz i dźwięk", "visual & sound") : t("dźwięk", "sound")) : t("obraz", "visual")}</dd></div>` : `<div><dt>${t("Dźwięk", "Sound")}</dt><dd>${backgroundName(prefs.noiseType)} · ${Math.round(prefs.masterVolume * 100)}%</dd></div>`}<div><dt>${breath ? t("Tło", "Background") : t("Ekran", "Screen")}</dt><dd>${breath ? backgroundName(prefs.breathBackground) : visualName(visual)}</dd></div></dl>`;
 }
+function sessionExplanation(content) {
+  return `<details class="setup-about" id="setupAbout"><summary>${t("Co daje ta sesja i jak działa", "What this session offers and how it works")}</summary><div class="session-explanation"><h2>${t("Po co ją wybrać", "Why choose it")}</h2><p>${esc(local(content.benefit))}</p><h2>${t("Jak działa", "How it works")}</h2><p>${esc(local(content.how))}</p><h2>${t("Jak z niej skorzystać", "How to use it")}</h2><p>${esc(local(content.practice))}</p></div></details>`;
+}
 function setupLayout({
   goal,
   name,
   description,
+  explanation,
   duration,
   summary,
   controls,
@@ -210,7 +215,7 @@ function setupLayout({
   sequence,
   alternative = true,
 }) {
-  return `${back()}<div class="setup-layout" data-goal="${goal}"><section class="setup-intro"><div class="overline">${icon(pathFor(goal).icon, 20)}${local(pathFor(goal))}</div><h1>${name}</h1><p>${description}</p><div class="setup-art" aria-hidden="true">${orb(goal)}</div></section><section class="setup-main" aria-label="${t("Twoja sesja", "Your session")}"><div class="setup-duration">${icon("clock", 20)}<strong>${durationLabel(duration)}</strong><span>${goal === "breath" ? t("dla oddechu", "to breathe") : t("dla siebie", "for yourself")}</span></div>${sequence ? `<p class="setup-sequence">${sequence}</p>` : ""}${summary}<div class="start-dock"><div id="startError" class="error" role="alert" hidden></div>${action}</div><details class="setup-adjust" id="setupAdjust"><summary><span>${icon("settings", 18)}${t("Dopasuj", "Adjust")}</span><span class="small muted">${t("Dźwięk i obraz", "Sound & visuals")}</span></summary><div class="form-stack">${controls}${save || ""}</div></details>${alternative ? link("#library/" + goal, t("Inne sesje w tej ścieżce", "Other sessions for this need"), "arrow", "text-link setup-alternatives") : ""}<a class="help text-link setup-help" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></section></div>`;
+  return `${back()}<div class="setup-layout" data-goal="${goal}"><section class="setup-intro"><div class="overline">${icon(pathFor(goal).icon, 20)}${local(pathFor(goal))}</div><h1>${name}</h1><p>${description}</p><div class="setup-art" aria-hidden="true">${orb(goal)}</div></section><section class="setup-main" aria-label="${t("Twoja sesja", "Your session")}"><div class="setup-duration">${icon("clock", 20)}<strong>${durationLabel(duration)}</strong><span>${goal === "breath" ? t("dla oddechu", "to breathe") : t("dla siebie", "for yourself")}</span></div>${sequence ? `<p class="setup-sequence">${sequence}</p>` : ""}${summary}<div class="start-dock"><div id="startError" class="error" role="alert" hidden></div>${action}</div>${explanation || ""}<details class="setup-adjust" id="setupAdjust"><summary><span>${icon("settings", 18)}${t("Dopasuj", "Adjust")}</span><span class="small muted">${t("Dźwięk i obraz", "Sound & visuals")}</span></summary><div class="form-stack">${controls}${save || ""}</div></details>${alternative ? link("#library/" + goal, t("Inne sesje w tej ścieżce", "Other sessions for this need"), "arrow", "text-link setup-alternatives") : ""}<a class="help text-link setup-help" href="${language === "pl" ? "guide-pl.html" : "guide.html"}#safety">${t("Jak korzystać komfortowo", "Using Cortex comfortably")}</a></section></div>`;
 }
 export function prepare(
   id,
@@ -223,6 +228,9 @@ export function prepare(
 ) {
   const s = sessionFor(id),
     breath = id === "breath";
+  const content = breath
+    ? breathingCopy[prefs.breathPattern] || breathingCopy["4-6"]
+    : s;
   const programStep = pendingProgram?.program.steps[pendingProgram.index];
   const duration = programStep
     ? programStep.durationMinutes * 60 +
@@ -287,7 +295,8 @@ export function prepare(
   return setupLayout({
     goal: s.goal,
     name: local(s.title),
-    description: local(s.description),
+    description: local(content.description),
+    explanation: sessionExplanation(content),
     duration,
     summary: setupSummary(prefs, breath, visualMode),
     controls,
@@ -317,7 +326,14 @@ export function prepare(
 export function programView(id, active) {
   const p = programs.find((p) => p.id === id);
   if (!p) return library({ goal: "all", duration: "all", query: "" });
-  return `${back("#library")}${title(t("Program", "Programme"), p.name, local(p.description))}<div class="prepare-layout"><section><ol class="program-steps">${p.steps.map((step, i) => `<li><span class="step-number">${i + 1}</span><div><h3>${sessionFor(step.sessionId).name}</h3><p>${minutes(step.durationMinutes * 60)} · ${local(sessionFor(step.sessionId).title)}</p></div></li>`).join("")}</ol></section><section class="prepare-panel"><h2>${minutes(p.steps.reduce((n, s) => n + s.durationMinutes * 60, 0))}</h2><p>${t("Po każdym etapie możesz zrobić przerwę. Kolejny uruchomisz wtedy, gdy zechcesz.", "Take a break after each step. Start the next one when you are ready.")}</p><div class="form-stack" style="margin-top:25px">${active ? link("#session", t("Wróć do sesji", "Return to session"), "play", "btn btn-primary") : button("startProgram", t("Przygotuj pierwszy etap", "Prepare the first step"), "arrow", "btn btn-primary", `data-program="${p.id}"`)}</div></section></div>`;
+  const steps = p.steps.map((step, i) => {
+    const session = sessionFor(step.sessionId);
+    return `<li><span class="step-number">${i + 1}</span><div><h3>${session.name}</h3><p>${minutes(step.durationMinutes * 60)} · ${local(session.title)}</p><p class="program-purpose">${local(session.description)}</p></div></li>`;
+  }).join("");
+  const action = active
+    ? link("#session", t("Wróć do sesji", "Return to session"), "play", "btn btn-primary")
+    : button("startProgram", t("Przygotuj pierwszy etap", "Prepare the first step"), "arrow", "btn btn-primary", `data-program="${p.id}"`);
+  return `${back("#library")}${title(t("Program", "Programme"), p.name, local(p.description))}<div class="prepare-layout program-layout"><section class="prepare-panel"><h2>${minutes(p.steps.reduce((n, s) => n + s.durationMinutes * 60, 0))}</h2><p>${t("Po każdym etapie możesz zrobić przerwę. Kolejny uruchomisz wtedy, gdy zechcesz.", "Take a break after each step. Start the next one when you are ready.")}</p><div class="form-stack" style="margin-top:25px">${action}</div></section><section class="program-outline" aria-label="${t("Etapy programu", "Programme steps")}"><ol class="program-steps">${steps}</ol></section></div>`;
 }
 export function visualOptions(mode, session, breath = false, playing = false) {
   const options = [
@@ -442,6 +458,11 @@ export function ritualPrepare(id, prefs, active, saved) {
     goal: r.goal,
     name: local(r.name),
     description: local(r.description),
+    explanation: sessionExplanation(
+      breath
+        ? breathingCopy[prefs.breathPattern] || breathingCopy["4-6"]
+        : sessionFor(id === "evening" ? "hypnos" : "deepFocus"),
+    ),
     duration: steps.at(-1).end,
     summary: setupSummary(prefs, breath, prefs.ritualVisual),
     controls,

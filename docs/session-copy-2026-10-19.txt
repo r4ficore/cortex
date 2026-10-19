@@ -1,0 +1,47 @@
+Cortex in-app session descriptions — 2026-10-19
+
+Scope
+14 sound sessions, the breathing entry and its three selectable patterns,
+three quick-start rituals and five programmes, in Polish and English.
+
+Content structure
+- Library/preparation: a recognisable situation and the intended benefit.
+- An optional explanation after Start: why choose it, how the sequence works,
+  and a concrete way to use the session.
+- Breathing explanations follow the selected 4–6, Box or 4–7–8 pattern.
+- Work/evening rituals reuse the explanation for their actual sound session;
+  the reset ritual follows its selected breathing pattern.
+- Programme steps show the purpose alongside the actual programme duration.
+  The programme start precedes the extended outline on mobile.
+- Search also covers benefits and practical usage instructions.
+
+Protocol review
+Compared every description with protocols.js, audio-profiles.js, breath.js,
+rituals.js and the actual playback/transition logic. Stage descriptions use
+relative order rather than standalone timings, so scaled programmes remain
+accurate. Sleep options retain finite/unlimited endings; programme steps still
+require the user to continue. Audio parameters and stimulation remain unchanged.
+
+Editorial basis
+The primary-source review in marketing-copy-2026-10-19.txt and the previous audio
+audits remain the evidence basis. Rechecked Tharion 2012 (PMID 23029969): daily
+practice for a month, selected HRV changes, not a guaranteed immediate effect.
+Lane 1998, Orozco Perez 2020 and Mallik & Russo 2022 describe different research
+conditions and do not establish unique benefits for each Cortex preset.
+
+Descriptions therefore distinguish intended use (sustained work, planning,
+rest, evening wind-down, getting started) and the real signal sequence. They do
+not turn a frequency into a proven physiological dose. REM Sculpt is explained
+as an evening practice, not REM-stage control. Clinical and methodological
+detail stays in existing protocol evidence and the whitepaper.
+
+Validation
+Full suite: 97 tests passed. After final copy/view edits, 12 relevant integration
+tests passed again; syntax, references, document generation, build and diff
+checks passed. New checks cover all translated content, unchanged signals,
+selected breathing explanations in both entry points and both languages, and
+search by need.
+Browser checks: expanded preparation at 320, 390, 430, 768, 1024, 1280 and 1440 px;
+library and programme at 320 px; live selection of Box and 4–7–8; English setup.
+No page-wide overflow in checked views. New disclosure is at least 60 px high,
+Start remains 54 px high. Viewport emulation, not a physical iPhone test.

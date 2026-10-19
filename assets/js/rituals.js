@@ -7,8 +7,8 @@ export const rituals = [
     goal: "focus",
     name: { pl: "Zaczynam pracę", en: "Time to focus" },
     description: {
-      pl: "Chwila przygotowania. Jedno zadanie. Spokojne zakończenie.",
-      en: "A moment to settle. One task. A gentle finish.",
+      pl: "Gdy trudno zacząć lub co chwilę coś Cię odrywa. Wybierz jedno zadanie i poświęć mu najbliższy kwadrans.",
+      en: "When getting started is hard or interruptions keep pulling you away. Choose one task and give it the next quarter of an hour.",
     },
   },
   {
@@ -16,8 +16,8 @@ export const rituals = [
     goal: "calm",
     name: { pl: "Potrzebuję przerwy", en: "A little reset" },
     description: {
-      pl: "Trzy minuty spokojnego oddechu, z wybranym przez Ciebie tłem.",
-      en: "Three minutes of gentle breathing with your chosen background.",
+      pl: "Gdy czujesz przeciążenie między zadaniami. Zrób przerwę od obowiązków i wróć uwagą do oddechu.",
+      en: "When you feel overloaded between tasks. Take a break from your responsibilities and return your attention to your breath.",
     },
   },
   {
@@ -25,8 +25,8 @@ export const rituals = [
     goal: "sleep",
     name: { pl: "Kończę dzień", en: "Let the day go" },
     description: {
-      pl: "Odłóż telefon. Zostań z oddechem i spokojnym dźwiękiem.",
-      en: "Put your phone down. Settle into breathing and quiet sound.",
+      pl: "Gdy praca się skończyła, ale głowa wciąż jest zajęta. Zamknij dzień i zrób miejsce na spokojny wieczór.",
+      en: "When work is over but your mind is still busy. Close the day and make room for a quiet evening.",
     },
   },
 ];
